@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101014">
+<title>Стримеры Twitch</title>
+<style>
+:root{--bg:#0b0b0f;--panel:#14141b;--panel2:#1a1a23;--text:#f5f5f7;--muted:#9a9aa8;--accent:#b9ff36;--line:rgba(255,255,255,.09)}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 50% -15%,#292b20 0,transparent 42%),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+a{color:inherit;text-decoration:none}
+.wrap{width:min(1120px,calc(100% - 36px));margin:auto}
+header{padding:28px 0 24px;border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:-.06em;font-size:21px}
+.logo{width:42px;height:42px;background:var(--accent);color:#111;display:grid;place-items:center;font-size:21px;font-weight:1000;letter-spacing:-.09em;border-radius:11px;box-shadow:0 0 30px #b9ff3622}
+.navtag{font-size:12px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:9px 13px}
+.hero{padding:62px 0 34px;max-width:760px}
+.eyebrow{color:var(--accent);font-weight:800;font-size:12px;letter-spacing:.19em;text-transform:uppercase;display:flex;align-items:center;gap:9px}
+.eyebrow:before{content:"";width:22px;height:2px;background:var(--accent)}
+h1{font-size:clamp(42px,7vw,76px);line-height:.98;letter-spacing:-.065em;margin:18px 0 16px;font-weight:950}
+h1 span{color:var(--accent)}
+.lead{font-size:16px;line-height:1.7;color:var(--muted);max-width:570px;margin:0}
+.tabs{display:flex;gap:10px;margin:0 0 22px;flex-wrap:wrap}.tab-button{border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:12px 18px;border-radius:12px;font:inherit;font-weight:850;cursor:pointer}.tab-button.active{background:var(--accent);color:#111;border-color:var(--accent)}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:28px 0 18px;flex-wrap:wrap}
+#moderatorsPanel .toolbar{justify-content:flex-end}
+#moderatorsPanel .toolbar{justify-content:flex-end}
+.count{font-size:13px;color:var(--muted)}.count strong{color:var(--text);font-size:15px}
+.search{position:relative;min-width:min(100%,290px);width:330px}
+.search input{width:100%;background:var(--panel);border:1px solid var(--line);outline:none;color:var(--text);border-radius:13px;padding:13px 15px 13px 42px;font:inherit;font-size:14px;transition:.2s}
+.search input:focus{border-color:#b9ff3677;box-shadow:0 0 0 3px #b9ff3610}
+.search svg{position:absolute;left:14px;top:13px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding-bottom:28px}
+.category{margin:0 0 24px}
+.category-title{font-size:clamp(22px,3vw,30px);line-height:1.15;letter-spacing:-.04em;margin:0 0 14px;font-weight:900}
+.category-title span{color:var(--accent)}
+.streamer{position:relative;display:flex;align-items:center;gap:16px;padding:17px;background:linear-gradient(130deg,#17171f,#121218);border:1px solid var(--line);border-radius:18px;min-width:0;transition:transform .18s,border-color .18s,background .18s}
+.streamer:hover{transform:translateY(-3px);border-color:#b9ff3677;background:linear-gradient(130deg,#20251a,#15151c)}
+.avatar{width:64px;height:64px;flex:0 0 64px;border-radius:16px;overflow:hidden;background:#26262f;box-shadow:0 0 0 1px #ffffff12}
+.avatar img{display:block;width:100%;height:100%;object-fit:cover;opacity:1;visibility:visible;min-width:100%;min-height:100%;background:#26262f}
+.info{min-width:0;flex:1}
+.name{font-size:17px;font-weight:800;letter-spacing:-.025em;overflow-wrap:anywhere}
+.handle{font-size:13px;color:var(--muted);margin-top:5px}
+.platform{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:#d9b8ff;background:#9147ff1c;border:1px solid #9147ff35;padding:5px 8px;border-radius:7px;margin-top:10px}
+.twitch-mark{width:10px;height:10px;background:#a970ff;clip-path:polygon(0 0,100% 0,100% 75%,68% 75%,45% 100%,45% 75%,0 75%)}
+.status-line{display:flex;align-items:center;min-width:0;padding-left:8px;margin-top:9px}
+.moderates{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:10px;font-size:12px;color:var(--muted)}
+.moderates-label{font-weight:700}
+.moderates-tag{display:inline-flex;padding:4px 8px;border:1px solid var(--border);border-radius:999px;color:var(--text);background:var(--surface)}
+.live-status{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.035em;margin:0;max-width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere;line-height:1.35;color:#a3a3b2}
+.live-status::before{content:"";width:7px;height:7px;border-radius:50%;background:#777786;flex:0 0 auto}
+.live-status.is-live{color:#ff667a}
+.live-status.is-live::before{background:#ff4057;box-shadow:0 0 10px #ff405777}
+.live-status.is-loading{color:#a3a3b2}
+.streamer .info{min-width:0}
+.streamer .arrow{margin-left:2px}
+.live-status.is-loading::before{background:#b9ff36;box-shadow:0 0 8px #b9ff3677}
+.stream-meta{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.45}
+.stream-meta:empty{display:none}
+.arrow{color:#777786;transition:.18s;flex:0 0 auto}.streamer:hover .arrow{color:var(--accent);transform:translate(2px,-2px)}
+.empty{display:none;text-align:center;color:var(--muted);padding:40px 12px;grid-column:1/-1}
+footer{border-top:1px solid var(--line);padding:23px 0 32px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+footer b{color:var(--text)}
+.clips-toolbar{justify-content:flex-start;align-items:flex-end}.clip-filter{display:flex;flex-direction:column;gap:7px;color:var(--muted);font-size:12px;font-weight:800}.clip-filter select,.refresh-clips{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:12px 14px;font:inherit;font-size:14px}.refresh-clips{cursor:pointer;font-weight:800}.clip-streamer-picker{margin:14px 0 18px;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--panel)}.clip-picker-heading{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-weight:850;margin-bottom:12px}.clip-picker-heading label,.clip-streamer-option{display:flex;align-items:center;gap:8px;cursor:pointer}.clip-picker-heading input,.clip-streamer-option input{accent-color:var(--accent);width:17px;height:17px;flex:0 0 auto}.clip-streamer-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px 12px}.clip-streamer-option{font-size:13px;color:var(--text);overflow-wrap:anywhere}.clip-streamer-option span{min-width:0;overflow-wrap:anywhere}.clips-note{color:var(--muted);font-size:13px;margin:0 0 16px}.clips-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.clip-card{min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:16px;background:var(--panel);color:var(--text);text-decoration:none;transition:transform .18s,border-color .18s}.clip-card:hover{transform:translateY(-3px);border-color:#b9ff3677}.clip-thumb{width:100%;aspect-ratio:16/9;object-fit:cover;background:#17171f;display:block}.clip-body{padding:13px}.clip-title{font-weight:850;font-size:14px;line-height:1.35;margin-bottom:8px;overflow-wrap:anywhere}.clip-meta{color:var(--muted);font-size:12px;display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap}.clip-author{color:var(--accent);font-weight:800;margin-bottom:6px;font-size:12px}.clips-grid .empty{display:none}@media(max-width:850px){.clips-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:850px){.clip-streamer-list{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:550px){.clips-grid{grid-template-columns:1fr}.clips-toolbar{align-items:stretch}.clip-filter select,.refresh-clips{width:100%}.clip-streamer-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.tab-button{width:100%;padding:12px 8px;text-align:center}.tab-button#clipsTab{grid-column:1 / -1}.wrap{width:min(100% - 24px,540px)}header{padding:18px 0}.hero{padding:44px 0 20px}.grid{grid-template-columns:1fr;gap:10px}.streamer{padding:14px;gap:12px}.avatar{width:58px;height:58px;flex-basis:58px}.navtag{font-size:10px}.search{width:100%}.toolbar{align-items:stretch}.status-line{padding-left:6px}.category{margin-bottom:20px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav">
+  <span class="brand">Стримеры</span>
+</div></header>
+<main class="wrap">
+  <section class="hero">
+    <div class="eyebrow">Twitch-каналы</div>
+    <h1><span>СТРИМЕРЫ</span></h1>
+    <p class="lead">Выбирай канал, чтобы открыть Twitch и посмотреть трансляцию.</p>
+  </section>
+  <div class="tabs" role="tablist" aria-label="Разделы сообщества">
+    <button class="tab-button active" id="streamersTab" role="tab" aria-selected="true" type="button">СТРИМЕРЫ</button>
+    <button class="tab-button" id="moderatorsTab" role="tab" aria-selected="false" type="button">МОДЕРАТОРЫ</button>
+    <button class="tab-button" id="clipsTab" role="tab" aria-selected="false" type="button">КЛИПЫ</button>
+  </div>
+  <section id="streamersPanel" aria-label="Список стримеров">
+    <div class="toolbar">
+      <div class="count"><strong id="visibleCount">21</strong> стримеров</div>
+      <label class="search">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+        <input id="search" type="search" placeholder="Найти стримера..." aria-label="Найти стримера">
+      </label>
+    </div>
+    <div class="category" id="creatorCategory">
+      <h2 class="category-title">Создатель</h2>
+      <div class="grid" id="creatorGrid"></div>
+    </div>
+    <div class="category" id="mainCategory">
+      <h2 class="category-title"><span>1°6</span></h2>
+      <div class="grid" id="mainGrid"></div>
+    </div>
+    <div class="category" id="othersCategory">
+      <h2 class="category-title">Другие классные стримеры</h2>
+      <div class="grid" id="othersGrid"></div>
+    </div>
+    <div class="category" id="discoverCategory">
+      <h2 class="category-title">Возможно, вы их ещё не знаете — но они тоже классные!</h2>
+      <div class="grid" id="discoverGrid"></div>
+    </div>
+    <div class="empty" id="empty">Никого не нашли. Попробуй другой ник.</div>
+  </section>
+  <section id="clipsPanel" aria-label="Клипы стримеров" hidden>
+    <div class="toolbar clips-toolbar">
+      <label class="clip-filter"><span>Период</span><select id="clipPeriod" aria-label="Период клипов"><option value="24h">За 24 часа</option><option value="7d">За 7 дней</option><option value="30d">За 30 дней</option><option value="365d">За 365 дней</option><option value="all" selected>За всё время</option></select></label>
+      <label class="clip-filter"><span>Сортировка</span><select id="clipSort" aria-label="Сортировка клипов"><option value="popular" selected>По популярности</option><option value="newest">Сначала новые</option><option value="oldest">Сначала старые</option></select></label>
+      <button id="refreshClips" class="refresh-clips" type="button">Обновить клипы</button>
+    </div>
+    <div class="clip-streamer-picker" aria-label="Фильтр клипов по стримерам">
+      <div class="clip-picker-heading"><label><input type="checkbox" id="clipAllStreamers" checked><span>Все</span></label><span id="clipSelectedCount" style="color:var(--muted);font-size:12px;font-weight:700">Выбраны все стримеры</span></div>
+      <div class="clip-streamer-list" id="clipStreamerList"></div>
+    </div>
+    <p class="clips-note" id="clipsNote">Загружаем клипы с каналов из вкладки «СТРИМЕРЫ»…</p>
+    <div class="clips-grid" id="clipsGrid"></div>
+    <div class="empty" id="clipsEmpty">За этот период клипы не найдены.</div>
+  </section>
+  <section id="moderatorsPanel" aria-label="Список модераторов" hidden>
+    <div class="toolbar">
+      <div class="count" style="display:none"><strong id="moderatorCount">1</strong> модератор</div>
+      <label class="search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="moderatorSearch" type="search" placeholder="Найти модератора..." aria-label="Найти модератора"></label>
+    </div>
+    <div class="category"><h2 class="category-title">Модераторы сообщества</h2><div class="grid" id="moderatorsGrid"></div></div>
+    <div class="category" id="editorsCategory"><h2 class="category-title">Редакторы</h2><div class="grid" id="editorsGrid"></div></div>
+    <div class="empty" id="moderatorEmpty">Никого не нашли. Попробуй другой ник.</div>
+  </section>
+</main>
+<footer class="wrap"><span>Открывай каналы и поддерживай стримеров на Twitch <span style="color:var(--accent)">✦</span></span></footer>
+<script>
+const streamers = [
+  {name:"mob_nadziratel", url:"https://www.twitch.tv/mob_nadziratel", group:"creator"},
+  {name:"d1unizi", url:"https://www.twitch.tv/d1unizi", group:"main"},
+  {name:"plovecmolodec", url:"https://www.twitch.tv/plovecmolodec", group:"main"},
+  {name:"charakoi", url:"https://www.twitch.tv/charakoi", group:"main"},
+  {name:"kerik232tv", url:"https://www.twitch.tv/kerik232tv", group:"others"},
+  {name:"ribafyga", url:"https://www.twitch.tv/ribafyga", group:"others"},
+  {name:"mrbatosh", url:"https://www.twitch.tv/mrbatosh", group:"main"},
+  {name:"roman16rus", url:"https://www.twitch.tv/roman16rus", group:"main"},
+  {name:"rueumur", url:"https://www.twitch.tv/rueumur", group:"others"},
+  {name:"cherrys_fox", url:"https://www.twitch.tv/cherrys_fox", group:"others"},
+  {name:"hdr_straiker", url:"https://www.twitch.tv/hdr_straiker", group:"others"},
+  {name:"kostyan_321r", url:"https://www.twitch.tv/kostyan_321r", group:"others"},
+  {name:"sayjos", url:"https://www.twitch.tv/sayjos", group:"discover"},
+  {name:"lo4kalove", url:"https://www.twitch.tv/lo4kalove", group:"discover"},
+  {name:"slavabraze", url:"https://www.twitch.tv/slavabraze", group:"discover"},
+  {name:"zavryz1el", url:"https://www.twitch.tv/zavryz1el", group:"discover"},
+  {name:"ilyuha_lake", url:"https://www.twitch.tv/ilyuha_lake", group:"discover"},
+  {name:"brill1antt", url:"https://www.twitch.tv/brill1antt", group:"discover"},
+  {name:"helgard_simbirskiy", url:"https://www.twitch.tv/helgard_simbirskiy", group:"discover"},
+  {name:"pickachu2281", url:"https://www.twitch.tv/pickachu2281", group:"discover"},
+  {name:"zane5k5", url:"https://www.twitch.tv/zane5k5", group:"discover"},
+  {name:"dima26rx", url:"https://www.twitch.tv/dima26rx", group:"discover"}
+];
+const moderators = [
+  {name:"wildefild", url:"https://www.twitch.tv/wildefild", group:"moderators", channels:["cherrys_fox","mrbatosh"], tagLabel:"Модератор у:"},
+  {name:"dmitriy_okak", url:"https://www.twitch.tv/dmitriy_okak", group:"moderators", channels:["d1unizi","mob_nadziratel"], tagLabel:"Модератор у:"},
+  {name:"agyha1", url:"https://www.twitch.tv/agyha1", group:"moderators", channels:["mrbatosh"], tagLabel:"Модератор у:"},
+  {name:"1dnel", url:"https://www.twitch.tv/1dnel", group:"moderators", channels:["cherrys_fox"], tagLabel:"Модератор у:"},
+  {name:"wijwoetttt", url:"https://www.twitch.tv/wijwoetttt", group:"moderators", channels:["d1unizi"], tagLabel:"Модератор у:"}
+];
+const editors = [
+  {name:"agyha1", url:"https://www.twitch.tv/agyha1", group:"editors", channels:["cherrys_fox"], tagLabel:"Редактор у:"}
+];
+let activeTab = "streamers";
+let clipsData = [];
+let clipsLoaded = false;
+let clipsLoading = false;
+const selectedClipStreamers = new Set();
+const palettes = [
+  ["#b9ff36","#24320e"],["#a970ff","#321c4d"],["#ff7a59","#51251e"],
+  ["#42d6c5","#153c3a"],["#ffcf5a","#493515"],["#ff6ca8","#4a1d35"],
+  ["#7ea6ff","#1e2d51"],["#e7e7f0","#30303d"],["#f49dff","#44234a"],["#b9ff36","#263d10"]
+];
+function avatarSvg(name, i) {
+  const [a,b] = palettes[i % palettes.length];
+  const initials = name.replace(/[^a-z0-9]/gi,"").slice(0,2).toUpperCase();
+  const shapes = `<circle cx="80" cy="80" r="62" fill="${a}" opacity=".12"/><path d="M0 112L48 62l29 25 35-48 48 57v64H0Z" fill="${a}" opacity=".16"/><circle cx="80" cy="61" r="27" fill="${a}" opacity=".88"/><path d="M31 145c3-30 22-45 49-45s46 15 49 45" fill="${a}"/><text x="80" y="154" font-family="Arial,sans-serif" font-size="20" font-weight="900" text-anchor="middle" fill="${b}">${initials}</text>`;
+  return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160"><rect width="160" height="160" rx="24" fill="${b}"/>${shapes}</svg>`);
+}
+const grids = {
+  creator: document.getElementById("creatorGrid"),
+  main: document.getElementById("mainGrid"),
+  others: document.getElementById("othersGrid"),
+  discover: document.getElementById("discoverGrid"),
+  moderators: document.getElementById("moderatorsGrid"),
+  editors: document.getElementById("editorsGrid")
+};
+const categories = {
+  creator: document.getElementById("creatorCategory"),
+  main: document.getElementById("mainCategory"),
+  others: document.getElementById("othersCategory"),
+  discover: document.getElementById("discoverCategory")
+};
+const avatarCache = new Map();
+let latestStreamData = {};
+let latestStatusFetchedAt = 0;
+let statusRequestInFlight = null;
+let lastStatusAttemptAt = 0;
+
+async function loadTwitchAvatar(name, img) {
+  // Load avatars through our own server so mobile browsers do not depend on a third-party lookup/CORS.
+  if (avatarCache.has(name)) { img.src = avatarCache.get(name); return; }
+  try {
+    const response = await fetch(`/api/avatar?login=${encodeURIComponent(name)}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Avatar endpoint unavailable (${response.status})`);
+    const payload = await response.json();
+    const avatarUrl = String(payload.avatarUrl || "").trim();
+    if (!/^https:\/\//i.test(avatarUrl)) throw new Error("Invalid avatar URL");
+    avatarCache.set(name, avatarUrl);
+    img.onerror = () => { img.onerror = null; img.src = avatarSvg(name, Math.max(0, streamers.findIndex(item => item.name === name))); };
+    img.src = avatarUrl;
+  } catch (error) {
+    // The generated SVG placeholder remains visible if Twitch or the server is unavailable.
+  }
+}
+
+function initClipStreamerPicker() {
+  const list = document.getElementById("clipStreamerList");
+  list.innerHTML = "";
+  streamers.slice().sort((a,b) => a.name.localeCompare(b.name, "ru", {sensitivity:"base"})).forEach(streamer => {
+    selectedClipStreamers.add(streamer.name.toLowerCase());
+    const label = document.createElement("label");
+    label.className = "clip-streamer-option";
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox"; checkbox.value = streamer.name.toLowerCase(); checkbox.checked = true;
+    const name = document.createElement("span"); name.textContent = streamer.name;
+    checkbox.addEventListener("change", () => {
+      if (checkbox.checked) selectedClipStreamers.add(checkbox.value);
+      else selectedClipStreamers.delete(checkbox.value);
+      syncClipStreamerPicker(); renderClips();
+    });
+    label.append(checkbox, name); list.appendChild(label);
+  });
+  document.getElementById("clipAllStreamers").addEventListener("change", event => {
+    const checked = event.target.checked;
+    selectedClipStreamers.clear();
+    document.querySelectorAll("#clipStreamerList input[type=checkbox]").forEach(box => {
+      box.checked = checked;
+      if (checked) selectedClipStreamers.add(box.value);
+    });
+    syncClipStreamerPicker(); renderClips();
+  });
+  syncClipStreamerPicker();
+}
+function syncClipStreamerPicker() {
+  const boxes = [...document.querySelectorAll("#clipStreamerList input[type=checkbox]")];
+  const all = boxes.length > 0 && boxes.every(box => box.checked);
+  const master = document.getElementById("clipAllStreamers");
+  master.checked = all;
+  master.indeterminate = !all && boxes.some(box => box.checked);
+  const count = selectedClipStreamers.size;
+  document.getElementById("clipSelectedCount").textContent = all ? "Выбраны все стримеры" : `Выбрано: ${count} из ${boxes.length}`;
+}
+function formatClipDate(value) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "Дата неизвестна" : date.toLocaleDateString("ru-RU", { day:"numeric", month:"short", year:"numeric" });
+}
+function renderClips() {
+  const grid = document.getElementById("clipsGrid");
+  const period = document.getElementById("clipPeriod").value;
+  const sort = document.getElementById("clipSort").value;
+  const now = Date.now();
+  const ranges = {"24h": 24*60*60*1000, "7d": 7*24*60*60*1000, "30d":30*24*60*60*1000, "365d":365*24*60*60*1000};
+  let items = clipsData.filter(clip => {
+    const login = String(clip.broadcasterLogin || clip.broadcasterName || "").toLowerCase();
+    const streamerMatch = selectedClipStreamers.has(login);
+    const periodMatch = period === "all" || (Date.parse(clip.createdAt || "") >= now - ranges[period]);
+    return streamerMatch && periodMatch;
+  });
+  items.sort((a,b) => sort === "popular" ? (Number(b.viewCount)||0)-(Number(a.viewCount)||0) : sort === "newest" ? (Date.parse(b.createdAt)||0)-(Date.parse(a.createdAt)||0) : (Date.parse(a.createdAt)||0)-(Date.parse(b.createdAt)||0));
+  grid.innerHTML = "";
+  items.forEach(clip => {
+    const card = document.createElement("a");
+    card.className = "clip-card"; card.href = clip.url; card.target = "_blank"; card.rel = "noopener noreferrer";
+    const thumb = document.createElement("img"); thumb.className = "clip-thumb"; thumb.loading = "lazy"; thumb.alt = `Клип ${clip.title || "Twitch"}`; thumb.src = clip.thumbnailUrl || "";
+    const body = document.createElement("div"); body.className = "clip-body";
+    const author = document.createElement("div"); author.className = "clip-author"; author.textContent = clip.broadcasterName || clip.broadcasterLogin || "Twitch";
+    const title = document.createElement("div"); title.className = "clip-title"; title.textContent = clip.title || "Клип Twitch";
+    const meta = document.createElement("div"); meta.className = "clip-meta";
+    const views = document.createElement("span"); views.textContent = `${(Number(clip.viewCount)||0).toLocaleString("ru-RU")} просмотров`;
+    const date = document.createElement("span"); date.textContent = formatClipDate(clip.createdAt);
+    meta.append(views,date); body.append(author,title,meta); card.append(thumb,body); grid.appendChild(card);
+  });
+  document.getElementById("clipsEmpty").style.display = items.length ? "none" : "block";
+}
+async function loadClips(force=false) {
+  if (clipsLoading) return;
+  if (clipsLoaded && !force) { renderClips(); return; }
+  clipsLoading = true;
+  const note = document.getElementById("clipsNote");
+  note.textContent = "Загружаем клипы с каналов из вкладки «СТРИМЕРЫ»…";
+  try {
+    const period = document.getElementById("clipPeriod").value;
+    const response = await fetch(`/api/clips?period=${encodeURIComponent(period)}`, {cache:"no-store"});
+    const raw = await response.text();
+    let payload;
+    try { payload = JSON.parse(raw); }
+    catch {
+      if (response.status === 404 || /^not found\s*$/i.test(raw.trim())) {
+        throw new Error("Сервер Render не знает маршрут /api/clips (404). Нужно обновить и развернуть server.js вместе с public/index.html из полного ZIP-проекта; одних изменений HTML недостаточно.");
+      }
+      throw new Error(`Сервер вернул не JSON (HTTP ${response.status}): ${raw.slice(0, 120) || "пустой ответ"}`);
+    }
+    if (!response.ok) throw new Error(payload.error || `Ошибка сервера HTTP ${response.status}`);
+    clipsData = Array.isArray(payload.clips) ? payload.clips : [];
+    clipsLoaded = true;
+    note.textContent = `Клипы каналов из вкладки «СТРИМЕРЫ». Найдено: ${clipsData.length}. Сортировка выполняется на этой странице.`;
+    renderClips();
+  } catch (error) {
+    note.textContent = `Не удалось загрузить клипы: ${error.message || "ошибка API"}. Проверь Render Logs и настройки Twitch API, затем попробуй обновить.`;
+    document.getElementById("clipsGrid").innerHTML = "";
+    document.getElementById("clipsEmpty").style.display = "block";
+  } finally { clipsLoading = false; }
+}
+
+function render(filter="") {
+  Object.values(grids).forEach(grid => grid.innerHTML = "");
+  const normalizedFilter = filter.toLowerCase().trim();
+  const directory = activeTab === "moderators" ? [...moderators, ...editors] : streamers;
+  const matches = directory.filter(item => item.name.toLowerCase().includes(normalizedFilter));
+  matches.forEach(({name,url,group}) => {
+    const streamIndex = streamers.findIndex(item => item.name === name);
+    const moderatorIndex = [...moderators, ...editors].findIndex(item => item.name === name);
+    const i = streamIndex >= 0 ? streamIndex : streamers.length + Math.max(0, moderatorIndex);
+    const card = document.createElement("a");
+    card.className = "streamer";
+    card.href = url;
+    card.target = "_blank";
+    card.rel = "noopener noreferrer";
+    card.setAttribute("aria-label", `Открыть Twitch-канал ${name}`);
+    const moderator = activeTab === "moderators";
+    const modData = moderator ? [...moderators, ...editors].find(item => item.name === name && item.group === group) : null;
+    const moderationTags = modData ? `<div class="moderates"><span class="moderates-label">${modData.tagLabel}</span> ${modData.channels.map(channel => `<span class="moderates-tag">@${channel}</span>`).join(" ")}</div>` : "";
+    card.innerHTML = `<div class="avatar"><img src="${avatarSvg(name,i)}" alt="Аватар ${name}" loading="eager" referrerpolicy="no-referrer"></div>
+      <div class="info"><div class="name">${name}</div><div class="handle">@${name}</div><span class="platform"><span class="twitch-mark"></span> Twitch-канал</span>${moderator ? moderationTags : `<div class="status-line"><div class="live-status is-loading" data-status="${name}">Проверяем эфир…</div></div><div class="stream-meta" data-meta="${name}"></div>`}</div>
+      <svg class="arrow" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>`;
+    grids[group].appendChild(card);
+    loadTwitchAvatar(name, card.querySelector("img"));
+  });
+  reorderCategoryCards();
+  Object.entries(categories).forEach(([group, section]) => {
+    section.hidden = activeTab !== "streamers" || grids[group].children.length === 0;
+  });
+  document.getElementById("streamersPanel").hidden = activeTab !== "streamers";
+  document.getElementById("moderatorsPanel").hidden = activeTab !== "moderators";
+  document.getElementById("clipsPanel").hidden = activeTab !== "clips";
+  if (activeTab === "clips") loadClips();
+  document.getElementById("editorsCategory").hidden = activeTab !== "moderators" || grids.editors.children.length === 0;
+  document.getElementById("visibleCount").textContent = matches.length;
+  document.getElementById("empty").style.display = activeTab === "streamers" && matches.length ? "none" : (activeTab === "streamers" ? "block" : "none");
+  document.getElementById("moderatorCount").textContent = matches.length;
+  document.getElementById("moderatorEmpty").style.display = activeTab === "moderators" && matches.length === 0 ? "block" : "none";
+  // Re-apply the most recent API response after every render/search/tab change.
+  // Otherwise newly created cards could remain stuck on “Проверяем эфир…” until the next poll.
+  if (Object.keys(latestStreamData).length) applyLiveStatuses(latestStreamData);
+  // Recreated streamer cards need a fresh status after returning from another tab.
+  // Throttle this so typing in search or rapid tab switches cannot flood the API.
+  if (activeTab === "streamers" &&
+      (Date.now() - latestStatusFetchedAt > 45_000 || !Object.keys(latestStreamData).length)) {
+    refreshLiveStatuses();
+  }
+}
+function reorderCategoryCards() {
+  // Keep every category independently sorted alphabetically, regardless of live status.
+  // This also sorts moderators and editors within their own sections.
+  Object.entries(grids).forEach(([group, grid]) => {
+    const cards = Array.from(grid.querySelectorAll(".streamer"));
+    cards.sort((a, b) => {
+      const nameA = a.querySelector(".name")?.textContent || "";
+      const nameB = b.querySelector(".name")?.textContent || "";
+      return nameA.localeCompare(nameB, "ru", { sensitivity: "base", numeric: true });
+    });
+    cards.forEach(card => grid.appendChild(card));
+  });
+}
+
+function applyLiveStatuses(streams) {
+  streamers.forEach(({name}) => {
+    const status = document.querySelector(`[data-status="${name}"]`);
+    const meta = document.querySelector(`[data-meta="${name}"]`);
+    if (!status || !meta) return;
+    const item = streams[name];
+    status.classList.remove("is-loading", "is-live");
+    if (item && item.isLive) {
+      status.classList.add("is-live");
+      status.textContent = "В ЭФИРЕ";
+      const viewers = Number.isFinite(item.viewerCount) ? ` · ${item.viewerCount.toLocaleString("ru-RU")} зрителей` : "";
+      meta.textContent = `${item.title || "Прямой эфир"}${viewers}`;
+    } else if (item && item.error) {
+      status.textContent = "СТАТУС НЕДОСТУПЕН";
+      meta.textContent = "Не удалось проверить эфир";
+    } else {
+      status.textContent = "НЕ В СЕТИ";
+      meta.textContent = "";
+    }
+  });
+}
+
+async function refreshLiveStatuses() {
+  if (statusRequestInFlight) return statusRequestInFlight;
+  // Avoid starting a request on every search keystroke or rapid tab switch.
+  if (Date.now() - lastStatusAttemptAt < 8_000) return;
+  lastStatusAttemptAt = Date.now();
+  statusRequestInFlight = (async () => {
+    try {
+      const response = await fetch("/api/streams", { cache: "no-store" });
+      if (!response.ok) throw new Error(`Status endpoint unavailable (${response.status})`);
+      const payload = await response.json();
+      if (!payload || !payload.streams || typeof payload.streams !== "object") {
+        throw new Error("Invalid status response");
+      }
+      latestStreamData = payload.streams;
+      latestStatusFetchedAt = Date.now();
+      // The user may have switched tabs while the request was in flight. Update any
+      // streamer cards that currently exist, without touching moderator/editor cards.
+      applyLiveStatuses(latestStreamData);
+      if (activeTab === "streamers") reorderCategoryCards();
+    } catch (error) {
+      // Keep failures distinct from offline. If streamer cards are recreated later,
+      // render() will retry after the throttle window rather than leaving them loading.
+      document.querySelectorAll("#streamersPanel .live-status").forEach(el => {
+        el.classList.remove("is-loading", "is-live");
+        el.textContent = "СТАТУС НЕДОСТУПЕН";
+      });
+      document.querySelectorAll("#streamersPanel .stream-meta").forEach(el => {
+        el.textContent = "Не удалось проверить эфир — проверь настройки Twitch API в Render";
+      });
+    } finally {
+      statusRequestInFlight = null;
+    }
+  })();
+  return statusRequestInFlight;
+}
+document.getElementById("search").addEventListener("input", e => render(e.target.value));
+document.getElementById("moderatorSearch").addEventListener("input", e => render(e.target.value));
+document.getElementById("streamersTab").addEventListener("click", () => {
+  activeTab = "streamers";
+  document.getElementById("streamersTab").classList.add("active");
+  document.getElementById("moderatorsTab").classList.remove("active");
+  document.getElementById("streamersTab").setAttribute("aria-selected", "true");
+  document.getElementById("moderatorsTab").setAttribute("aria-selected", "false");
+  render(document.getElementById("search").value);
+});
+document.getElementById("moderatorsTab").addEventListener("click", () => {
+  activeTab = "moderators";
+  document.getElementById("moderatorsTab").classList.add("active");
+  document.getElementById("streamersTab").classList.remove("active");
+  document.getElementById("moderatorsTab").setAttribute("aria-selected", "true");
+  document.getElementById("streamersTab").setAttribute("aria-selected", "false");
+  render(document.getElementById("moderatorSearch").value);
+});
+document.getElementById("clipsTab").addEventListener("click", () => {
+  activeTab = "clips";
+  ["streamersTab","moderatorsTab","clipsTab"].forEach(id => {
+    const button = document.getElementById(id); const selected = id === "clipsTab";
+    button.classList.toggle("active", selected); button.setAttribute("aria-selected", String(selected));
+  });
+  render(""); loadClips();
+});
+for (const id of ["streamersTab","moderatorsTab"]) {
+  document.getElementById(id).addEventListener("click", () => {
+    document.getElementById("clipsTab").classList.remove("active");
+    document.getElementById("clipsTab").setAttribute("aria-selected", "false");
+  });
+}
+document.getElementById("clipPeriod").addEventListener("change", () => loadClips(true));
+document.getElementById("clipSort").addEventListener("change", renderClips);
+document.getElementById("refreshClips").addEventListener("click", () => loadClips(true));
+initClipStreamerPicker();
+render();
+refreshLiveStatuses();
+setInterval(refreshLiveStatuses, 60000);
+</script>
+</body>
+</html>
