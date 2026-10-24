@@ -1,14 +1,15 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#101014">
+<meta name="theme-color" content="#101014" id="themeColor">
 <title>Стримеры Twitch</title>
 <style>
 :root{--bg:#0b0b0f;--panel:#14141b;--panel2:#1a1a23;--text:#f5f5f7;--muted:#9a9aa8;--accent:#b9ff36;--line:rgba(255,255,255,.09)}
 *{box-sizing:border-box}
-body{margin:0;background:radial-gradient(ellipse at 50% -15%,#292b20 0,transparent 42%),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+body{margin:0;background:radial-gradient(ellipse at 50% -15%,#292b20 0,transparent 42%),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh;transition:background .2s,color .2s}
 a{color:inherit;text-decoration:none}
 .wrap{width:min(1120px,calc(100% - 36px));margin:auto}
 header{padding:28px 0 24px;border-bottom:1px solid var(--line)}
@@ -16,6 +17,8 @@ header{padding:28px 0 24px;border-bottom:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:-.06em;font-size:21px}
 .logo{width:42px;height:42px;background:var(--accent);color:#111;display:grid;place-items:center;font-size:21px;font-weight:1000;letter-spacing:-.09em;border-radius:11px;box-shadow:0 0 30px #b9ff3622}
 .navtag{font-size:12px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:9px 13px}
+.theme-toggle{display:inline-flex;align-items:center;justify-content:center;gap:8px;flex:0 0 auto;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;padding:10px 13px;font:inherit;font-size:13px;font-weight:800;cursor:pointer;transition:background .2s,border-color .2s}
+.theme-toggle:hover{border-color:var(--accent)}
 .hero{padding:62px 0 34px;max-width:760px}
 .eyebrow{color:var(--accent);font-weight:800;font-size:12px;letter-spacing:.19em;text-transform:uppercase;display:flex;align-items:center;gap:9px}
 .eyebrow:before{content:"";width:22px;height:2px;background:var(--accent)}
@@ -24,7 +27,6 @@ h1 span{color:var(--accent)}
 .lead{font-size:16px;line-height:1.7;color:var(--muted);max-width:570px;margin:0}
 .tabs{display:flex;gap:10px;margin:0 0 22px;flex-wrap:wrap}.tab-button{border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:12px 18px;border-radius:12px;font:inherit;font-weight:850;cursor:pointer}.tab-button.active{background:var(--accent);color:#111;border-color:var(--accent)}
 .toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:28px 0 18px;flex-wrap:wrap}
-#moderatorsPanel .toolbar{justify-content:flex-end}
 #moderatorsPanel .toolbar{justify-content:flex-end}
 .count{font-size:13px;color:var(--muted)}.count strong{color:var(--text);font-size:15px}
 .search{position:relative;min-width:min(100%,290px);width:330px}
@@ -47,7 +49,7 @@ h1 span{color:var(--accent)}
 .status-line{display:flex;align-items:center;min-width:0;padding-left:8px;margin-top:9px}
 .moderates{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:10px;font-size:12px;color:var(--muted)}
 .moderates-label{font-weight:700}
-.moderates-tag{display:inline-flex;padding:4px 8px;border:1px solid var(--border);border-radius:999px;color:var(--text);background:var(--surface)}
+.moderates-tag{display:inline-flex;padding:4px 8px;border:1px solid var(--line);border-radius:999px;color:var(--text);background:var(--panel2)}
 .live-status{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.035em;margin:0;max-width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere;line-height:1.35;color:#a3a3b2}
 .live-status::before{content:"";width:7px;height:7px;border-radius:50%;background:#777786;flex:0 0 auto}
 .live-status.is-live{color:#ff667a}
@@ -62,12 +64,15 @@ h1 span{color:var(--accent)}
 .empty{display:none;text-align:center;color:var(--muted);padding:40px 12px;grid-column:1/-1}
 footer{border-top:1px solid var(--line);padding:23px 0 32px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 footer b{color:var(--text)}
-.clips-toolbar{justify-content:flex-start;align-items:flex-end}.clip-filter{display:flex;flex-direction:column;gap:7px;color:var(--muted);font-size:12px;font-weight:800}.clip-filter select,.refresh-clips{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:12px 14px;font:inherit;font-size:14px}.refresh-clips{cursor:pointer;font-weight:800}.clip-streamer-picker{margin:14px 0 18px;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--panel)}.clip-picker-heading{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-weight:850;margin-bottom:12px}.clip-picker-heading label,.clip-streamer-option{display:flex;align-items:center;gap:8px;cursor:pointer}.clip-picker-heading input,.clip-streamer-option input{accent-color:var(--accent);width:17px;height:17px;flex:0 0 auto}.clip-streamer-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px 12px}.clip-streamer-option{font-size:13px;color:var(--text);overflow-wrap:anywhere}.clip-streamer-option span{min-width:0;overflow-wrap:anywhere}.clips-note{color:var(--muted);font-size:13px;margin:0 0 16px}.clips-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.clip-card{min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:16px;background:var(--panel);color:var(--text);text-decoration:none;transition:transform .18s,border-color .18s}.clip-card:hover{transform:translateY(-3px);border-color:#b9ff3677}.clip-thumb{width:100%;aspect-ratio:16/9;object-fit:cover;background:#17171f;display:block}.clip-body{padding:13px}.clip-title{font-weight:850;font-size:14px;line-height:1.35;margin-bottom:8px;overflow-wrap:anywhere}.clip-meta{color:var(--muted);font-size:12px;display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap}.clip-author{color:var(--accent);font-weight:800;margin-bottom:6px;font-size:12px}.clips-grid .empty{display:none}@media(max-width:850px){.clips-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:850px){.clip-streamer-list{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:550px){.clips-grid{grid-template-columns:1fr}.clips-toolbar{align-items:stretch}.clip-filter select,.refresh-clips{width:100%}.clip-streamer-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:650px){.tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.tab-button{width:100%;padding:12px 8px;text-align:center}.tab-button#clipsTab{grid-column:1 / -1}.wrap{width:min(100% - 24px,540px)}header{padding:18px 0}.hero{padding:44px 0 20px}.grid{grid-template-columns:1fr;gap:10px}.streamer{padding:14px;gap:12px}.avatar{width:58px;height:58px;flex-basis:58px}.navtag{font-size:10px}.search{width:100%}.toolbar{align-items:stretch}.status-line{padding-left:6px}.category{margin-bottom:20px}}
+.clips-toolbar{justify-content:flex-start;align-items:flex-end}.clip-filter{display:flex;flex-direction:column;gap:7px;color:var(--muted);font-size:12px;font-weight:800}.clip-filter select,.refresh-clips{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:12px 14px;font:inherit;font-size:14px}.refresh-clips{cursor:pointer;font-weight:800}.clip-streamer-picker{margin:14px 0 18px;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--panel)}.clip-picker-heading{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-weight:850;margin-bottom:12px}.clip-picker-heading label,.clip-streamer-option{display:flex;align-items:center;gap:8px;cursor:pointer}.clip-picker-heading input,.clip-streamer-option input{accent-color:var(--accent);width:17px;height:17px;flex:0 0 auto}.clip-streamer-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px 12px}.clip-streamer-option{font-size:13px;color:var(--text);overflow-wrap:anywhere}.clip-streamer-option span{min-width:0;overflow-wrap:anywhere}.clips-note{color:var(--muted);font-size:13px;margin:0 0 16px}.clips-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.clip-card{min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:16px;background:var(--panel);color:var(--text);text-decoration:none;transition:transform .18s,border-color .18s}.clip-card:hover{transform:translateY(-3px);border-color:#b9ff3677}.clip-thumb{width:100%;aspect-ratio:16/9;object-fit:cover;background:#17171f;display:block}.clip-body{padding:13px}.clip-title{font-weight:850;font-size:14px;line-height:1.35;margin-bottom:8px;overflow-wrap:anywhere}.clip-meta{color:var(--muted);font-size:12px;display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap}.clip-author{color:var(--accent);font-weight:800;margin-bottom:6px;font-size:12px}.clips-grid .empty{display:none}
+@media(max-width:850px){.clips-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:850px){.clip-streamer-list{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:550px){.clips-grid{grid-template-columns:1fr}.clips-toolbar{align-items:stretch}.clip-filter select,.refresh-clips{width:100%}.clip-streamer-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.tab-button{width:100%;padding:12px 8px;text-align:center}.tab-button#clipsTab{grid-column:1 / -1}.wrap{width:min(100% - 24px,540px)}header{padding:18px 0}.hero{padding:44px 0 20px}.grid{grid-template-columns:1fr;gap:10px}.streamer{padding:14px;gap:12px}.avatar{width:58px;height:58px;flex-basis:58px}.navtag{font-size:10px}.search{width:100%}.toolbar{align-items:stretch}.status-line{padding-left:6px}.category{margin-bottom:20px}.theme-toggle{font-size:12px;padding:9px 10px}.brand{font-size:18px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 
-.clip-modal{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.82);backdrop-filter:blur(8px)}.clip-modal.is-open{display:flex}.clip-modal-dialog{position:relative;width:min(100%,1000px);max-height:100%;padding:18px;border:1px solid var(--line);border-radius:20px;background:#111116;box-shadow:0 24px 100px #0009}.clip-modal-top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 48px 14px 2px}.clip-modal-title{font-size:16px;font-weight:850;overflow-wrap:anywhere}.clip-modal-author{display:flex;align-items:center;gap:9px;margin-top:9px;width:max-content;max-width:100%;color:var(--text);text-decoration:none;font-size:13px;font-weight:800}.clip-modal-author:hover{color:var(--accent)}.clip-modal-author-avatar{width:38px;height:38px;flex:0 0 38px;border-radius:50%;object-fit:cover;background:#26262f;border:1px solid var(--line)}.clip-modal-author-name{overflow-wrap:anywhere}.clip-modal-close{position:absolute;right:14px;top:14px;width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--line);border-radius:11px;background:var(--panel2);color:var(--text);font-size:24px;line-height:1;cursor:pointer}.clip-player-frame{display:block;width:100%;aspect-ratio:16/9;border:0;border-radius:12px;background:#000}.clip-modal-help{color:var(--muted);font-size:12px;margin:12px 2px 0}.clip-card{cursor:pointer;font:inherit;text-align:left;padding:0;width:100%}@media(max-width:600px){.clip-modal{padding:10px}.clip-modal-dialog{padding:10px;border-radius:15px}.clip-modal-top{padding:0 44px 10px 2px}.clip-modal-title{font-size:14px}.clip-modal-close{right:10px;top:10px;width:34px;height:34px}.clip-player-frame{border-radius:8px}}
-
+.clip-modal{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,.82);backdrop-filter:blur(8px)}.clip-modal.is-open{display:flex}.clip-modal-dialog{position:relative;width:min(100%,1000px);max-height:100%;padding:18px;border:1px solid var(--line);border-radius:20px;background:var(--panel);box-shadow:0 24px 100px #0009}.clip-modal-top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 48px 14px 2px}.clip-modal-title{font-size:16px;font-weight:850;overflow-wrap:anywhere}.clip-modal-author{display:flex;align-items:center;gap:9px;margin-top:9px;width:max-content;max-width:100%;color:var(--text);text-decoration:none;font-size:13px;font-weight:800}.clip-modal-author:hover{color:var(--accent)}.clip-modal-author-avatar{width:38px;height:38px;flex:0 0 38px;border-radius:50%;object-fit:cover;background:#26262f;border:1px solid var(--line)}.clip-modal-author-name{overflow-wrap:anywhere}.clip-modal-close{position:absolute;right:14px;top:14px;width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--line);border-radius:11px;background:var(--panel2);color:var(--text);font-size:24px;line-height:1;cursor:pointer}.clip-player-frame{display:block;width:100%;aspect-ratio:16/9;border:0;border-radius:12px;background:#000}.clip-modal-help{color:var(--muted);font-size:12px;margin:12px 2px 0}.clip-card{cursor:pointer;font:inherit;text-align:left;padding:0;width:100%}
+@media(max-width:600px){.clip-modal{padding:10px}.clip-modal-dialog{padding:10px;border-radius:15px}.clip-modal-top{padding:0 44px 10px 2px}.clip-modal-title{font-size:14px}.clip-modal-close{right:10px;top:10px;width:34px;height:34px}.clip-player-frame{border-radius:8px}}
 
 /* Dedicated streamer profile view, addressed with ?streamer=login */
 #profilePage{display:none;min-height:100vh;padding:28px 0 56px}
@@ -86,11 +91,27 @@ body.profile-mode #profilePage{display:block}
 .profile-social-link:hover{background:#9147ff22;border-color:#a970ff}
 .profile-social-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:#9147ff;color:white;font-weight:1000;font-size:20px}
 .profile-social-link small{display:block;color:var(--muted);font-size:12px;font-weight:500;margin-top:3px}
+
+/* Светлая тема */
+body.light-theme{--bg:#f3f4f7;--panel:#ffffff;--panel2:#e9ebf1;--text:#22232b;--muted:#686b78;--line:rgba(20,20,30,.13);background:radial-gradient(ellipse at 50% -15%,#e2ebd1 0,transparent 45%),var(--bg);color:var(--text)}
+body.light-theme .streamer{background:linear-gradient(130deg,#fff,#f5f6f9)}
+body.light-theme .streamer:hover{background:linear-gradient(130deg,#f1f7e7,#fff)}
+body.light-theme .avatar,body.light-theme .avatar img,body.light-theme .clip-modal-author-avatar,body.light-theme .profile-avatar{background:#e5e7ee}
+body.light-theme .clip-thumb{background:#e5e7ee}
+body.light-theme .profile-card{background:linear-gradient(145deg,#fff,#f5f6fa)}
+body.light-theme .moderates-tag{background:var(--panel2)}
+body.light-theme .clip-modal-dialog{background:var(--panel)}
+body.light-theme .live-status.is-loading{color:#686b78}
+body.light-theme .live-status.is-loading::before{background:#719d12;box-shadow:0 0 8px #719d1244}
+body.light-theme .profile-social-link{color:var(--text)}
+body.light-theme .logo{box-shadow:0 0 20px #719d121a}
 </style>
 </head>
+
 <body>
 <header><div class="wrap nav">
   <span class="brand">Стримеры</span>
+  <button class="theme-toggle" id="themeToggle" type="button" aria-label="Переключить тему">☀️ Светлая тема</button>
 </div></header>
 <main class="wrap">
   <section class="hero">
@@ -105,7 +126,7 @@ body.profile-mode #profilePage{display:block}
   </div>
   <section id="streamersPanel" aria-label="Список стримеров">
     <div class="toolbar">
-      <div class="count"><strong id="visibleCount">21</strong> стримеров</div>
+      <div class="count"><strong id="visibleCount">22</strong> <span id="streamerCountLabel">стримера</span></div>
       <label class="search">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
         <input id="search" type="search" placeholder="Найти стримера..." aria-label="Найти стримера">
@@ -253,7 +274,6 @@ let statusRequestInFlight = null;
 let lastStatusAttemptAt = 0;
 
 async function loadTwitchAvatar(name, img) {
-  // Load avatars through our own server so mobile browsers do not depend on a third-party lookup/CORS.
   if (avatarCache.has(name)) { img.src = avatarCache.get(name); return; }
   try {
     const response = await fetch(`/api/avatar?login=${encodeURIComponent(name)}`, { cache: "no-store" });
@@ -265,7 +285,7 @@ async function loadTwitchAvatar(name, img) {
     img.onerror = () => { img.onerror = null; img.src = avatarSvg(name, Math.max(0, streamers.findIndex(item => item.name === name))); };
     img.src = avatarUrl;
   } catch (error) {
-    // The generated SVG placeholder remains visible if Twitch or the server is unavailable.
+    // Оставляем SVG-заглушку, если Twitch или сервер недоступны.
   }
 }
 
@@ -401,7 +421,7 @@ async function loadClips(force=false) {
     try { payload = JSON.parse(raw); }
     catch {
       if (response.status === 404 || /^not found\s*$/i.test(raw.trim())) {
-        throw new Error("Сервер Render не знает маршрут /api/clips (404). Нужно обновить и развернуть server.js вместе с public/index.html из полного ZIP-проекта; одних изменений HTML недостаточно.");
+        throw new Error("Сервер Render не знает маршрут /api/clips (404). Нужно обновить server.js вместе с public/index.html; одних изменений HTML недостаточно.");
       }
       throw new Error(`Сервер вернул не JSON (HTTP ${response.status}): ${raw.slice(0, 120) || "пустой ответ"}`);
     }
@@ -422,6 +442,7 @@ function render(filter="") {
   const normalizedFilter = filter.toLowerCase().trim();
   const directory = activeTab === "moderators" ? [...moderators, ...editors] : streamers;
   const matches = directory.filter(item => item.name.toLowerCase().includes(normalizedFilter));
+
   matches.forEach(({name,url,group}) => {
     const streamIndex = streamers.findIndex(item => item.name === name);
     const moderatorIndex = [...moderators, ...editors].findIndex(item => item.name === name);
@@ -439,6 +460,7 @@ function render(filter="") {
     grids[group].appendChild(card);
     loadTwitchAvatar(name, card.querySelector("img"));
   });
+
   reorderCategoryCards();
   Object.entries(categories).forEach(([group, section]) => {
     section.hidden = activeTab !== "streamers" || grids[group].children.length === 0;
@@ -448,23 +470,30 @@ function render(filter="") {
   document.getElementById("clipsPanel").hidden = activeTab !== "clips";
   if (activeTab === "clips") loadClips();
   document.getElementById("editorsCategory").hidden = activeTab !== "moderators" || grids.editors.children.length === 0;
+
   document.getElementById("visibleCount").textContent = matches.length;
+  document.getElementById("streamerCountLabel").textContent = getStreamerWord(matches.length);
   document.getElementById("empty").style.display = activeTab === "streamers" && matches.length ? "none" : (activeTab === "streamers" ? "block" : "none");
   document.getElementById("moderatorCount").textContent = matches.length;
   document.getElementById("moderatorEmpty").style.display = activeTab === "moderators" && matches.length === 0 ? "block" : "none";
-  // Re-apply the most recent API response after every render/search/tab change.
-  // Otherwise newly created cards could remain stuck on “Проверяем эфир…” until the next poll.
+
   if (Object.keys(latestStreamData).length) applyLiveStatuses(latestStreamData);
-  // Recreated streamer cards need a fresh status after returning from another tab.
-  // Throttle this so typing in search or rapid tab switches cannot flood the API.
   if (activeTab === "streamers" &&
       (Date.now() - latestStatusFetchedAt > 45_000 || !Object.keys(latestStreamData).length)) {
     refreshLiveStatuses();
   }
 }
+
+function getStreamerWord(count) {
+  const lastTwo = count % 100;
+  const lastOne = count % 10;
+  if (lastTwo >= 11 && lastTwo <= 14) return "стримеров";
+  if (lastOne === 1) return "стример";
+  if (lastOne >= 2 && lastOne <= 4) return "стримера";
+  return "стримеров";
+}
+
 function reorderCategoryCards() {
-  // Keep every category independently sorted alphabetically, regardless of live status.
-  // This also sorts moderators and editors within their own sections.
   Object.entries(grids).forEach(([group, grid]) => {
     const cards = Array.from(grid.querySelectorAll(".streamer"));
     cards.sort((a, b) => {
@@ -500,9 +529,9 @@ function applyLiveStatuses(streams) {
 
 async function refreshLiveStatuses() {
   if (statusRequestInFlight) return statusRequestInFlight;
-  // Avoid starting a request on every search keystroke or rapid tab switch.
   if (Date.now() - lastStatusAttemptAt < 8_000) return;
   lastStatusAttemptAt = Date.now();
+
   statusRequestInFlight = (async () => {
     try {
       const response = await fetch("/api/streams", { cache: "no-store" });
@@ -513,13 +542,9 @@ async function refreshLiveStatuses() {
       }
       latestStreamData = payload.streams;
       latestStatusFetchedAt = Date.now();
-      // The user may have switched tabs while the request was in flight. Update any
-      // streamer cards that currently exist, without touching moderator/editor cards.
       applyLiveStatuses(latestStreamData);
       if (activeTab === "streamers") reorderCategoryCards();
     } catch (error) {
-      // Keep failures distinct from offline. If streamer cards are recreated later,
-      // render() will retry after the throttle window rather than leaving them loading.
       document.querySelectorAll("#streamersPanel .live-status").forEach(el => {
         el.classList.remove("is-loading", "is-live");
         el.textContent = "СТАТУС НЕДОСТУПЕН";
@@ -533,8 +558,10 @@ async function refreshLiveStatuses() {
   })();
   return statusRequestInFlight;
 }
+
 document.getElementById("search").addEventListener("input", e => render(e.target.value));
 document.getElementById("moderatorSearch").addEventListener("input", e => render(e.target.value));
+
 document.getElementById("streamersTab").addEventListener("click", () => {
   activeTab = "streamers";
   document.getElementById("streamersTab").classList.add("active");
@@ -543,6 +570,7 @@ document.getElementById("streamersTab").addEventListener("click", () => {
   document.getElementById("moderatorsTab").setAttribute("aria-selected", "false");
   render(document.getElementById("search").value);
 });
+
 document.getElementById("moderatorsTab").addEventListener("click", () => {
   activeTab = "moderators";
   document.getElementById("moderatorsTab").classList.add("active");
@@ -551,32 +579,44 @@ document.getElementById("moderatorsTab").addEventListener("click", () => {
   document.getElementById("streamersTab").setAttribute("aria-selected", "false");
   render(document.getElementById("moderatorSearch").value);
 });
+
 document.getElementById("clipsTab").addEventListener("click", () => {
   activeTab = "clips";
   ["streamersTab","moderatorsTab","clipsTab"].forEach(id => {
-    const button = document.getElementById(id); const selected = id === "clipsTab";
-    button.classList.toggle("active", selected); button.setAttribute("aria-selected", String(selected));
+    const button = document.getElementById(id);
+    const selected = id === "clipsTab";
+    button.classList.toggle("active", selected);
+    button.setAttribute("aria-selected", String(selected));
   });
-  render(""); loadClips();
+  render("");
+  loadClips();
 });
+
 for (const id of ["streamersTab","moderatorsTab"]) {
   document.getElementById(id).addEventListener("click", () => {
     document.getElementById("clipsTab").classList.remove("active");
     document.getElementById("clipsTab").setAttribute("aria-selected", "false");
   });
 }
+
 document.getElementById("clipModalClose").addEventListener("click", closeClipPlayer);
-document.getElementById("clipModal").addEventListener("click", event => { if (event.target.id === "clipModal") closeClipPlayer(); });
-document.addEventListener("keydown", event => { if (event.key === "Escape" && document.getElementById("clipModal").classList.contains("is-open")) closeClipPlayer(); });
+document.getElementById("clipModal").addEventListener("click", event => {
+  if (event.target.id === "clipModal") closeClipPlayer();
+});
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && document.getElementById("clipModal").classList.contains("is-open")) closeClipPlayer();
+});
 document.getElementById("clipPeriod").addEventListener("change", () => loadClips(true));
 document.getElementById("clipSort").addEventListener("change", renderClips);
 document.getElementById("refreshClips").addEventListener("click", () => loadClips(true));
+
 function initStreamerProfilePage() {
   const params = new URLSearchParams(window.location.search);
   const login = (params.get("streamer") || "").toLowerCase();
   if (!login) return false;
   const person = [...streamers, ...moderators, ...editors].find(item => item.name.toLowerCase() === login);
   if (!person) return false;
+
   document.body.classList.add("profile-mode");
   document.title = `${person.name} — профиль стримера`;
   document.getElementById("profileName").textContent = person.name;
@@ -590,6 +630,32 @@ function initStreamerProfilePage() {
   loadTwitchAvatar(person.name, avatar);
   return true;
 }
+
+/* Переключение темы с сохранением выбора */
+function applyTheme(theme) {
+  const isLight = theme === "light";
+  document.body.classList.toggle("light-theme", isLight);
+  const button = document.getElementById("themeToggle");
+  button.textContent = isLight ? "🌙 Тёмная тема" : "☀️ Светлая тема";
+  button.setAttribute("aria-label", isLight ? "Включить тёмную тему" : "Включить светлую тему");
+  document.getElementById("themeColor").setAttribute("content", isLight ? "#f3f4f7" : "#101014");
+}
+
+let savedTheme = "dark";
+try {
+  savedTheme = localStorage.getItem("streamers-theme") || "dark";
+} catch (error) {}
+
+applyTheme(savedTheme);
+
+document.getElementById("themeToggle").addEventListener("click", () => {
+  const nextTheme = document.body.classList.contains("light-theme") ? "dark" : "light";
+  applyTheme(nextTheme);
+  try {
+    localStorage.setItem("streamers-theme", nextTheme);
+  } catch (error) {}
+});
+
 const isProfilePage = initStreamerProfilePage();
 if (!isProfilePage) {
   initClipStreamerPicker();
