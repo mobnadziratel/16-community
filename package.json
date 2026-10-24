@@ -1,0 +1,12 @@
+{
+  "name": "16-community-twitch-live",
+  "version": "1.0.0",
+  "private": true,
+  "description": "1°6 Community streamer list with live Twitch status via Helix API",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
