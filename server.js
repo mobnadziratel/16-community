@@ -7,86 +7,233 @@ const CLIENT_ID = process.env.TWITCH_CLIENT_ID;
 const CLIENT_SECRET = process.env.TWITCH_CLIENT_SECRET;
 const PUBLIC_DIR = path.join(__dirname, "public");
 
-const LOGINS = [
-  "mob_nadziratel",
-  "d1unizi",
-  "plovecmolodec",
-  "charakoi",
-  "kerik232tv",
-  "ribafyga",
-  "mrbatosh",
-  "roman16rus",
-  "rueumur",
-  "cherrys_fox",
-  "hdr_straiker",
-  "kostyan_321r",
-  "sayjos",
-  "lo4kalove",
-  "slavabraze",
-  "zavryz1el",
-  "ilyuha_lake",
-  "brill1antt",
-  "helgard_simbirskiy",
-  "pickachu2281",
-  "zane5k5",
-  "dima26rx",
-  "ishak_kodolov",
-  "mandarin555q"
-];
+// Keep the backend status list synchronized with the site's actual streamer cards.
+// This prevents newly added profiles from silently missing live-status checks.
+let directoryLoadError = null;
+function loadDirectoryLogins() {
+  try {
+    const html = fs.readFileSync(path.join(PUBLIC_DIR, "index.html"), "utf8");
+    const match = html.match(/const\s+streamers\s*=\s*\[([\s\S]*?)^\s*\];/m);
+    if (!match) throw new Error("Could not find the streamers array in public/index.html");
+    const logins = [...match[1].matchAll(/\bname\s*:\s*["']([^"']+)["']/g)]
+      .map(item => String(item[1]).trim().toLowerCase())
+      .filter(login => /^[a-z0-9_]{1,25}$/.test(login));
+    const unique = [...new Set(logins)];
+    if (!unique.length) throw new Error("No streamer logins were found in public/index.html");
+    if (unique.length !== logins.length) {
+      console.warn("Duplicate Twitch logins detected in the streamers array; the status checker will use unique logins.");
+    }
+    return unique;
+  } catch (error) {
+    directoryLoadError = error.message;
+    console.error(`Could not load Twitch channel list from public/index.html: ${error.message}`);
+    return [];
+  }
+}
+const LOGINS = loadDirectoryLogins();
 
 let token = null;
 let tokenExpiresAt = 0;
 let cachedStreams = {};
 let cacheExpiresAt = 0;
 let refreshInFlight = null;
+let twitchDiagnosticsCache = null;
+let twitchDiagnosticsExpiresAt = 0;
+let twitchDiagnosticsInFlight = null;
+
+async function getTwitchDiagnostics() {
+  if (twitchDiagnosticsCache && Date.now() < twitchDiagnosticsExpiresAt) return twitchDiagnosticsCache;
+  if (twitchDiagnosticsInFlight) return twitchDiagnosticsInFlight;
+
+  twitchDiagnosticsInFlight = (async () => {
+    const report = {
+      checkedAt: new Date().toISOString(),
+      overallOk: false,
+      environment: {
+        clientIdConfigured: Boolean(CLIENT_ID),
+        clientSecretConfigured: Boolean(CLIENT_SECRET)
+      },
+      directory: {
+        source: "public/index.html",
+        sourceOk: !directoryLoadError,
+        configuredCount: LOGINS.length,
+        loadError: directoryLoadError || undefined
+      },
+      authentication: { ok: false },
+      userLookup: { ok: false, requestedCount: LOGINS.length, foundCount: 0, missingLogins: [] },
+      streamLookup: { ok: false, checkedCount: 0, liveCount: 0, offlineCount: 0, liveChannels: [] }
+    };
+
+    if (!CLIENT_ID || !CLIENT_SECRET) {
+      report.authentication.error = "Missing TWITCH_CLIENT_ID or TWITCH_CLIENT_SECRET in Render Environment.";
+      return report;
+    }
+    if (!LOGINS.length) {
+      report.userLookup.error = "The site streamer list could not be loaded from public/index.html.";
+      return report;
+    }
+
+    try {
+      await getAppToken();
+      report.authentication = { ok: true };
+    } catch (error) {
+      report.authentication = { ok: false, error: error.message };
+      return report;
+    }
+
+    let usersByLogin;
+    try {
+      usersByLogin = await fetchDirectoryUsers();
+      const missingLogins = LOGINS.filter(login => !usersByLogin.has(login));
+      report.userLookup = {
+        ok: true,
+        requestedCount: LOGINS.length,
+        foundCount: usersByLogin.size,
+        missingLogins
+      };
+    } catch (error) {
+      report.userLookup = {
+        ok: false,
+        requestedCount: LOGINS.length,
+        foundCount: 0,
+        missingLogins: [],
+        error: error.message
+      };
+      return report;
+    }
+
+    try {
+      const streams = await fetchLiveStreams(usersByLogin);
+      const missingLogins = LOGINS.filter(login => !usersByLogin.has(login));
+      report.streamLookup = {
+        ok: true,
+        checkedCount: usersByLogin.size,
+        liveCount: streams.length,
+        offlineCount: Math.max(0, usersByLogin.size - streams.length),
+        liveChannels: streams.map(stream => ({
+          login: String(stream.user_login || "").toLowerCase(),
+          title: String(stream.title || ""),
+          viewerCount: Number(stream.viewer_count || 0)
+        })),
+        missingLogins
+      };
+      report.overallOk = !directoryLoadError && missingLogins.length === 0;
+    } catch (error) {
+      report.streamLookup = {
+        ok: false,
+        checkedCount: usersByLogin.size,
+        liveCount: 0,
+        offlineCount: 0,
+        liveChannels: [],
+        error: error.message
+      };
+    }
+    return report;
+  })().then(report => {
+    twitchDiagnosticsCache = report;
+    twitchDiagnosticsExpiresAt = Date.now() + 30_000;
+    return report;
+  }).finally(() => { twitchDiagnosticsInFlight = null; });
+
+  return twitchDiagnosticsInFlight;
+}
 
 async function getAppToken() {
+  if (!CLIENT_ID || !CLIENT_SECRET) {
+    throw new Error("Set TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET in the Render Environment.");
+  }
   if (token && Date.now() < tokenExpiresAt - 60_000) return token;
   const body = new URLSearchParams({
     client_id: CLIENT_ID,
     client_secret: CLIENT_SECRET,
     grant_type: "client_credentials"
   });
-  const response = await fetch("https://id.twitch.tv/oauth2/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body
-  });
-  if (!response.ok) throw new Error(`Twitch token request failed (${response.status})`);
+  let response;
+  try {
+    response = await fetch("https://id.twitch.tv/oauth2/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body,
+      signal: AbortSignal.timeout(10_000)
+    });
+  } catch (error) {
+    throw new Error(`Twitch OAuth request failed: ${error.name === "TimeoutError" ? "timeout" : error.message}`);
+  }
+  if (!response.ok) {
+    token = null;
+    tokenExpiresAt = 0;
+    throw new Error(`Twitch token request failed (${response.status})`);
+  }
   const data = await response.json();
+  if (!data.access_token) {
+    token = null;
+    tokenExpiresAt = 0;
+    throw new Error("Twitch OAuth response did not contain an access token.");
+  }
   token = data.access_token;
-  tokenExpiresAt = Date.now() + (data.expires_in || 3600) * 1000;
+  tokenExpiresAt = Date.now() + Math.max(60, Number(data.expires_in) || 3600) * 1000;
   return token;
 }
 
+// Shared site-wide lookup pipeline: names come from the cards, user IDs come from Helix,
+// and the stream query uses those stable IDs. Both /api/streams and diagnostics use these functions.
+async function fetchDirectoryUsers() {
+  if (!LOGINS.length) {
+    throw new Error(directoryLoadError || "No streamer logins were loaded from public/index.html.");
+  }
+  const userParams = new URLSearchParams();
+  LOGINS.forEach(login => userParams.append("login", login));
+  let usersPayload;
+  try {
+    usersPayload = await helix("users", userParams);
+  } catch (error) {
+    throw new Error(`Twitch users lookup failed: ${error.message}`);
+  }
+  const users = Array.isArray(usersPayload.data) ? usersPayload.data : [];
+  const usersByLogin = new Map();
+  users.forEach(user => {
+    const login = String(user.login || "").toLowerCase();
+    if (login && LOGINS.includes(login)) usersByLogin.set(login, user);
+  });
+  return usersByLogin;
+}
+
+async function fetchLiveStreams(usersByLogin) {
+  const ids = [...usersByLogin.values()].map(user => String(user.id)).filter(Boolean);
+  if (!ids.length) return [];
+  const streamParams = new URLSearchParams();
+  ids.forEach(id => streamParams.append("user_id", id));
+  try {
+    const streamPayload = await helix("streams", streamParams);
+    return Array.isArray(streamPayload.data) ? streamPayload.data : [];
+  } catch (error) {
+    throw new Error(`Twitch streams lookup failed: ${error.message}`);
+  }
+}
+
+async function fetchDirectorySnapshot() {
+  const usersByLogin = await fetchDirectoryUsers();
+  const streams = await fetchLiveStreams(usersByLogin);
+  return { usersByLogin, streams };
+}
+
 async function fetchStreams() {
-  if (!CLIENT_ID || !CLIENT_SECRET) {
-    throw new Error("Set TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET in the environment.");
-  }
-  const accessToken = await getAppToken();
-  const params = new URLSearchParams();
-  LOGINS.forEach(login => params.append("user_login", login));
-  const response = await fetch(`https://api.twitch.tv/helix/streams?${params}`, {
-    headers: {
-      "Client-Id": CLIENT_ID,
-      "Authorization": `Bearer ${accessToken}`
-    }
-  });
-  if (!response.ok) {
-    if (response.status === 401) {
-      token = null;
-      tokenExpiresAt = 0;
-    }
-    throw new Error(`Twitch streams request failed (${response.status})`);
-  }
-  const data = await response.json();
+  const snapshot = await fetchDirectorySnapshot();
   const result = {};
+
+  // Missing user records should not be misreported as ordinary offline status.
+  // This also makes removed/renamed Twitch accounts visible in diagnostics.
   LOGINS.forEach(login => {
-    result[login] = { isLive: false, viewerCount: null, title: null };
+    if (!snapshot.usersByLogin.has(login)) {
+      result[login] = { isLive: false, viewerCount: null, title: null, error: true, errorType: "channel_not_found" };
+    } else {
+      result[login] = { isLive: false, viewerCount: null, title: null };
+    }
   });
-  (data.data || []).forEach(stream => {
+
+  snapshot.streams.forEach(stream => {
     const login = String(stream.user_login || "").toLowerCase();
-    if (result[login]) {
+    if (Object.prototype.hasOwnProperty.call(result, login)) {
       result[login] = {
         isLive: true,
         viewerCount: Number(stream.viewer_count || 0),
@@ -95,6 +242,7 @@ async function fetchStreams() {
       };
     }
   });
+
   cachedStreams = result;
   cacheExpiresAt = Date.now() + 30_000;
   return result;
@@ -117,7 +265,8 @@ async function helix(pathname, params) {
   if (!CLIENT_ID || !CLIENT_SECRET) throw new Error("Set TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET in Render environment.");
   const accessToken = await getAppToken();
   const response = await fetch(`https://api.twitch.tv/helix/${pathname}?${params.toString()}`, {
-    headers: { "Client-Id": CLIENT_ID, "Authorization": `Bearer ${accessToken}` }
+    headers: { "Client-Id": CLIENT_ID, "Authorization": `Bearer ${accessToken}` },
+    signal: AbortSignal.timeout(10_000)
   });
   if (!response.ok) {
     if (response.status === 401) { token = null; tokenExpiresAt = 0; }
@@ -271,6 +420,21 @@ const server = http.createServer(async (req, res) => {
     } catch (error) {
       console.error(error.message);
       res.writeHead(503); res.end(JSON.stringify({ error: error.message || "Twitch clips are temporarily unavailable", clips: [] }));
+    }
+    return;
+  }
+
+  if (url.pathname === "/api/diagnostics/twitch") {
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    res.setHeader("Cache-Control", "no-store");
+    try {
+      const diagnostics = await getTwitchDiagnostics();
+      res.writeHead(200);
+      res.end(JSON.stringify(diagnostics));
+    } catch (error) {
+      console.error(`Twitch diagnostics failed: ${error.message}`);
+      res.writeHead(503);
+      res.end(JSON.stringify({ checkedAt: new Date().toISOString(), error: "Diagnostic request failed" }));
     }
     return;
   }
