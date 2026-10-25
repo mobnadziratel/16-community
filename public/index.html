@@ -986,6 +986,20 @@ html[data-theme="light"] .tabs .tab-button + .tab-button::before {
 .wall-splatter.splatter-b{top:56%;right:20%;--splatter:#73dedb;transform:rotate(-12deg);}
 .wall-splatter.splatter-c{top:76%;left:34%;--splatter:#f1a06d;transform:rotate(22deg);}
 .wall-footing{position:absolute;z-index:3;height:18px;bottom:0;left:0;right:0;background:linear-gradient(180deg,#4a3935,#211b1a);border-top:2px solid rgba(22,17,17,.58);box-shadow:0 -3px 14px rgba(0,0,0,.15);}
+
+/* Bakery flyer pinned to the community wall */
+.bakery-flyer{position:absolute;z-index:5;top:51%;left:6%;width:min(330px,42%);box-sizing:border-box;padding:22px 20px 20px;color:#48291b;text-align:center;background:linear-gradient(145deg,#fff8df 0%,#f3dca7 52%,#e9c98c 100%);border:2px solid #9c6235;box-shadow:0 16px 25px rgba(0,0,0,.5),inset 0 0 0 5px rgba(255,255,255,.4),inset 0 0 22px rgba(132,75,32,.16);transform:rotate(-3deg);font-family:Georgia,"Times New Roman",serif;}
+.bakery-flyer:before{content:"";position:absolute;inset:8px;border:1px dashed rgba(130,75,36,.58);pointer-events:none;}
+.bakery-logo{position:relative;display:block;margin:0 auto 10px;color:#7b321e;text-decoration:none;font-family:Impact,"Arial Black",sans-serif;font-size:clamp(22px,3.1vw,34px);font-weight:900;line-height:.95;letter-spacing:.025em;text-shadow:1px 2px 0 #f8e9bd,2px 3px 0 rgba(123,50,30,.2);}
+.bakery-logo small{display:block;margin-top:5px;font-family:Georgia,serif;font-size:10px;letter-spacing:.28em;font-weight:700;}
+.bakery-rule{width:64%;height:3px;margin:12px auto;background:#a14e2b;border-radius:3px;}
+.bakery-headline{margin:10px 0 8px;font-size:clamp(20px,2.6vw,28px);font-weight:900;line-height:1.05;text-transform:uppercase;}
+.bakery-copy{margin:0 auto 14px;max-width:260px;font-size:15px;line-height:1.4;}
+.bakery-stamp{display:inline-block;margin:2px 0 13px;padding:5px 9px;border:2px solid #a14e2b;color:#a14e2b;font:bold 10px Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;transform:rotate(-4deg);}
+.bakery-assortment{position:relative;margin:0;font-size:14px;line-height:1.45;font-weight:700;}
+.bakery-assortment a{color:#7d2c19;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px;overflow-wrap:anywhere;}
+@media(max-width:650px){.bakery-flyer{top:57%;left:50%;width:min(300px,84%);padding:20px 17px 18px;transform:translateX(-50%) rotate(-2deg);}.bakery-logo{font-size:clamp(25px,7vw,32px);}.bakery-headline{font-size:clamp(21px,6vw,27px);}}
+
 @media(max-width:650px){
  .tabs{grid-template-columns:repeat(2,minmax(0,1fr));}.tabs .tab-button#clipsTab{grid-column:auto;}.tabs .tab-button#clipsTab::before{display:none;}
  .wall-mural{min-height:1900px;padding:25px 12px 38px;border-radius:12px;}
@@ -1125,6 +1139,17 @@ html[data-theme="light"] .tab-button.active {
         <p class="wanted-reason">Воровала письки.<br>Нужна живой!</p>
         <a class="wanted-link" href="https://www.twitch.tv/cherrys_fox" target="_blank" rel="noopener noreferrer">Найти на Twitch ↗</a>
       </div>
+      <article class="bakery-flyer" aria-label="Рекламная листовка пекарни БАТОНЫ БАТОНА">
+        <a class="bakery-logo" href="https://ibb.co/W4v6hwZB" target="_blank" rel="noopener noreferrer" aria-label="Открыть логотип БАТОНЫ БАТОНА">
+          БАТОНЫ<br>БАТОНА
+          <small>ПЕКАРНЯ</small>
+        </a>
+        <div class="bakery-rule" aria-hidden="true"></div>
+        <h2 class="bakery-headline">Тепло. Хруст. Батон.</h2>
+        <p class="bakery-copy">Пусть день будет чуть вкуснее — заглядывай за своей порцией хорошего настроения!</p>
+        <span class="bakery-stamp">Выпечено с душой</span>
+        <p class="bakery-assortment">Наш ассортимент: <a href="https://twitch.tv/mrbatosh" target="_blank" rel="noopener noreferrer">смотри здесь</a></p>
+      </article>
       <div class="wall-tag tag-purple" aria-hidden="true">NIGHT
 SHIFT</div>
       <div class="wall-tag tag-cyan" aria-hidden="true">STAY
@@ -1483,6 +1508,9 @@ async function loadTwitchAvatar(name, img) {
   }
 }
 
+// Replace the wall poster placeholder with cherrys_fox's current Twitch avatar when available.
+if (wantedCherryAvatar) loadTwitchAvatar("cherrys_fox", wantedCherryAvatar);
+
 function initClipStreamerPicker() {
   const list = document.getElementById("clipStreamerList");
   list.innerHTML = "";
@@ -1689,7 +1717,7 @@ function render(filter="") {
       const statusLine = info.querySelector('.status-line');
       info.insertBefore(blurb, statusLine || null);
     }
-    const cardLinks = !moderator && person ? (person.links || []) : [];
+    const cardLinks = !moderator && person ? [...(person.links || [])].sort((a, b) => String(a.label || '').localeCompare(String(b.label || ''), 'ru', { sensitivity: 'base' })) : [];
     if (!moderator && person) {
       const socialRow = document.createElement('div');
       socialRow.className = 'card-socials';
@@ -2000,7 +2028,7 @@ function openStreamerProfile(login, updateHistory = false) {
   const links = [
     {label:"Twitch", url:`https://www.twitch.tv/${encodeURIComponent(person.name)}`, subtitle:`twitch.tv/${person.name}`},
     ...(person.links || []).map(link => ({...link, subtitle:new URL(link.url).hostname.replace(/^www\./, "")}))
-  ];
+  ].sort((a, b) => String(a.label || '').localeCompare(String(b.label || ''), 'ru', { sensitivity: 'base' }));
   links.forEach((link, socialIndex) => {
     const item = document.createElement("a");
     item.className = "profile-social-link";
