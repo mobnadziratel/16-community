@@ -7,6 +7,11 @@
 <title>Стримеры Twitch</title>
 <style>
 :root{--bg:#0b0b0f;--panel:#14141b;--panel2:#1a1a23;--text:#f5f5f7;--muted:#9a9aa8;--accent:#b9ff36;--line:rgba(255,255,255,.09)}
+/* Circular theme reveal expands outward from the theme switch */
+@keyframes theme-circle-reveal{from{clip-path:circle(0 at var(--theme-x,50%) var(--theme-y,50%))}to{clip-path:circle(var(--theme-radius,150vmax) at var(--theme-x,50%) var(--theme-y,50%))}}
+::view-transition-old(root){animation:none;z-index:1}
+::view-transition-new(root){animation:theme-circle-reveal .72s cubic-bezier(.22,.75,.25,1) both;z-index:2}
+@media(prefers-reduced-motion:reduce){::view-transition-new(root){animation-duration:.01ms}}
 *{box-sizing:border-box}
 body{margin:0;background:radial-gradient(ellipse at 50% -15%,#292b20 0,transparent 42%),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
 a{color:inherit;text-decoration:none}
@@ -48,7 +53,7 @@ html[data-theme="light"] .card-description{color:#656978}
 .status-line{display:flex;align-items:center;min-width:0;padding-left:8px;margin-top:9px}
 .moderates{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:10px;font-size:12px;color:var(--muted)}
 .moderates-label{font-weight:700}
-.moderates-tag{display:inline-flex;padding:4px 8px;border:1px solid var(--border);border-radius:999px;color:var(--text);background:var(--surface)}
+.moderates-tag{display:inline-flex;padding:4px 8px;border:1px solid var(--border);border-radius:999px;color:var(--text);background:var(--surface);cursor:pointer;font:inherit;transition:background .18s,border-color .18s,transform .18s}.moderates-tag:hover{background:var(--accent-soft,rgba(143,125,255,.16));border-color:var(--accent,#8f7dff);transform:translateY(-1px)}.moderates-tag:focus-visible{outline:2px solid var(--accent,#8f7dff);outline-offset:2px}.streamer.tag-target-highlight{animation:tagTargetPulse 1.4s ease-out}@keyframes tagTargetPulse{0%{box-shadow:0 0 0 3px rgba(143,125,255,.75)}100%{box-shadow:0 0 0 0 transparent}}
 .live-status{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.035em;margin:0;max-width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere;line-height:1.35;color:#a3a3b2}
 .live-status::before{content:"";width:7px;height:7px;border-radius:50%;background:#777786;flex:0 0 auto}
 .live-status.is-live{color:#ff667a}
@@ -461,18 +466,18 @@ html[data-theme="light"] footer { border-top-color: rgba(73,52,115,.12); }
   box-shadow: 0 12px 38px rgba(0,0,0,.26), 0 0 24px rgba(139,99,245,.20);
   transform: translate3d(-20vw, 0, 0) rotate(-22deg) scale(.72);
   opacity: 0; will-change: transform, opacity;
-  animation: streamer-avatar-flight var(--flight-duration, 980ms) cubic-bezier(.2,.68,.24,1) var(--flight-delay, 0ms) both;
+  animation: streamer-avatar-flight var(--flight-duration, 1280ms) cubic-bezier(.22,.72,.18,1) var(--flight-delay, 0ms) both;
 }
 .avatar-flight-item img {
   display: block; width: 100%; height: 100%; object-fit: cover;
   border: 2px solid rgba(255,255,255,.88); border-radius: 17px; background: #24212f;
 }
 @keyframes streamer-avatar-flight {
-  0% { transform: translate3d(-20vw, 0, 0) rotate(-25deg) scale(.68); opacity: 0; }
-  9% { opacity: 1; }
-  42% { transform: translate3d(42vw, -2.5vh, 0) rotate(4deg) scale(1.12); opacity: 1; }
-  76% { transform: translate3d(81vw, 1vh, 0) rotate(17deg) scale(.96); opacity: 1; }
-  100% { transform: translate3d(122vw, -3vh, 0) rotate(28deg) scale(.78); opacity: 0; }
+  0% { transform: translate3d(-20vw, 1vh, 0) rotate(-20deg) scale(.72); opacity: 0; }
+  12% { opacity: 1; }
+  38% { transform: translate3d(34vw, -1.5vh, 0) rotate(-2deg) scale(1.04); opacity: 1; }
+  68% { transform: translate3d(73vw, .5vh, 0) rotate(12deg) scale(1); opacity: 1; }
+  100% { transform: translate3d(122vw, -2vh, 0) rotate(24deg) scale(.82); opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   .logo.logo-tap-pop { animation-duration: .01ms; }
@@ -990,7 +995,8 @@ html[data-theme="light"] .tabs .tab-button + .tab-button::before {
 /* Bakery flyer pinned to the community wall */
 .bakery-flyer{position:absolute;z-index:5;top:51%;left:6%;width:min(330px,42%);box-sizing:border-box;padding:22px 20px 20px;color:#48291b;text-align:center;background:linear-gradient(145deg,#fff8df 0%,#f3dca7 52%,#e9c98c 100%);border:2px solid #9c6235;box-shadow:0 16px 25px rgba(0,0,0,.5),inset 0 0 0 5px rgba(255,255,255,.4),inset 0 0 22px rgba(132,75,32,.16);transform:rotate(-3deg);font-family:Georgia,"Times New Roman",serif;}
 .bakery-flyer:before{content:"";position:absolute;inset:8px;border:1px dashed rgba(130,75,36,.58);pointer-events:none;}
-.bakery-logo{position:relative;display:block;width:min(100%,250px);margin:0 auto 10px;text-decoration:none;line-height:0;text-align:center}.bakery-logo img{display:block;width:100%;height:auto;max-height:210px;object-fit:contain;border-radius:10px;}
+.bakery-logo{position:relative;display:block;width:min(100%,175px);margin:0 auto 7px;text-decoration:none;line-height:0;text-align:center}.bakery-logo img{display:block;width:100%;height:auto;max-height:140px;object-fit:contain;border-radius:10px;}
+.bakery-brand{position:relative;margin:0 auto 8px;font:bold 13px/1.2 Arial,sans-serif;letter-spacing:.07em;color:#7d2c19;text-transform:uppercase;}
 
 .bakery-rule{width:64%;height:3px;margin:12px auto;background:#a14e2b;border-radius:3px;}
 .bakery-headline{margin:10px 0 8px;font-size:clamp(20px,2.6vw,28px);font-weight:900;line-height:1.05;text-transform:uppercase;}
@@ -998,7 +1004,7 @@ html[data-theme="light"] .tabs .tab-button + .tab-button::before {
 .bakery-stamp{display:inline-block;margin:2px 0 13px;padding:5px 9px;border:2px solid #a14e2b;color:#a14e2b;font:bold 10px Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;transform:rotate(-4deg);}
 .bakery-assortment{position:relative;margin:0;font-size:14px;line-height:1.45;font-weight:700;}
 .bakery-assortment a{color:#7d2c19;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px;overflow-wrap:anywhere;}
-@media(max-width:650px){.bakery-flyer{top:57%;left:50%;width:min(300px,84%);padding:20px 17px 18px;transform:translateX(-50%) rotate(-2deg);}.bakery-logo{font-size:clamp(25px,7vw,32px);}.bakery-headline{font-size:clamp(21px,6vw,27px);}}
+@media(max-width:650px){.bakery-flyer{top:57%;left:50%;width:min(300px,84%);padding:20px 17px 18px;transform:translateX(-50%) rotate(-2deg);}.bakery-logo{width:min(100%,155px);}.bakery-brand{font-size:12px;}.bakery-headline{font-size:clamp(21px,6vw,27px);}}
 
 @media(max-width:650px){
  .tabs{grid-template-columns:repeat(2,minmax(0,1fr));}.tabs .tab-button#clipsTab{grid-column:auto;}.tabs .tab-button#clipsTab::before{display:none;}
@@ -1167,10 +1173,11 @@ html[data-theme="light"] .tabs .tab-button.active {
         <p class="wanted-reason">Воровала письки.<br>Нужна живой!</p>
         <a class="wanted-link" href="https://www.twitch.tv/cherrys_fox" target="_blank" rel="noopener noreferrer">Найти на Twitch ↗</a>
       </div>
-      <article class="bakery-flyer" aria-label="Рекламная листовка пекарни БАТОНЫ БАТОНА">
-        <a class="bakery-logo" href="https://ibb.co/W4v6hwZB" target="_blank" rel="noopener noreferrer" aria-label="Открыть логотип БАТОНЫ БАТОНА">
-          <img src="https://i.ibb.co/JwjK14Vr/photo-2026-10-25-10-54-20.jpg" alt="Логотип БАТОНЫ БАТОНАПЕКАРНЯ — кот в наушниках с батонами" loading="lazy">
+      <article class="bakery-flyer" aria-label="Рекламная листовка пекарни БАТОНЫ БАТОНА ПЕКАРНЯ">
+        <a class="bakery-logo" href="https://ibb.co/W4v6hwZB" target="_blank" rel="noopener noreferrer" aria-label="Открыть логотип БАТОНЫ БАТОНА ПЕКАРНЯ">
+          <img src="https://i.ibb.co/JwjK14Vr/photo-2026-10-25-10-54-20.jpg" alt="Логотип БАТОНЫ БАТОНА ПЕКАРНЯ — кот в наушниках с батонами" loading="lazy">
         </a>
+        <div class="bakery-brand">БАТОНЫ БАТОНА ПЕКАРНЯ</div>
         <div class="bakery-rule" aria-hidden="true"></div>
         <h2 class="bakery-headline">Тепло. Хруст. Батон.</h2>
         <p class="bakery-copy">Пусть день будет чуть вкуснее — заглядывай за своей порцией хорошего настроения!</p>
@@ -1395,7 +1402,37 @@ const moderators = [
 const editors = [
   {name:"agyha1", url:"https://www.twitch.tv/agyha1", group:"editors", channels:["cherrys_fox"], tagLabel:"Редактор у:"}
 ];
+// Restore the selected tab and scroll position after a page refresh in the same tab.
 let activeTab = "streamers";
+try {
+  const savedTab = sessionStorage.getItem("small-streamers-active-tab");
+  if (["streamers", "moderators", "clips", "wall"].includes(savedTab)) activeTab = savedTab;
+} catch (_) {}
+(function preservePagePosition() {
+  try {
+    const savedY = sessionStorage.getItem("small-streamers-scroll-y");
+    if (savedY !== null) {
+      const restore = () => window.scrollTo(0, Math.max(0, Number(savedY) || 0));
+      window.addEventListener("pageshow", () => {
+        requestAnimationFrame(() => requestAnimationFrame(restore));
+        setTimeout(restore, 250);
+        setTimeout(restore, 800);
+      }, { once: true });
+    }
+  } catch (_) {}
+  let saveQueued = false;
+  window.addEventListener("scroll", () => {
+    if (saveQueued) return;
+    saveQueued = true;
+    requestAnimationFrame(() => {
+      saveQueued = false;
+      try { sessionStorage.setItem("small-streamers-scroll-y", String(window.scrollY)); } catch (_) {}
+    });
+  }, { passive: true });
+  window.addEventListener("beforeunload", () => {
+    try { sessionStorage.setItem("small-streamers-scroll-y", String(window.scrollY)); } catch (_) {}
+  });
+})();
 let clipsData = [];
 let clipsLoaded = false;
 let clipsLoading = false;
@@ -1729,7 +1766,7 @@ function render(filter="") {
     });
     const moderator = activeTab === "moderators";
     const modData = moderator ? [...moderators, ...editors].find(item => item.name === name && item.group === group) : null;
-    const moderationTags = modData ? `<div class="moderates"><span class="moderates-label">${modData.tagLabel}</span> ${modData.channels.map(channel => `<span class="moderates-tag">@${channel}</span>`).join(" ")}</div>` : "";
+    const moderationTags = modData ? `<div class="moderates"><span class="moderates-label">${modData.tagLabel}</span> ${modData.channels.map(channel => `<button type="button" class="moderates-tag" data-streamer-target="${String(channel).replace(/&/g, "&amp;").replace(/\"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}" aria-label="Найти стримера ${channel}">@${channel}</button>`).join(" ")}</div>` : "";
     card.innerHTML = `<div class="avatar"><img src="${avatarSvg(name,i)}" alt="Аватар ${name}" loading="eager" referrerpolicy="no-referrer"></div>
       <div class="info"><div class="name">${name}</div>${moderator ? "" : ``}${moderator ? moderationTags : `<div class="status-line"><div class="live-status is-loading" data-status="${name}">Проверяем эфир…</div></div><div class="stream-meta" data-meta="${name}"></div>`}</div>
       <svg class="arrow" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>`;
@@ -1974,6 +2011,7 @@ const tabButtons = {
 };
 function activateTab(nextTab) {
   activeTab = nextTab;
+  try { sessionStorage.setItem("small-streamers-active-tab", nextTab); } catch (_) {}
   const selectedButtonId = tabButtons[nextTab];
   Object.values(tabButtons).forEach(id => {
     const button = document.getElementById(id);
@@ -1990,6 +2028,31 @@ function activateTab(nextTab) {
 Object.entries(tabButtons).forEach(([tab, id]) => {
   document.getElementById(id).addEventListener("click", () => activateTab(tab));
 });
+// Moderator channel tags jump to the corresponding streamer card in the Streamers tab.
+document.addEventListener("click", event => {
+  const tag = event.target.closest("[data-streamer-target]");
+  if (!tag) return;
+  event.preventDefault();
+  const login = String(tag.dataset.streamerTarget || "").toLowerCase();
+  const search = document.getElementById("search");
+  if (search) search.value = "";
+  activateTab("streamers");
+  requestAnimationFrame(() => {
+    const target = [...document.querySelectorAll("#creatorGrid .streamer, #mainGrid .streamer, #othersGrid .streamer, #discoverGrid .streamer")]
+      .find(card => card.querySelector(".name")?.textContent.trim().toLowerCase() === login);
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+      target.classList.remove("tag-target-highlight");
+      void target.offsetWidth;
+      target.classList.add("tag-target-highlight");
+      target.addEventListener("animationend", () => target.classList.remove("tag-target-highlight"), { once: true });
+    } else {
+      openStreamerProfile(login, true);
+    }
+  });
+});
+// Apply the tab remembered for this browser tab before the first paint.
+if (activeTab !== "streamers") activateTab(activeTab);
 document.getElementById("clipModalClose").addEventListener("click", closeClipPlayer);
 document.getElementById("clipModal").addEventListener("click", event => { if (event.target.id === "clipModal") closeClipPlayer(); });
 document.addEventListener("keydown", event => { if (event.key === "Escape" && document.getElementById("clipModal").classList.contains("is-open")) closeClipPlayer(); });
@@ -2164,16 +2227,31 @@ document.addEventListener("keydown", event => {
     overlay.className = 'avatar-flight-overlay';
     overlay.setAttribute('aria-hidden', 'true');
 
-    const people = streamers.slice();
+    // Use the people from the currently selected directory tab.
+    // On Moderators, include moderators and editors; on Streamers, use streamers.
+    const sourcePeople = activeTab === "moderators" ? [...moderators, ...editors] : streamers;
+    // Deduplicate by Twitch login so a person listed in more than one role flies only once.
+    const seenLogins = new Set();
+    const people = sourcePeople.filter(person => {
+      const login = String(person.name || "").trim().toLowerCase();
+      if (!login || seenLogins.has(login)) return false;
+      seenLogins.add(login);
+      return true;
+    });
     if (!people.length) return;
+    // Shuffle independently on every launch so the avatar parade order changes each time.
+    for (let i = people.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [people[i], people[j]] = [people[j], people[i]];
+    }
     let remaining = people.length;
-    const flightDuration = 980;
-    const flightGap = 145;
+    const flightDuration = 1280;
+    const flightGap = 115;
 
     people.forEach((person, index) => {
       const item = document.createElement('div');
       item.className = 'avatar-flight-item';
-      item.style.setProperty('--flight-y', `${7 + (index % 7) * 12}%`);
+      item.style.setProperty('--flight-y', `${5 + Math.random() * 82}%`);
       item.style.setProperty('--flight-delay', `${index * flightGap}ms`);
       item.style.setProperty('--flight-duration', `${flightDuration}ms`);
 
@@ -2252,7 +2330,21 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
     try { localStorage.setItem('small-streamers-theme', theme); } catch (_) {}
   }
   applyTheme(initial);
-  button.addEventListener('click', () => applyTheme(root.dataset.theme === 'light' ? 'dark' : 'light'));
+  button.addEventListener('click', () => {
+    const nextTheme = root.dataset.theme === 'light' ? 'dark' : 'light';
+    const rect = button.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    const radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+    root.style.setProperty('--theme-x', `${x}px`);
+    root.style.setProperty('--theme-y', `${y}px`);
+    root.style.setProperty('--theme-radius', `${radius}px`);
+    if (document.startViewTransition && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.startViewTransition(() => applyTheme(nextTheme));
+    } else {
+      applyTheme(nextTheme);
+    }
+  });
 })();
 </script>
 </body>
