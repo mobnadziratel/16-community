@@ -2464,9 +2464,11 @@ function applyLiveStatuses(streams) {
       status.textContent = "В ЭФИРЕ";
       const viewers = Number.isFinite(item.viewerCount) ? ` · ${item.viewerCount.toLocaleString("ru-RU")} зрителей` : "";
       meta.textContent = `${item.title || "Прямой эфир"}${viewers}`;
-    } else if (item && item.error) {
+    } else if (!item || item.error) {
+      // A missing channel entry indicates an incomplete/unexpected API response,
+      // not proof that the channel is offline. Keep the distinction visible.
       status.textContent = "СТАТУС НЕДОСТУПЕН";
-      meta.textContent = "Не удалось проверить эфир";
+      meta.textContent = "Не удалось проверить эфир. Данные Twitch неполные.";
     } else {
       status.textContent = "НЕ В СЕТИ";
       meta.textContent = "";
