@@ -32,7 +32,8 @@ const LOGINS = [
   "dima26rx1",
   "ishak_kodolov",
   "mandarin555q",
-  "z3kat"
+  "z3kat",
+  "ssh1nxx"
 ];
 
 let token = null;

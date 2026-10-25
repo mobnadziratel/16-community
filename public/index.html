@@ -1568,8 +1568,8 @@ html[data-theme="light"] .streamer .card-social-icon:hover {
 }
 
 
-/* Clips helper: return-to-top control appears after several clip cards have passed. */
-.clips-back-to-top {
+/* Site-wide return-to-top control. */
+.back-to-top {
   position: fixed;
   right: clamp(14px, 3vw, 30px);
   bottom: calc(16px + env(safe-area-inset-bottom, 0px));
@@ -1594,17 +1594,17 @@ html[data-theme="light"] .streamer .card-social-icon:hover {
   transition: opacity .2s ease, transform .2s ease, border-color .2s ease, box-shadow .2s ease;
   -webkit-tap-highlight-color: transparent;
 }
-.clips-back-to-top[hidden] { display: none !important; }
-.clips-back-to-top.is-visible { opacity: 1; transform: translateY(0) scale(1); }
-.clips-back-to-top:hover { border-color: #b9ff36; box-shadow: 0 12px 34px rgba(0,0,0,.4), 0 0 25px rgba(185,255,54,.22); }
-.clips-back-to-top:focus-visible { outline: 3px solid #b9ff36; outline-offset: 3px; }
-.clips-back-to-top svg { width: 17px; height: 17px; flex: 0 0 17px; }
-html[data-theme="light"] .clips-back-to-top { color:#252b18; background:linear-gradient(135deg,rgba(245,255,220,.98),rgba(255,255,255,.98)); border-color:rgba(90,132,16,.45); box-shadow:0 10px 28px rgba(41,38,67,.2),0 0 18px rgba(139,190,36,.16); }
+.back-to-top[hidden] { display: none !important; }
+.back-to-top.is-visible { opacity: 1; transform: translateY(0) scale(1); }
+.back-to-top:hover { border-color: #b9ff36; box-shadow: 0 12px 34px rgba(0,0,0,.4), 0 0 25px rgba(185,255,54,.22); }
+.back-to-top:focus-visible { outline: 3px solid #b9ff36; outline-offset: 3px; }
+.back-to-top svg { width: 17px; height: 17px; flex: 0 0 17px; }
+html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradient(135deg,rgba(245,255,220,.98),rgba(255,255,255,.98)); border-color:rgba(90,132,16,.45); box-shadow:0 10px 28px rgba(41,38,67,.2),0 0 18px rgba(139,190,36,.16); }
 @media (max-width: 550px) {
-  .clips-back-to-top { right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); min-height: 44px; padding: 0 14px; }
+  .back-to-top { right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); min-height: 44px; padding: 0 14px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .clips-back-to-top { transition: none !important; transform: none; }
+  .back-to-top { transition: none !important; transform: none; }
 }
 
 </style>
@@ -1749,7 +1749,7 @@ LEGENDS</div>
     <p class="clip-modal-help">Нажми кнопку воспроизведения в плеере, чтобы посмотреть клип. Если видео не загрузилось, проверь доступность Twitch и домен сайта.</p>
   </div>
 </div>
-<button id="clipsBackToTop" class="clips-back-to-top" type="button" hidden aria-hidden="true" aria-label="Вернуться к началу списка клипов">
+<button id="backToTopButton" class="back-to-top" type="button" hidden aria-hidden="true" aria-label="Вернуться наверх страницы">
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
   <span>Наверх</span>
 </button>
@@ -1863,6 +1863,12 @@ const streamers = [
     {label:"DonationAlerts", url:"https://www.donationalerts.com/r/slavabraze"},
     {label:"Telegram", url:"https://t.me/SecretBraze"},
     {label:"DonatePay", url:"https://new.donatepay.ru/@braze"}
+   ]},
+  {name:"ssh1nxx", url:"https://www.twitch.tv/ssh1nxx", group:"others",
+   description:"Артём, 18 лет. Живу в Брянске. Стримлю все жанры игр, но больше всего люблю ААА проекты.",
+   links:[
+    {label:"YouTube", url:"https://www.youtube.com/@ssh1nxx"},
+    {label:"DonationAlerts", url:"https://www.donationalerts.com/r/shh1mmo"}
    ]},
   {name:"zavryz1el", url:"https://www.twitch.tv/zavryz1el", group:"others",
    description:"Привет, я Zavryziel! Это мой канал для стримов!"},
@@ -2241,18 +2247,12 @@ function formatClipDate(value) {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? "Дата неизвестна" : date.toLocaleDateString("ru-RU", { day:"numeric", month:"short", year:"numeric" });
 }
-function updateClipsBackToTopVisibility() {
-  const button = document.getElementById("clipsBackToTop");
+function updateBackToTopVisibility() {
+  const button = document.getElementById("backToTopButton");
   if (!button) return;
-  let shouldShow = false;
-  if (activeTab === "clips" && !document.getElementById("clipsPanel").hidden) {
-    const cards = [...document.querySelectorAll("#clipsGrid .clip-card")];
-    if (cards.length) {
-      // Reveal after the user has passed about six clips (two rows on desktop, six on mobile).
-      const thresholdCard = cards[Math.min(5, cards.length - 1)];
-      shouldShow = thresholdCard.getBoundingClientRect().bottom < 0;
-    }
-  }
+  // Show the same control on every tab after the page has been scrolled.
+  const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+  const shouldShow = scrollY > 600;
   const wasHidden = button.hidden;
   button.hidden = !shouldShow;
   button.setAttribute("aria-hidden", String(!shouldShow));
@@ -2294,7 +2294,7 @@ function renderClips() {
     meta.append(views,date); body.append(author,title,meta); card.append(thumb,body); grid.appendChild(card);
   });
   document.getElementById("clipsEmpty").style.display = items.length ? "none" : "block";
-  requestAnimationFrame(updateClipsBackToTopVisibility);
+  requestAnimationFrame(updateBackToTopVisibility);
 }
 async function loadClips(force=false) {
   if (clipsLoading) return;
@@ -2692,7 +2692,7 @@ function activateTab(nextTab) {
     ? document.getElementById(filterId).value
     : "";
   render(filterValue);
-  requestAnimationFrame(updateClipsBackToTopVisibility);
+  requestAnimationFrame(updateBackToTopVisibility);
 }
 Object.entries(tabButtons).forEach(([tab, id]) => {
   document.getElementById(id).addEventListener("click", () => activateTab(tab));
@@ -2728,15 +2728,13 @@ document.addEventListener("keydown", event => { if (event.key === "Escape" && do
 document.getElementById("clipPeriod").addEventListener("change", () => { saveClipSettings(); loadClips(true); });
 document.getElementById("clipSort").addEventListener("change", () => { saveClipSettings(); renderClips(); });
 document.getElementById("refreshClips").addEventListener("click", () => loadClips(true));
-const clipsBackToTopButton = document.getElementById("clipsBackToTop");
-clipsBackToTopButton.addEventListener("click", () => {
-  const clipsPanel = document.getElementById("clipsPanel");
-  if (activeTab !== "clips") activateTab("clips");
+const backToTopButton = document.getElementById("backToTopButton");
+backToTopButton.addEventListener("click", () => {
   const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  clipsPanel.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
+  window.scrollTo({ top: 0, left: 0, behavior: reducedMotion ? "auto" : "smooth" });
 });
-window.addEventListener("scroll", updateClipsBackToTopVisibility, { passive: true });
-window.addEventListener("resize", updateClipsBackToTopVisibility, { passive: true });
+window.addEventListener("scroll", updateBackToTopVisibility, { passive: true });
+window.addEventListener("resize", updateBackToTopVisibility, { passive: true });
 function formatFollowerCount(count) {
   const n = Math.max(0, Math.trunc(Number(count) || 0));
   const mod100 = n % 100;
