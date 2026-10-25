@@ -990,8 +990,8 @@ html[data-theme="light"] .tabs .tab-button + .tab-button::before {
 /* Bakery flyer pinned to the community wall */
 .bakery-flyer{position:absolute;z-index:5;top:51%;left:6%;width:min(330px,42%);box-sizing:border-box;padding:22px 20px 20px;color:#48291b;text-align:center;background:linear-gradient(145deg,#fff8df 0%,#f3dca7 52%,#e9c98c 100%);border:2px solid #9c6235;box-shadow:0 16px 25px rgba(0,0,0,.5),inset 0 0 0 5px rgba(255,255,255,.4),inset 0 0 22px rgba(132,75,32,.16);transform:rotate(-3deg);font-family:Georgia,"Times New Roman",serif;}
 .bakery-flyer:before{content:"";position:absolute;inset:8px;border:1px dashed rgba(130,75,36,.58);pointer-events:none;}
-.bakery-logo{position:relative;display:block;margin:0 auto 10px;color:#7b321e;text-decoration:none;font-family:Impact,"Arial Black",sans-serif;font-size:clamp(22px,3.1vw,34px);font-weight:900;line-height:.95;letter-spacing:.025em;text-shadow:1px 2px 0 #f8e9bd,2px 3px 0 rgba(123,50,30,.2);}
-.bakery-logo small{display:block;margin-top:5px;font-family:Georgia,serif;font-size:10px;letter-spacing:.28em;font-weight:700;}
+.bakery-logo{position:relative;display:block;width:min(100%,250px);margin:0 auto 10px;text-decoration:none;line-height:0;text-align:center}.bakery-logo img{display:block;width:100%;height:auto;max-height:210px;object-fit:contain;border-radius:10px;}
+
 .bakery-rule{width:64%;height:3px;margin:12px auto;background:#a14e2b;border-radius:3px;}
 .bakery-headline{margin:10px 0 8px;font-size:clamp(20px,2.6vw,28px);font-weight:900;line-height:1.05;text-transform:uppercase;}
 .bakery-copy{margin:0 auto 14px;max-width:260px;font-size:15px;line-height:1.4;}
@@ -1169,8 +1169,7 @@ html[data-theme="light"] .tabs .tab-button.active {
       </div>
       <article class="bakery-flyer" aria-label="Рекламная листовка пекарни БАТОНЫ БАТОНА">
         <a class="bakery-logo" href="https://ibb.co/W4v6hwZB" target="_blank" rel="noopener noreferrer" aria-label="Открыть логотип БАТОНЫ БАТОНА">
-          БАТОНЫ<br>БАТОНА
-          <small>ПЕКАРНЯ</small>
+          <img src="https://i.ibb.co/JwjK14Vr/photo-2026-10-25-10-54-20.jpg" alt="Логотип БАТОНЫ БАТОНАПЕКАРНЯ — кот в наушниках с батонами" loading="lazy">
         </a>
         <div class="bakery-rule" aria-hidden="true"></div>
         <h2 class="bakery-headline">Тепло. Хруст. Батон.</h2>
