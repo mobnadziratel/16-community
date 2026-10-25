@@ -473,11 +473,11 @@ html[data-theme="light"] footer { border-top-color: rgba(73,52,115,.12); }
   border: 2px solid rgba(255,255,255,.88); border-radius: 17px; background: #24212f;
 }
 @keyframes streamer-avatar-flight {
-  0% { transform: translate3d(-20vw, 1vh, 0) rotate(-20deg) scale(.72); opacity: 0; }
+  0% { transform: translate3d(-20vw, 1vh, 0) rotate(calc(-20deg + var(--flight-rotation, 0deg))) scale(.72); opacity: 0; }
   12% { opacity: 1; }
-  38% { transform: translate3d(34vw, -1.5vh, 0) rotate(-2deg) scale(1.04); opacity: 1; }
-  68% { transform: translate3d(73vw, .5vh, 0) rotate(12deg) scale(1); opacity: 1; }
-  100% { transform: translate3d(122vw, -2vh, 0) rotate(24deg) scale(.82); opacity: 0; }
+  38% { transform: translate3d(34vw, -1.5vh, 0) rotate(calc(-2deg + var(--flight-rotation, 0deg))) scale(1.04); opacity: 1; }
+  68% { transform: translate3d(73vw, .5vh, 0) rotate(calc(12deg + var(--flight-rotation, 0deg))) scale(1); opacity: 1; }
+  100% { transform: translate3d(122vw, -2vh, 0) rotate(calc(24deg + var(--flight-rotation, 0deg))) scale(.82); opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   .logo.logo-tap-pop { animation-duration: .01ms; }
@@ -1173,11 +1173,11 @@ html[data-theme="light"] .tabs .tab-button.active {
         <p class="wanted-reason">Воровала письки.<br>Нужна живой!</p>
         <a class="wanted-link" href="https://www.twitch.tv/cherrys_fox" target="_blank" rel="noopener noreferrer">Найти на Twitch ↗</a>
       </div>
-      <article class="bakery-flyer" aria-label="Рекламная листовка пекарни БАТОНЫ БАТОНА ПЕКАРНЯ">
-        <a class="bakery-logo" href="https://ibb.co/W4v6hwZB" target="_blank" rel="noopener noreferrer" aria-label="Открыть логотип БАТОНЫ БАТОНА ПЕКАРНЯ">
-          <img src="https://i.ibb.co/JwjK14Vr/photo-2026-10-25-10-54-20.jpg" alt="Логотип БАТОНЫ БАТОНА ПЕКАРНЯ — кот в наушниках с батонами" loading="lazy">
-        </a>
-        <div class="bakery-brand">БАТОНЫ БАТОНА ПЕКАРНЯ</div>
+      <article class="bakery-flyer" aria-label="Рекламная листовка — Пекарня: БАТОНЫ БАТОНА">
+        <div class="bakery-logo" aria-label="Логотип пекарни: БАТОНЫ БАТОНА">
+          <img src="https://i.ibb.co/JwjK14Vr/photo-2026-10-25-10-54-20.jpg" alt="Логотип пекарни «БАТОНЫ БАТОНА» — кот в наушниках с батонами" loading="lazy">
+        </div>
+        <div class="bakery-brand">Пекарня: БАТОНЫ БАТОНА</div>
         <div class="bakery-rule" aria-hidden="true"></div>
         <h2 class="bakery-headline">Тепло. Хруст. Батон.</h2>
         <p class="bakery-copy">Пусть день будет чуть вкуснее — заглядывай за своей порцией хорошего настроения!</p>
@@ -1402,36 +1402,31 @@ const moderators = [
 const editors = [
   {name:"agyha1", url:"https://www.twitch.tv/agyha1", group:"editors", channels:["cherrys_fox"], tagLabel:"Редактор у:"}
 ];
-// Restore the selected tab and scroll position after a page refresh in the same tab.
+// Restore the selected tab, but always start at the top after a page refresh.
 let activeTab = "streamers";
 try {
   const savedTab = sessionStorage.getItem("small-streamers-active-tab");
   if (["streamers", "moderators", "clips", "wall"].includes(savedTab)) activeTab = savedTab;
 } catch (_) {}
-(function preservePagePosition() {
+(function startAtTopOnReload() {
+  let isReload = false;
   try {
-    const savedY = sessionStorage.getItem("small-streamers-scroll-y");
-    if (savedY !== null) {
-      const restore = () => window.scrollTo(0, Math.max(0, Number(savedY) || 0));
-      window.addEventListener("pageshow", () => {
-        requestAnimationFrame(() => requestAnimationFrame(restore));
-        setTimeout(restore, 250);
-        setTimeout(restore, 800);
-      }, { once: true });
-    }
+    const nav = performance.getEntriesByType && performance.getEntriesByType("navigation")[0];
+    isReload = !!nav && nav.type === "reload";
   } catch (_) {}
-  let saveQueued = false;
-  window.addEventListener("scroll", () => {
-    if (saveQueued) return;
-    saveQueued = true;
-    requestAnimationFrame(() => {
-      saveQueued = false;
-      try { sessionStorage.setItem("small-streamers-scroll-y", String(window.scrollY)); } catch (_) {}
-    });
-  }, { passive: true });
-  window.addEventListener("beforeunload", () => {
-    try { sessionStorage.setItem("small-streamers-scroll-y", String(window.scrollY)); } catch (_) {}
-  });
+  if (!isReload) return;
+  try { history.scrollRestoration = "manual"; } catch (_) {}
+  const pinToTop = () => window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  pinToTop();
+  window.addEventListener("pageshow", () => {
+    pinToTop();
+    requestAnimationFrame(pinToTop);
+    setTimeout(pinToTop, 100);
+    setTimeout(pinToTop, 350);
+    setTimeout(pinToTop, 800);
+  }, { once: true });
+  // Prevent stale saved positions from being reused by older restore logic.
+  try { sessionStorage.removeItem("small-streamers-scroll-y"); } catch (_) {}
 })();
 let clipsData = [];
 let clipsLoaded = false;
@@ -1642,8 +1637,16 @@ function openClipPlayer(clip) {
     document.getElementById("clipModalTitle").textContent = "Не удалось определить клип";
     return;
   }
-  const parent = window.location.hostname;
-  const params = new URLSearchParams({clip: slug, parent, autoplay: "false", muted: "true"});
+  // Twitch requires the exact parent domain in the embed URL. Include the deployed
+  // Render domain and the current hostname so the player also works on custom domains.
+  const params = new URLSearchParams({clip: slug, autoplay: "false", muted: "true"});
+  const parentDomains = new Set(["small-streamers.onrender.com", window.location.hostname]);
+  parentDomains.forEach(domain => {
+    if (domain && domain !== "localhost" && domain !== "127.0.0.1" && !domain.includes(":")) params.append("parent", domain);
+  });
+  if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+    params.append("parent", window.location.hostname);
+  }
   frame.src = `https://clips.twitch.tv/embed?${params.toString()}`;
   modal.classList.add("is-open");
   modal.setAttribute("aria-hidden", "false");
@@ -1781,7 +1784,7 @@ function render(filter="") {
       const statusLine = info.querySelector('.status-line');
       info.insertBefore(blurb, statusLine || null);
     }
-    const cardLinks = !moderator && person ? [...(person.links || [])].sort((a, b) => String(a.label || '').localeCompare(String(b.label || ''), 'ru', { sensitivity: 'base' })) : [];
+    const cardLinks = !moderator && person ? [...(person.links || [])].sort((a, b) => ((String(a.label || '').trim().toLowerCase() === 'twitch') ? -1 : (String(b.label || '').trim().toLowerCase() === 'twitch') ? 1 : String(a.label || '').localeCompare(String(b.label || ''), 'ru', { sensitivity: 'base' }))) : [];
     if (!moderator && person) {
       const socialRow = document.createElement('div');
       socialRow.className = 'card-socials';
@@ -2120,7 +2123,7 @@ function openStreamerProfile(login, updateHistory = false) {
   const links = [
     {label:"Twitch", url:`https://www.twitch.tv/${encodeURIComponent(person.name)}`, subtitle:`twitch.tv/${person.name}`},
     ...(person.links || []).map(link => ({...link, subtitle:new URL(link.url).hostname.replace(/^www\./, "")}))
-  ].sort((a, b) => String(a.label || '').localeCompare(String(b.label || ''), 'ru', { sensitivity: 'base' }));
+  ].sort((a, b) => ((String(a.label || '').trim().toLowerCase() === 'twitch') ? -1 : (String(b.label || '').trim().toLowerCase() === 'twitch') ? 1 : String(a.label || '').localeCompare(String(b.label || ''), 'ru', { sensitivity: 'base' })));
   links.forEach((link, socialIndex) => {
     const item = document.createElement("a");
     item.className = "profile-social-link";
@@ -2244,15 +2247,39 @@ document.addEventListener("keydown", event => {
       const j = Math.floor(Math.random() * (i + 1));
       [people[i], people[j]] = [people[j], people[i]];
     }
-    let remaining = people.length;
-    const flightDuration = 1280;
-    const flightGap = 115;
+    const avatarSize = 76;
+    const laneGap = 100;
+    // Run several avatars at once on separate horizontal lanes. A lane only
+    // launches its next avatar after the previous one has completely left the screen.
+    const laneCount = Math.max(1, Math.floor((window.innerHeight - avatarSize) / laneGap) + 1);
+    const totalLaneHeight = (laneCount - 1) * laneGap + avatarSize;
+    const firstLaneY = Math.max(8, (window.innerHeight - totalLaneHeight) / 2);
+    const laneQueues = Array.from({ length: laneCount }, () => []);
+    people.forEach((person, index) => laneQueues[index % laneCount].push({ person, index }));
+    let finished = 0;
 
-    people.forEach((person, index) => {
+    function launchNextInLane(laneIndex, isFirstInLane = false) {
+      if (runId !== flightRun) return;
+      const next = laneQueues[laneIndex].shift();
+      if (!next) {
+        if (finished >= people.length) overlay.remove();
+        return;
+      }
+
+      const { person, index } = next;
       const item = document.createElement('div');
       item.className = 'avatar-flight-item';
-      item.style.setProperty('--flight-y', `${5 + Math.random() * 82}%`);
-      item.style.setProperty('--flight-delay', `${index * flightGap}ms`);
+      // Keep lanes safely separated while varying each avatar's exact path and timing.
+      const laneJitter = Math.round(Math.random() * 12 - 6);
+      const rotationJitter = Math.round(Math.random() * 14 - 7);
+      const flightDuration = 1080 + Math.floor(Math.random() * 680);
+      // Each lane starts at a different time; later avatars also get a small random pause.
+      const flightDelay = isFirstInLane
+        ? Math.floor(Math.random() * 760)
+        : 80 + Math.floor(Math.random() * 420);
+      item.style.setProperty('--flight-y', `${firstLaneY + laneIndex * laneGap + laneJitter}px`);
+      item.style.setProperty('--flight-rotation', `${rotationJitter}deg`);
+      item.style.setProperty('--flight-delay', `${flightDelay}ms`);
       item.style.setProperty('--flight-duration', `${flightDuration}ms`);
 
       const img = document.createElement('img');
@@ -2267,12 +2294,15 @@ document.addEventListener("keydown", event => {
       item.addEventListener('animationend', event => {
         if (event.target !== item || runId !== flightRun) return;
         item.remove();
-        remaining -= 1;
-        if (remaining <= 0) overlay.remove();
+        finished += 1;
+        if (finished >= people.length) overlay.remove();
+        else launchNextInLane(laneIndex);
       }, { once: true });
-    });
+    }
 
+    // Launch several at once, but stagger lanes and vary speed so the parade feels organic.
     document.body.appendChild(overlay);
+    laneQueues.forEach((_, laneIndex) => launchNextInLane(laneIndex, true));
   }
 
   function registerTap() {
