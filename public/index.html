@@ -3507,7 +3507,6 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
       if(!response.ok)throw new Error(data.error||"Не удалось загрузить публикации.");
       if(wallFeed)wallFeed.replaceChildren();
       const suggested=(data.submissions||[]).filter(item=>item.kind==="streamer");
-      const wall=(data.submissions||[]).filter(item=>item.kind==="wall");
       let addedToDirectory=false;
       suggested.forEach(item=>{
         const login=String(item.twitchLogin||"").toLowerCase();
@@ -3517,13 +3516,8 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
         }
       });
       if(addedToDirectory){render();initClipStreamerPicker();refreshLiveStatuses();}
-      wall.forEach(item=>{
-        const card=makeText("article","","wall-post-card");
-        if(item.imageData){const img=document.createElement("img");img.className="wall-approved-image";img.src=item.imageData;img.alt="Изображение от "+item.nickname;img.loading="lazy";card.append(img);}
-        if(item.text)card.append(makeText("div",item.text,"wall-post-copy"));
-        card.append(makeText("small","Отправил(а): "+item.nickname,"wall-post-date"));
-        if(wallFeed)wallFeed.append(card);
-      });
+      // Wall suggestions are not published automatically; they can be downloaded from moderation instead.
+      if(wallFeed)wallFeed.replaceChildren();
     }catch(error){
       if(wallFeed)wallFeed.replaceChildren();
       console.error("Не удалось загрузить публикации сообщества:",error);
@@ -3537,6 +3531,47 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
     const response=await fetch(url,{credentials:"same-origin",...options});
     const data=await response.json().catch(()=>({}));
     if(!response.ok)throw new Error(data.error||"Запрос не выполнен.");return data;
+  }
+  async function downloadWallSuggestion(item){
+    const canvas=document.createElement("canvas"),ctx=canvas.getContext("2d");
+    const width=1200,padding=64,contentWidth=width-padding*2;
+    const font="600 32px system-ui, sans-serif",titleFont="800 24px system-ui, sans-serif";
+    ctx.font=font;
+    const wrapText=(value,maxWidth)=>{
+      const lines=[];
+      String(value||"").split(/\\r?\\n/).forEach(paragraph=>{
+        const words=paragraph.split(/\\s+/);let line="";
+        words.forEach(word=>{
+          const test=line?line+" "+word:word;
+          if(line&&ctx.measureText(test).width>maxWidth){lines.push(line);line=word;}else line=test;
+        });
+        lines.push(line);
+      });
+      return lines;
+    };
+    let sourceImage=null;
+    if(item.imageData){
+      sourceImage=new Image();
+      sourceImage.src=item.imageData;
+      await new Promise((resolve,reject)=>{sourceImage.onload=resolve;sourceImage.onerror=()=>reject(new Error("Не удалось загрузить прикреплённую картинку."));});
+    }
+    const imageHeight=sourceImage?Math.round(contentWidth*Math.min(1,(sourceImage.naturalHeight||1)/(sourceImage.naturalWidth||1))):0;
+    const lines=wrapText(item.text||"Без текста",contentWidth);
+    const lineHeight=44,headerHeight=76,footerHeight=54,textHeight=lines.length*lineHeight+padding;
+    canvas.width=width;canvas.height=padding+headerHeight+imageHeight+textHeight+footerHeight;
+    ctx.fillStyle="#101014";ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle="#b9ff36";ctx.font=titleFont;ctx.fillText("Предложение на стену",padding,padding+28);
+    ctx.fillStyle="#9a9aa8";ctx.font="500 20px system-ui, sans-serif";ctx.fillText("Автор: "+String(item.nickname||"Аноним").slice(0,60),padding,padding+58);
+    let y=padding+headerHeight;
+    if(sourceImage){ctx.drawImage(sourceImage,padding,y,contentWidth,imageHeight);y+=imageHeight+padding/2;}
+    ctx.fillStyle="#f5f5f7";ctx.font=font;
+    lines.forEach(line=>{ctx.fillText(line,padding,y+lineHeight-8);y+=lineHeight;});
+    ctx.fillStyle="#9a9aa8";ctx.font="500 18px system-ui, sans-serif";ctx.fillText("small-streamers.onrender.com",padding,canvas.height-padding/2);
+    const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));
+    if(!blob)throw new Error("Не удалось создать картинку для скачивания.");
+    const url=URL.createObjectURL(blob),anchor=document.createElement("a");
+    anchor.href=url;anchor.download="wall-suggestion-"+String(item.nickname||"post").replace(/[^\\p{L}\\p{N}_-]+/gu,"-").slice(0,40)+".png";
+    document.body.appendChild(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
   async function loadPending(){
     pending.replaceChildren(makeText("p","Загружаем заявки…","wall-muted"));
@@ -3552,6 +3587,17 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
         if(item.twitchLogin){const link=document.createElement("a");link.href="https://www.twitch.tv/"+encodeURIComponent(item.twitchLogin);link.target="_blank";link.rel="noopener noreferrer";link.textContent="twitch.tv/"+item.twitchLogin;card.append(link);}
         if(item.text)card.append(makeText("p",item.text));
         if(item.imageData){const img=document.createElement("img");img.src=item.imageData;img.alt="Изображение на проверке";img.loading="lazy";card.append(img);}
+        if(item.kind==="wall"){
+          const downloadButton=makeText("button","Скачать картинку с текстом","wall-action-button");
+          downloadButton.type="button";
+          downloadButton.addEventListener("click",async()=>{
+            downloadButton.disabled=true;
+            try{await downloadWallSuggestion(item);moderatorMessage.textContent="Картинка предложения скачана.";}
+            catch(error){moderatorMessage.textContent=error.message||"Не удалось скачать картинку.";}
+            finally{downloadButton.disabled=false;}
+          });
+          card.append(downloadButton);
+        }
         const actions=makeText("div","","community-pending-actions");
         [["approve","Одобрить"],["reject","Отклонить"],["delete","Удалить"]].forEach(([action,label])=>{
           const button=makeText("button",label,"wall-action-button");button.type="button";
