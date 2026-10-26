@@ -2,23 +2,9 @@ const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
 
-// Load a local .env without an extra dependency. Hosting-provider environment variables take precedence.
-try {
-  const envText = fs.readFileSync(path.join(__dirname, ".env"), "utf8");
-  for (const line of envText.split(/\r?\n/)) {
-    const match = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$/);
-    if (!match || match[1] in process.env) continue;
-    let value = match[2];
-    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) value = value.slice(1, -1);
-    process.env[match[1]] = value;
-  }
-} catch (error) { if (error.code !== "ENOENT") console.warn(`Could not load .env: ${error.message}`); }
-
 const PORT = Number(process.env.PORT || 3000);
 const CLIENT_ID = process.env.TWITCH_CLIENT_ID;
 const CLIENT_SECRET = process.env.TWITCH_CLIENT_SECRET;
-const USER_ACCESS_TOKEN = process.env.TWITCH_USER_ACCESS_TOKEN;
-const MODERATOR_CHANNELS = String(process.env.TWITCH_MODERATOR_CHANNELS || "").split(",").map(x => x.trim().toLowerCase()).filter(x => /^[a-z0-9_]{1,25}$/.test(x));
 const PUBLIC_DIR = path.join(__dirname, "public");
 
 const LOGINS = [
@@ -374,104 +360,8 @@ async function fetchClips(period) {
   return clips;
 }
 
-const moderatorApiCache = { value: null, expiresAt: 0, inFlight: null };
-async function getModeratorDirectory() {
-  if (moderatorApiCache.value && Date.now() < moderatorApiCache.expiresAt) return moderatorApiCache.value;
-  if (moderatorApiCache.inFlight) return moderatorApiCache.inFlight;
-  moderatorApiCache.inFlight = (async () => {
-    const peopleByLogin = new Map();
-    let publicSourceCount = 0;
-    // Optional, reviewable community-maintained fallback. It is not represented as official Twitch data.
-    try {
-      const raw = await fs.promises.readFile(path.join(PUBLIC_DIR, "moderators.json"), "utf8");
-      const parsed = JSON.parse(raw);
-      const list = Array.isArray(parsed) ? parsed : (Array.isArray(parsed.people) ? parsed.people : []);
-      for (const item of list) {
-        const name = String(item.name || item.login || "").trim().toLowerCase();
-        if (!/^[a-z0-9_]{1,25}$/.test(name)) continue;
-        const channels = Array.isArray(item.channels) ? item.channels.map(x => String(x).trim().toLowerCase()).filter(x => /^[a-z0-9_]{1,25}$/.test(x)) : [];
-        const group = item.group === "editors" ? "editors" : "moderators";
-        peopleByLogin.set(name, { name, url: `https://www.twitch.tv/${name}`, group, channels: [...new Set(channels)], tagLabel: group === "editors" ? "Редактор у:" : "Модератор у:", source: "community" });
-        publicSourceCount++;
-      }
-    } catch (error) { if (error.code !== "ENOENT") console.warn(`Could not read public/moderators.json: ${error.message}`); }
-
-    const status = { configured: Boolean(USER_ACCESS_TOKEN && MODERATOR_CHANNELS.length), checkedAt: new Date().toISOString(), channelsConfigured: MODERATOR_CHANNELS.length, channelsChecked: 0, channelsFailed: [], officialPeopleCount: 0 };
-    if (USER_ACCESS_TOKEN && MODERATOR_CHANNELS.length && CLIENT_ID && CLIENT_SECRET) {
-      for (const channelLogin of MODERATOR_CHANNELS) {
-        try {
-          const userParams = new URLSearchParams(); userParams.append("login", channelLogin);
-          const users = await helix("users", userParams);
-          const broadcaster = (users.data || [])[0];
-          if (!broadcaster) { status.channelsFailed.push({ channel: channelLogin, reason: "Канал не найден" }); continue; }
-          let after = "";
-          const channelModerators = [];
-          do {
-            const params = new URLSearchParams({ broadcaster_id: broadcaster.id, first: "100" });
-            if (after) params.set("after", after);
-            const response = await fetch(`https://api.twitch.tv/helix/moderation/moderators?${params}`, {
-              headers: { "Client-Id": CLIENT_ID, "Authorization": `Bearer ${USER_ACCESS_TOKEN}` },
-              signal: AbortSignal.timeout(10000)
-            });
-            if (!response.ok) throw new Error(`Twitch API вернул ${response.status}; проверь user token и scope`);
-            const payload = await response.json();
-            channelModerators.push(...(payload.data || []));
-            after = payload.pagination && payload.pagination.cursor ? payload.pagination.cursor : "";
-          } while (after);
-          status.channelsChecked++;
-          for (const person of channelModerators) {
-            const name = String(person.user_login || person.user_name || "").toLowerCase();
-            if (!/^[a-z0-9_]{1,25}$/.test(name)) continue;
-            const current = peopleByLogin.get(name) || { name, url: `https://www.twitch.tv/${name}`, group: "moderators", channels: [], tagLabel: "Модератор у:" };
-            current.channels = [...new Set([...(current.channels || []), channelLogin])];
-            current.source = current.source === "community" ? "community+Twitch" : "Twitch API";
-            peopleByLogin.set(name, current);
-            status.officialPeopleCount++;
-          }
-        } catch (error) {
-          status.channelsFailed.push({ channel: channelLogin, reason: error.message || "Ошибка Twitch API" });
-        }
-      }
-    }
-    return { updatedAt: new Date().toISOString(), people: [...peopleByLogin.values()], status: { ...status, communityEntries: publicSourceCount } };
-  })().then(value => { moderatorApiCache.value = value; moderatorApiCache.expiresAt = Date.now() + 60_000; return value; }).finally(() => { moderatorApiCache.inFlight = null; });
-  return moderatorApiCache.inFlight;
-}
-
-const ALLOWED_ORIGINS = new Set([
-  "https://mobnadziratel.github.io",
-  "https://small-streamers.onrender.com",
-  "http://localhost:3000",
-  "http://127.0.0.1:3000"
-]);
-
 const server = http.createServer(async (req, res) => {
-  const origin = req.headers.origin;
-  if (origin && ALLOWED_ORIGINS.has(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-    res.setHeader("Vary", "Origin");
-    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  }
-  if (req.method === "OPTIONS") {
-    res.writeHead(origin && !ALLOWED_ORIGINS.has(origin) ? 403 : 204);
-    res.end();
-    return;
-  }
   const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
-  if (url.pathname === "/api/moderators") {
-    res.setHeader("Content-Type", "application/json; charset=utf-8");
-    res.setHeader("Cache-Control", "no-store");
-    try {
-      const result = await getModeratorDirectory();
-      res.writeHead(200); res.end(JSON.stringify(result));
-    } catch (error) {
-      console.error(`Could not load moderator directory: ${error.message}`);
-      res.writeHead(503); res.end(JSON.stringify({ updatedAt: new Date().toISOString(), people: [], status: { error: "Moderator data temporarily unavailable" } }));
-    }
-    return;
-  }
-
   if (url.pathname === "/api/followers") {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.setHeader("Cache-Control", "no-store");
@@ -547,6 +437,7 @@ const server = http.createServer(async (req, res) => {
   if (url.pathname === "/api/streams") {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.setHeader("Cache-Control", "no-store");
+    res.setHeader("Access-Control-Allow-Origin", "same-origin");
     try {
       const streams = await getStreams();
       res.writeHead(200);

@@ -1751,7 +1751,6 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
       <div class="count" style="display:none"><strong id="moderatorCount">1</strong> модератор</div>
       <label class="search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="moderatorSearch" type="search" placeholder="Найти модератора..." aria-label="Найти модератора"></label>
     </div>
-    <p class="clips-note" id="moderatorSyncStatus" role="status">Список модераторов: встроенные данные; проверяем дополнительные источники…</p>
     <div class="category"><h2 class="category-title">Модераторы сообщества</h2><div class="grid" id="moderatorsGrid"></div></div>
     <div class="category" id="editorsCategory"><h2 class="category-title">Редакторы</h2><div class="grid" id="editorsGrid"></div></div>
     <div class="empty" id="moderatorEmpty">Никого не нашли. Попробуй другой ник.</div>
@@ -2051,48 +2050,6 @@ const moderators = [
 const editors = [
   {name:"agyha1", url:"https://www.twitch.tv/agyha1", group:"editors", channels:["cherrys_fox"], tagLabel:"Редактор у:"}
 ];
-let apiModeratorPeople = [];
-let moderatorApiStatus = null;
-function getModeratorDirectory() {
-  const merged = new Map();
-  [...moderators, ...editors, ...apiModeratorPeople].forEach(person => {
-    const name = String(person.name || "").trim().toLowerCase();
-    if (!name) return;
-    const old = merged.get(name);
-    if (!old) merged.set(name, { ...person, channels: [...new Set((person.channels || []).map(String))] });
-    else {
-      old.channels = [...new Set([...(old.channels || []), ...(person.channels || [])])];
-      if (person.source) old.source = person.source;
-      if (person.group === "editors") old.group = "editors";
-    }
-  });
-  return [...merged.values()];
-}
-async function refreshModeratorDirectory() {
-  try {
-    const response = await fetch("https://small-streamers.onrender.com/api/moderators", { cache: "no-store" });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const payload = await response.json();
-    apiModeratorPeople = Array.isArray(payload.people) ? payload.people : [];
-    moderatorApiStatus = payload.status || null;
-    const statusNode = document.getElementById("moderatorSyncStatus");
-    if (statusNode) {
-      const status = moderatorApiStatus || {};
-      if (status.configured) {
-        statusNode.textContent = `Автопроверка Twitch: ${status.channelsChecked || 0} из ${status.channelsConfigured || 0} каналов. ${status.channelsFailed?.length ? `Ошибок: ${status.channelsFailed.length}.` : ""} Встроенный список сохранён как резерв.`;
-      } else if (status.communityEntries) {
-        statusNode.textContent = `Используется встроенный список и ${status.communityEntries} записей из файла community. Для официальной проверки настройте Twitch user token на сервере.`;
-      } else {
-        statusNode.textContent = "Используется встроенный список. Автоматическая проверка Twitch включится после настройки user token и списка каналов на сервере.";
-      }
-    }
-    if (activeTab === "moderators") render(document.getElementById("moderatorSearch")?.value || "");
-  } catch (error) {
-    console.warn("Moderator directory refresh failed; keeping the built-in list.", error);
-  }
-}
-refreshModeratorDirectory();
-
 // Restore the selected tab, but always start at the top after a page refresh.
 let activeTab = "streamers";
 try {
@@ -2273,7 +2230,7 @@ async function loadTwitchAvatar(name, img) {
   // Load avatars through our own server so mobile browsers do not depend on a third-party lookup/CORS.
   if (avatarCache.has(name)) { img.src = avatarCache.get(name); return; }
   try {
-    const response = await fetch(`https://small-streamers.onrender.com/api/avatar?login=${encodeURIComponent(name)}`, { cache: "no-store" });
+    const response = await fetch(`/api/avatar?login=${encodeURIComponent(name)}`, { cache: "no-store" });
     if (!response.ok) throw new Error(`Avatar endpoint unavailable (${response.status})`);
     const payload = await response.json();
     const avatarUrl = String(payload.avatarUrl || "").trim();
@@ -2448,7 +2405,7 @@ async function loadClips(force=false) {
   note.textContent = "Загружаем клипы с каналов из вкладки «СТРИМЕРЫ»…";
   try {
     const period = document.getElementById("clipPeriod").value;
-    const response = await fetch(`https://small-streamers.onrender.com/api/clips?period=${encodeURIComponent(period)}`, {cache:"no-store"});
+    const response = await fetch(`/api/clips?period=${encodeURIComponent(period)}`, {cache:"no-store"});
     const raw = await response.text();
     let payload;
     try { payload = JSON.parse(raw); }
@@ -2485,12 +2442,12 @@ function updateStreamerCount(count) {
 
 function render(filter="") {
   Object.values(grids).forEach(grid => grid.innerHTML = "");
-  const directory = activeTab === "moderators" ? getModeratorDirectory() : (activeTab === "wall" ? [] : streamers);
+  const directory = activeTab === "moderators" ? [...moderators, ...editors] : (activeTab === "wall" ? [] : streamers);
   // Build cards once per tab change. Search keystrokes only hide/show existing cards.
   directory.forEach(({name,url,group,displayName}, cardEnterIndex) => {
     const cardLabel = displayName || name;
     const streamIndex = streamers.findIndex(item => item.name === name);
-    const moderatorIndex = getModeratorDirectory().findIndex(item => item.name === name);
+    const moderatorIndex = [...moderators, ...editors].findIndex(item => item.name === name);
     const i = streamIndex >= 0 ? streamIndex : streamers.length + Math.max(0, moderatorIndex);
     const card = document.createElement("div");
     card.className = "streamer card-appear";
@@ -2515,7 +2472,7 @@ function render(filter="") {
       }
     });
     const moderator = activeTab === "moderators";
-    const modData = moderator ? getModeratorDirectory().find(item => item.name === name && item.group === group) : null;
+    const modData = moderator ? [...moderators, ...editors].find(item => item.name === name && item.group === group) : null;
     const moderationTags = modData ? `<div class="moderates"><span class="moderates-label">${modData.tagLabel}</span> ${modData.channels.map(channel => `<button type="button" class="moderates-tag" data-streamer-target="${String(channel).replace(/&/g, "&amp;").replace(/\"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}" aria-label="Найти стримера ${channel}">@${channel}</button>`).join(" ")}</div>` : "";
     card.innerHTML = `<div class="avatar"><img src="${avatarSvg(name,i)}" alt="Аватар ${name}" loading="eager" referrerpolicy="no-referrer"></div>
       <div class="info"><div class="name">${cardLabel}</div>${moderator ? "" : ``}${moderator ? moderationTags : `<div class="status-line"><div class="live-status is-loading" data-status="${name}">Проверяем эфир…</div></div><div class="stream-meta" data-meta="${name}"></div>`}</div>
@@ -2734,7 +2691,7 @@ async function refreshLiveStatuses() {
   lastStatusAttemptAt = Date.now();
   statusRequestInFlight = (async () => {
     try {
-      const response = await fetch("https://small-streamers.onrender.com/api/streams", { cache: "no-store" });
+      const response = await fetch("/api/streams", { cache: "no-store" });
       if (!response.ok) throw new Error(`Status endpoint unavailable (${response.status})`);
       const payload = await response.json();
       if (!payload || !payload.streams || typeof payload.streams !== "object") {
@@ -2775,7 +2732,7 @@ async function refreshLiveStatuses() {
     if (label) label.textContent = "Проверяем эфиры…";
     // Keep the previous message in place while checking so the button does not jump back.
     try {
-      const response = await fetch("https://small-streamers.onrender.com/api/streams", { cache: "no-store" });
+      const response = await fetch("/api/streams", { cache: "no-store" });
       if (!response.ok) throw new Error(`Status endpoint unavailable (${response.status})`);
       const payload = await response.json();
       if (!payload || !payload.streams || typeof payload.streams !== "object") {
@@ -2894,7 +2851,7 @@ async function loadProfileFollowerCount(login, requestSequence) {
 
   text.textContent = `${baseSubtitle} · загружаем фолловеров…`;
   try {
-    const response = await fetch(`https://small-streamers.onrender.com/api/followers?login=${encodeURIComponent(key)}`, { cache: "no-store" });
+    const response = await fetch(`/api/followers?login=${encodeURIComponent(key)}`, { cache: "no-store" });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok || !Number.isFinite(Number(payload.total))) {
       throw new Error(payload.error || "Follower count unavailable");
@@ -2911,7 +2868,7 @@ async function loadProfileFollowerCount(login, requestSequence) {
 
 function openStreamerProfile(login, updateHistory = false) {
   const normalizedLogin = String(login || "").toLowerCase();
-  const allPeople = [...streamers, ...getModeratorDirectory()];
+  const allPeople = [...streamers, ...moderators, ...editors];
   const person = allPeople.find(item => item.name.toLowerCase() === normalizedLogin);
   if (!person) return false;
 
@@ -3045,7 +3002,7 @@ document.addEventListener("keydown", event => {
 
     // Use the people from the currently selected directory tab.
     // On Moderators, include moderators and editors; on Streamers, use streamers.
-    const sourcePeople = activeTab === "moderators" ? getModeratorDirectory() : streamers;
+    const sourcePeople = activeTab === "moderators" ? [...moderators, ...editors] : streamers;
     // Deduplicate by Twitch login so a person listed in more than one role flies only once.
     const seenLogins = new Set();
     const people = sourcePeople.filter(person => {
