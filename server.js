@@ -23,7 +23,6 @@ const LOGINS = [
   "sayjos",
   "lo4kalove",
   "slavabraze",
-  "screada67",
   "zavryz1el",
   "ilyuha_lake",
   "brill1antt",
