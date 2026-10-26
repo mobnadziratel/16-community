@@ -526,10 +526,14 @@ const server = http.createServer(async (req, res) => {
         if (kind === "streamer") {
           const raw = cleanText(body.twitch, 300);
           try {
-            const candidate = new URL(raw.includes("://") ? raw : "https://" + raw);
-            const login = candidate.pathname.split("/").filter(Boolean)[0] || "";
-            if (!/^(?:www\.)?twitch\.tv$/i.test(candidate.hostname) || !/^[a-zA-Z0-9_]{1,25}$/.test(login)) throw new Error("invalid");
-            twitchLogin = login.toLowerCase();
+            if (/^[a-zA-Z0-9_]{1,25}$/.test(raw)) {
+              twitchLogin = raw.toLowerCase();
+            } else {
+              const candidate = new URL(raw.includes("://") ? raw : "https://" + raw);
+              const login = candidate.pathname.split("/").filter(Boolean)[0] || "";
+              if (!/^(?:www\.)?twitch\.tv$/i.test(candidate.hostname) || !/^[a-zA-Z0-9_]{1,25}$/.test(login)) throw new Error("invalid");
+              twitchLogin = login.toLowerCase();
+            }
           } catch (_) { return sendJson(400, { error: "Введите корректную ссылку на Twitch или ник канала." }); }
         }
         let imageData = "";
