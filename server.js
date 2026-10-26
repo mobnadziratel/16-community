@@ -438,7 +438,26 @@ async function getModeratorDirectory() {
   return moderatorApiCache.inFlight;
 }
 
+const ALLOWED_ORIGINS = new Set([
+  "https://mobnadziratel.github.io",
+  "https://small-streamers.onrender.com",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000"
+]);
+
 const server = http.createServer(async (req, res) => {
+  const origin = req.headers.origin;
+  if (origin && ALLOWED_ORIGINS.has(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  }
+  if (req.method === "OPTIONS") {
+    res.writeHead(origin && !ALLOWED_ORIGINS.has(origin) ? 403 : 204);
+    res.end();
+    return;
+  }
   const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
   if (url.pathname === "/api/moderators") {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -528,7 +547,6 @@ const server = http.createServer(async (req, res) => {
   if (url.pathname === "/api/streams") {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.setHeader("Cache-Control", "no-store");
-    res.setHeader("Access-Control-Allow-Origin", "same-origin");
     try {
       const streams = await getStreams();
       res.writeHead(200);
