@@ -1797,6 +1797,19 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
 .section-switcher .hero:before,.section-switcher .hero:after{display:none!important;content:none!important}
 .section-switcher .tabs{width:100%;box-sizing:border-box;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;border-radius:0!important}
 html[data-theme="light"] .section-switcher .tabs{background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}
+
+/* Remove decorative outlines around the heading and description text. */
+.section-switcher h1,.section-switcher .lead,
+.section-switcher #sectionHeading,.section-switcher #sectionDescription{
+  border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;
+  padding-left:0!important;padding-right:0!important;
+}
+.section-switcher h1:before,.section-switcher h1:after,
+.section-switcher .lead:before,.section-switcher .lead:after,
+.section-switcher #sectionHeading span:before,.section-switcher #sectionHeading span:after,
+.section-switcher #sectionDescription:before,.section-switcher #sectionDescription:after{
+  display:none!important;content:none!important;border:0!important;box-shadow:none!important;
+}
 </style>
 </head>
 <body>
