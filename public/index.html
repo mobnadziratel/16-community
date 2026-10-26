@@ -1810,6 +1810,37 @@ html[data-theme="light"] .section-switcher .tabs{background:transparent!importan
 .section-switcher #sectionDescription:before,.section-switcher #sectionDescription:after{
   display:none!important;content:none!important;border:0!important;box-shadow:none!important;
 }
+
+/* One outer frame only: no extra outline around the text or tab group. */
+.section-switcher .hero,
+.section-switcher h1,
+.section-switcher h1 span,
+.section-switcher .lead,
+.section-switcher .tabs{
+  border:0!important;outline:0!important;box-shadow:none!important;
+  background:transparent!important;
+}
+.section-switcher .hero,
+.section-switcher h1,
+.section-switcher h1 span,
+.section-switcher .lead{padding:0!important;border-radius:0!important}
+.section-switcher .hero:before,
+.section-switcher .hero:after,
+.section-switcher h1:before,
+.section-switcher h1:after,
+.section-switcher h1 span:before,
+.section-switcher h1 span:after,
+.section-switcher .lead:before,
+.section-switcher .lead:after,
+.section-switcher .tabs:before,
+.section-switcher .tabs:after{
+  display:none!important;content:none!important;border:0!important;box-shadow:none!important;
+}
+html[data-theme="light"] .section-switcher .hero,
+html[data-theme="light"] .section-switcher h1,
+html[data-theme="light"] .section-switcher h1 span,
+html[data-theme="light"] .section-switcher .lead,
+html[data-theme="light"] .section-switcher .tabs{background:transparent!important;border:0!important;box-shadow:none!important}
 </style>
 </head>
 <body>
