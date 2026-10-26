@@ -1841,6 +1841,17 @@ html[data-theme="light"] .section-switcher h1,
 html[data-theme="light"] .section-switcher h1 span,
 html[data-theme="light"] .section-switcher .lead,
 html[data-theme="light"] .section-switcher .tabs{background:transparent!important;border:0!important;box-shadow:none!important}
+
+/* Keep the active tab's explanatory text visible; only remove its outline. */
+.section-switcher #sectionDescription{
+  display:block!important;visibility:visible!important;opacity:1;
+  color:var(--muted)!important;-webkit-text-fill-color:var(--muted)!important;
+  font-size:16px;line-height:1.7;min-height:1.7em;
+  border:0!important;outline:0!important;box-shadow:none!important;
+}
+html[data-theme="light"] .section-switcher #sectionDescription{
+  color:#6f6b88!important;-webkit-text-fill-color:#6f6b88!important;
+}
 </style>
 </head>
 <body>
