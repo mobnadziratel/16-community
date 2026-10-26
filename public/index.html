@@ -68,6 +68,10 @@ html[data-theme="light"] .card-description{color:#656978}
 .stream-meta:empty{display:none}
 .arrow{color:#777786;transition:.18s;flex:0 0 auto}.streamer:hover .arrow{color:var(--accent);transform:translate(2px,-2px)}
 .empty{display:none;text-align:center;color:var(--muted);padding:40px 12px;grid-column:1/-1}
+.mod-note{margin:30px auto 8px;max-width:680px;text-align:center;color:var(--muted);font-size:15px;font-weight:700;line-height:1.55;padding:16px 20px;border:1px dashed var(--line);border-radius:16px}
+.mod-note a{color:var(--accent);font-weight:900;text-decoration:none}
+.mod-note a:hover{text-decoration:underline}
+html[data-theme="light"] .mod-note a{color:#7548ee}
 footer{border-top:1px solid var(--line);padding:23px 0 32px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 footer b{color:var(--text)}
 .clips-toolbar{justify-content:flex-start;align-items:flex-end}.clip-filter{display:flex;flex-direction:column;gap:7px;color:var(--muted);font-size:12px;font-weight:800}.clip-filter select,.refresh-clips{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:12px 14px;font:inherit;font-size:14px}.refresh-clips{cursor:pointer;font-weight:800}.clip-streamer-picker{margin:14px 0 18px;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--panel)}.clip-picker-heading{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-weight:850;margin-bottom:12px}.clip-picker-heading label,.clip-streamer-option{display:flex;align-items:center;gap:8px;cursor:pointer}.clip-picker-heading input,.clip-streamer-option input{accent-color:var(--accent);width:17px;height:17px;flex:0 0 auto}.clip-streamer-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px 12px}.clip-streamer-option{font-size:13px;color:var(--text);overflow-wrap:anywhere}.clip-streamer-option span{min-width:0;overflow-wrap:anywhere}.clips-note{color:var(--muted);font-size:13px;margin:0 0 16px}.clips-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.clip-card{min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:16px;background:var(--panel);color:var(--text);text-decoration:none;transition:transform .18s,border-color .18s}.clip-card:hover{transform:translateY(-3px);border-color:#b9ff3677}.clip-thumb{width:100%;aspect-ratio:16/9;object-fit:cover;background:#17171f;display:block}.clip-body{padding:13px}.clip-title{font-weight:850;font-size:14px;line-height:1.35;margin-bottom:8px;overflow-wrap:anywhere}.clip-meta{color:var(--muted);font-size:12px;display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap}.clip-author{color:var(--accent);font-weight:800;margin-bottom:6px;font-size:12px}.clips-grid .empty{display:none}@media(max-width:850px){.clips-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:850px){.clip-streamer-list{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:550px){.clips-grid{grid-template-columns:1fr}.clips-toolbar{align-items:stretch}.clip-filter select,.refresh-clips{width:100%}.clip-streamer-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -1680,6 +1684,58 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
 }
 @media(prefers-reduced-motion:reduce) { .pumpkin-warning { scroll-behavior:auto; } }
 
+
+/* ===== Twitch-style theme (final override) ===== */
+:root{--tw-bg:#0e0e10;--tw-panel:#18181b;--tw-hover:#1f1f23;--tw-border:#2f2f35;--tw-text:#efeff1;--tw-muted:#adadb8;--tw-link:#bf94ff;--tw-live:#ff4a47;
+--bg:#0e0e10;--panel:#18181b;--panel2:#1f1f23;--text:#efeff1;--muted:#adadb8;--accent:#9147ff;--line:#2f2f35;--surface:#1f1f23;--border:#2f2f35}
+html[data-theme="light"]{--tw-bg:#f7f7f8;--tw-panel:#fff;--tw-hover:#efeff1;--tw-border:#dcdce0;--tw-text:#0e0e10;--tw-muted:#53535f;--tw-link:#772ce8;--tw-live:#eb0400;
+--bg:#f7f7f8;--panel:#fff;--panel2:#efeff1;--text:#0e0e10;--muted:#53535f;--accent:#772ce8;--line:#dcdce0;--surface:#efeff1;--border:#dcdce0}
+html:root body{background:var(--tw-bg)!important;color:var(--tw-text)!important;letter-spacing:0!important}
+html:root body::before{display:none!important}
+html:root ::selection{background:#9147ff;color:#fff}
+html:root header{background:var(--tw-panel)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border-bottom:1px solid var(--tw-border)!important;box-shadow:0 1px 2px rgba(0,0,0,.25)!important}
+html:root .brand{color:var(--tw-text)!important;letter-spacing:0!important}
+html:root .logo{background:#9147ff!important;color:#fff!important;border-radius:6px!important;box-shadow:none!important}
+html:root .logo::after{display:none!important}
+html:root .theme-toggle{background:var(--tw-hover)!important;color:var(--tw-text)!important;border:0!important;border-radius:6px!important;box-shadow:none!important}
+html:root .theme-toggle:hover{background:var(--tw-border)!important}
+html:root .hero{background:var(--tw-panel)!important;border:1px solid var(--tw-border)!important;border-left:4px solid #9147ff!important;border-radius:6px!important;box-shadow:none!important}
+html:root .hero::before,html:root .hero::after{display:none!important}
+html:root .hero h1,html:root .hero h1 span{background:none!important;-webkit-text-fill-color:currentColor!important;color:var(--tw-text)!important}
+html:root .hero h1 span{color:var(--tw-link)!important}
+html:root .eyebrow{background:#9147ff!important;color:#fff!important;border:0!important;border-radius:4px!important;letter-spacing:.08em!important}
+html:root .eyebrow:before{background:#fff!important;box-shadow:none!important}
+html:root .lead{color:var(--tw-muted)!important}
+html:root .tab-button{background:transparent!important;color:var(--tw-muted)!important;border:0!important;border-bottom:3px solid transparent!important;border-radius:0!important;box-shadow:none!important;letter-spacing:.03em!important}
+html:root .tab-button:hover{background:var(--tw-hover)!important;color:var(--tw-text)!important}
+html:root .tab-button.active{background:transparent!important;color:var(--tw-link)!important;border-bottom-color:#9147ff!important}
+html:root .search input{background:var(--tw-hover)!important;color:var(--tw-text)!important;border:2px solid var(--tw-border)!important;border-radius:6px!important;box-shadow:none!important}
+html:root .search input:focus{border-color:#9147ff!important;background:var(--tw-bg)!important}
+html:root .count{background:transparent!important;border:0!important;padding:0!important;color:var(--tw-muted)!important}
+html:root .count strong{color:var(--tw-text)!important}
+html:root .category-title{color:var(--tw-text)!important;letter-spacing:0!important;font-size:20px!important}
+html:root .category-title::after{background:var(--tw-border)!important}
+html:root .category-title span{color:var(--tw-link)!important}
+html:root .streamer,html:root .clip-card,html:root .profile-card,html:root .clip-modal-dialog{background:var(--tw-panel)!important;border:1px solid var(--tw-border)!important;border-radius:6px!important;box-shadow:none!important}
+html:root .streamer::before{display:none!important}
+html:root .streamer:hover,html:root .clip-card:hover{background:var(--tw-hover)!important;border-color:#9147ff!important;transform:translateY(-2px)!important}
+html:root .avatar{border-radius:50%!important;padding:0!important;background:var(--tw-hover)!important;box-shadow:none!important}
+html:root .avatar img{border-radius:50%!important;border:0!important;background:var(--tw-hover)!important}
+html:root .streamer:has(.live-status.is-live) .avatar{box-shadow:0 0 0 3px var(--tw-panel),0 0 0 5px #eb0400!important}
+html:root .name{color:var(--tw-text)!important;letter-spacing:0!important;font-weight:700!important}
+html:root .handle,html:root .moderates{color:var(--tw-muted)!important}
+html:root .live-status{color:var(--tw-muted)!important;text-transform:none!important;letter-spacing:0!important;font-size:12px!important;font-weight:600!important}
+html:root .live-status::before{background:var(--tw-muted)!important;box-shadow:none!important}
+html:root .live-status.is-live{color:var(--tw-live)!important}
+html:root .live-status.is-live::before{background:#eb0400!important}
+html:root .moderates-tag{background:var(--tw-hover)!important;color:var(--tw-text)!important;border:0!important;border-radius:4px!important}
+html:root .moderates-tag:hover{background:#9147ff!important;color:#fff!important}
+html:root .random-streamer-button,html:root .back-to-top{background:#9147ff!important;color:#fff!important;border:0!important;border-radius:6px!important;box-shadow:none!important;filter:none!important}
+html:root .random-streamer-button:hover:not(:disabled),html:root .back-to-top:hover{background:#772ce8!important;transform:none!important;box-shadow:none!important}
+html:root .profile-back,html:root .profile-social-link{background:var(--tw-hover)!important;color:var(--tw-text)!important;border:1px solid var(--tw-border)!important;border-radius:6px!important;box-shadow:none!important}
+html:root .profile-back:hover,html:root .profile-social-link:hover{border-color:#9147ff!important}
+html:root .mod-note{border-color:var(--tw-border)!important;border-radius:6px!important}
+html{scrollbar-color:#464649 transparent}
 </style>
 </head>
 <body>
@@ -1754,6 +1810,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
     <div class="category"><h2 class="category-title">Модераторы сообщества</h2><div class="grid" id="moderatorsGrid"></div></div>
     <div class="category" id="editorsCategory"><h2 class="category-title">Редакторы</h2><div class="grid" id="editorsGrid"></div></div>
     <div class="empty" id="moderatorEmpty">Никого не нашли. Попробуй другой ник.</div>
+    <p class="mod-note">Если вы модератор и хотите добавить себя, или стример, который хочет добавить свою команду, пишите <a href="https://t.me/MNIVPI" target="_blank" rel="noopener noreferrer">@MNIVPI</a> в тг</p>
   </section>
   <section id="wallPanel" aria-label="Стена сообщества" hidden>
     <div class="wall-mural" role="img" aria-label="Длинная кирпичная стена с белой граффити-надписью: Хотите что-то добавить? Пишите @MNIVPI в тг!">
@@ -1850,6 +1907,8 @@ const streamers = [
   {name:"d1unizi", url:"https://www.twitch.tv/d1unizi", group:"main",
    description:"Стример от и для народа — Диунизи. Почта: mediadiuakk@gmail.com",
    links:[
+    {label:"YouTube", url:"https://www.youtube.com/@d1unizi"},
+    {label:"Telegram", url:"https://t.me/diunizi"},
     {label:"DonationAlerts", url:"https://www.donationalerts.com/r/d1unizi"},
     {label:"MemeAlerts", url:"https://memealerts.com/diunizi"}
    ]},
@@ -2050,6 +2109,21 @@ const moderators = [
 const editors = [
   {name:"agyha1", url:"https://www.twitch.tv/agyha1", group:"editors", channels:["cherrys_fox"], tagLabel:"Редактор у:"}
 ];
+// A moderator who is also an editor appears only in the moderators category.
+// Their editor role is kept as an extra tag on the moderator card.
+(function mergeEditorsIntoModerators() {
+  const editorsOnly = [];
+  editors.forEach(editor => {
+    const moderator = moderators.find(item => item.name.toLowerCase() === editor.name.toLowerCase());
+    if (moderator) {
+      (moderator.extraRoles = moderator.extraRoles || []).push({tagLabel: editor.tagLabel, channels: editor.channels});
+    } else {
+      editorsOnly.push(editor);
+    }
+  });
+  editors.length = 0;
+  editors.push(...editorsOnly);
+})();
 // Restore the selected tab, but always start at the top after a page refresh.
 let activeTab = "streamers";
 try {
@@ -2473,7 +2547,8 @@ function render(filter="") {
     });
     const moderator = activeTab === "moderators";
     const modData = moderator ? [...moderators, ...editors].find(item => item.name === name && item.group === group) : null;
-    const moderationTags = modData ? `<div class="moderates"><span class="moderates-label">${modData.tagLabel}</span> ${modData.channels.map(channel => `<button type="button" class="moderates-tag" data-streamer-target="${String(channel).replace(/&/g, "&amp;").replace(/\"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}" aria-label="Найти стримера ${channel}">@${channel}</button>`).join(" ")}</div>` : "";
+    const roleTagsHtml = role => `<div class="moderates"><span class="moderates-label">${role.tagLabel}</span> ${role.channels.map(channel => `<button type="button" class="moderates-tag" data-streamer-target="${String(channel).replace(/&/g, "&amp;").replace(/\"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}" aria-label="Найти стримера ${channel}">@${channel}</button>`).join(" ")}</div>`;
+    const moderationTags = modData ? [modData, ...(modData.extraRoles || [])].map(roleTagsHtml).join("") : "";
     card.innerHTML = `<div class="avatar"><img src="${avatarSvg(name,i)}" alt="Аватар ${name}" loading="eager" referrerpolicy="no-referrer"></div>
       <div class="info"><div class="name">${cardLabel}</div>${moderator ? "" : ``}${moderator ? moderationTags : `<div class="status-line"><div class="live-status is-loading" data-status="${name}">Проверяем эфир…</div></div><div class="stream-meta" data-meta="${name}"></div>`}</div>
       <svg class="arrow" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>`;
