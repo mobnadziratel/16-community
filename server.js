@@ -459,12 +459,7 @@ const server = http.createServer(async (req, res) => {
     const ext = path.extname(filePath);
     const types = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".svg": "image/svg+xml" };
     res.writeHead(200, { "Content-Type": types[ext] || "application/octet-stream" });
-    if (requested === "index.html") {
-      const html = data.toString("utf8").replace("</head>", '<link rel="stylesheet" href="/twitch-theme.css?v=1">\n</head>');
-      res.end(html);
-    } else {
-      res.end(data);
-    }
+    res.end(data);
   });
 });
 
