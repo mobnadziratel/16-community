@@ -153,6 +153,29 @@ html[data-theme="light"] #profilePage{background:rgba(25,28,36,.40)}
 
 
 
+/* Briefly highlight the target streamer's profile when opened. */
+#profilePage .profile-card.profile-highlight {
+  animation: streamer-profile-highlight 1.55s cubic-bezier(.2,.75,.25,1) both;
+}
+@keyframes streamer-profile-highlight {
+  0% {
+    border-color: rgba(157, 130, 255, .95);
+    box-shadow: 0 0 0 0 rgba(157, 130, 255, .62), 0 24px 90px rgba(0, 0, 0, .5);
+  }
+  24% {
+    border-color: rgba(157, 130, 255, 1);
+    box-shadow: 0 0 0 5px rgba(157, 130, 255, .22), 0 0 34px rgba(145, 71, 255, .42), 0 24px 90px rgba(0, 0, 0, .5);
+  }
+  58% {
+    border-color: rgba(102, 209, 230, .9);
+    box-shadow: 0 0 0 2px rgba(102, 209, 230, .12), 0 0 22px rgba(102, 209, 230, .24), 0 24px 90px rgba(0, 0, 0, .5);
+  }
+  100% {
+    border-color: var(--line);
+    box-shadow: 0 24px 90px rgba(0, 0, 0, .5);
+  }
+}
+
 /* Smooth card entrances, search filtering, and modal profile transitions */
 .streamer {
   transition: opacity .2s ease, transform .2s ease, border-color .18s, background .18s;
@@ -233,7 +256,8 @@ html[data-theme="light"] #profilePage{background:rgba(25,28,36,.40)}
 
 @media (prefers-reduced-motion: reduce) {
   .streamer.card-appear,
-  #profilePage.is-open .profile-social-link { animation: none !important; }
+  #profilePage.is-open .profile-social-link,
+  #profilePage .profile-card.profile-highlight { animation: none !important; }
   #profilePage, #profilePage .profile-wrap, .clip-modal, .clip-modal-dialog,
   .streamer { transition: none !important; }
 }
@@ -982,6 +1006,10 @@ html[data-theme="light"] .tabs .tab-button + .tab-button::before {
 .wanted-reason{margin:0;font-size:17px;line-height:1.25;font-weight:bold;}
 .wanted-link{position:relative;z-index:2;display:inline-block;margin-top:8px;color:#57351f;font:bold 12px Arial,sans-serif;}
 .wall-tag{position:absolute;z-index:1;display:block;max-width:42%;font-family:Impact,Haettenschweiler,"Arial Black",sans-serif;font-weight:900;line-height:.88;letter-spacing:.015em;white-space:pre-line;pointer-events:none;opacity:.9;filter:drop-shadow(3px 5px 2px rgba(0,0,0,.55));-webkit-text-stroke:1px rgba(25,18,18,.8);paint-order:stroke fill;}
+/* Square black wall mark: 1°6 */
+.wall-square-sign{position:absolute;z-index:4;top:32%;right:10%;width:clamp(112px,14vw,176px);aspect-ratio:1;display:grid;place-items:center;box-sizing:border-box;background:#030303;border:3px solid #191919;box-shadow:0 14px 24px rgba(0,0,0,.62),inset 0 0 0 3px rgba(255,255,255,.075),inset 0 -12px 18px rgba(255,255,255,.025);color:#f5f5f5;font-family:Impact,Haettenschweiler,"Arial Black",sans-serif;font-weight:900;font-size:clamp(32px,5vw,58px);line-height:1;letter-spacing:-.055em;text-align:center;text-shadow:2px 3px 0 #666,0 0 8px rgba(255,255,255,.14);transform:rotate(2deg);}
+.wall-square-sign::before{content:"";position:absolute;inset:7px;border:1px solid rgba(255,255,255,.15);pointer-events:none;}
+.wall-square-sign span{position:relative;z-index:1;}
 .wall-tag.tag-purple{top:20%;left:5%;font-size:clamp(30px,5vw,66px);color:#bca4ef;text-shadow:2px 2px 0 #5d3c82,-2px -1px 0 #5d3c82,4px 6px 0 rgba(20,10,25,.65);transform:rotate(-8deg);}
 .wall-tag.tag-cyan{top:43%;right:5%;font-size:clamp(28px,4.8vw,60px);color:#76e2df;text-shadow:2px 2px 0 #236d70,-2px -1px 0 #236d70,4px 6px 0 rgba(20,10,25,.65);transform:rotate(7deg);text-align:right;}
 .wall-tag.tag-orange{top:64%;left:8%;font-size:clamp(30px,5vw,64px);color:#f0a16e;text-shadow:2px 2px 0 #873f31,-2px -1px 0 #873f31,4px 6px 0 rgba(20,10,25,.65);transform:rotate(-5deg);}
@@ -1013,6 +1041,7 @@ html[data-theme="light"] .tabs .tab-button + .tab-button::before {
  .wall-paint-mark.mark-one{left:2%;width:48px;top:43%;}.wall-paint-mark.mark-two{right:3%;top:47%;height:44px;}
  .wanted-poster{margin:22px auto 28px;width:min(260px,88%);}
  .wall-tag{max-width:70%;}
+ .wall-square-sign{top:34%;right:5%;width:clamp(100px,30vw,132px);font-size:clamp(30px,9vw,42px);}
  .wall-tag.tag-purple{top:24%;left:3%;font-size:clamp(28px,9vw,44px);}
  .wall-tag.tag-cyan{top:47%;right:3%;font-size:clamp(26px,8vw,40px);}
  .wall-tag.tag-orange{top:68%;left:4%;font-size:clamp(27px,8.5vw,42px);}
@@ -1607,6 +1636,50 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
   .back-to-top { transition: none !important; transform: none; }
 }
 
+
+/* Pumpkin-shaped community caution notice. The allegation is presented as unverified, not as an established fact. */
+.pumpkin-warning {
+  position:absolute; z-index:6; top:67.5%; left:34%; width:min(390px,35%); min-height:230px;
+  box-sizing:border-box; padding:42px 30px 30px; overflow:visible; isolation:isolate;
+  border:2px solid #7e2b08; border-radius:50% 50% 46% 46% / 42% 42% 55% 55%;
+  background:
+    radial-gradient(ellipse at 50% 20%,rgba(255,220,129,.72),transparent 35%),
+    linear-gradient(90deg,#752806 0%,#df5b0a 9%,#ff9e23 20%,#b84308 31%,#f98215 42%,#a83907 52%,#ffa32a 64%,#a63807 76%,#f07811 89%,#732606 100%);
+  box-shadow:0 18px 27px rgba(0,0,0,.56),inset 0 3px 5px rgba(255,214,119,.52),inset 0 -13px 18px rgba(80,20,0,.3);
+  color:#241006; text-align:center; transform:rotate(-1.5deg);
+}
+.pumpkin-warning::before {
+  content:""; position:absolute; z-index:1; inset:7px 9px 5px; border-radius:inherit; pointer-events:none;
+  background:repeating-linear-gradient(90deg,transparent 0 17%,rgba(85,24,0,.12) 18% 20%,rgba(255,203,94,.12) 22% 24%,transparent 26% 37%);
+  box-shadow:inset 0 0 0 1px rgba(255,209,123,.2); opacity:.9;
+}
+.pumpkin-warning-stem {
+  position:absolute; z-index:0; top:-26px; left:45%; width:44px; height:42px; display:block;
+  border:2px solid #3d4a1e; border-radius:7px 9px 3px 3px;
+  background:linear-gradient(90deg,#35401b,#687735 42%,#3d4b20 76%,#263014);
+  box-shadow:2px 3px 5px rgba(0,0,0,.35); transform:rotate(-8deg);
+}
+.pumpkin-warning-content { position:relative; z-index:2; }
+.pumpkin-warning-kicker {
+  display:inline-block; margin:0 0 8px; padding:5px 10px; border:2px solid #3d1906; border-radius:4px;
+  background:#341204; color:#ffe6b0; font:900 11px/1 Arial,sans-serif; letter-spacing:.16em; text-transform:uppercase;
+  box-shadow:0 2px 4px rgba(52,18,4,.24);
+}
+.pumpkin-warning h2 {
+  margin:0 0 8px; color:#2d1205; font:900 clamp(21px,2.4vw,29px)/1.02 Impact,Haettenschweiler,"Arial Black",sans-serif;
+  letter-spacing:.025em; text-shadow:0 1px 0 rgba(255,211,111,.6); text-transform:uppercase;
+}
+.pumpkin-warning p { margin:0 auto 9px; max-width:300px; font:700 14px/1.35 Arial,sans-serif; color:#291106; }
+.pumpkin-warning a { color:#1e0a03; font-weight:900; text-decoration-thickness:2px; text-underline-offset:2px; overflow-wrap:anywhere; }
+.pumpkin-warning .pumpkin-warning-note { display:block; margin-top:8px; font:800 10px/1.25 Arial,sans-serif; letter-spacing:.035em; color:#44200a; }
+@media(max-width:650px) {
+  .pumpkin-warning { top:79.5%; left:50%; width:min(320px,88%); min-height:225px; padding:39px 24px 26px; transform:translateX(-50%) rotate(-1deg); }
+  .pumpkin-warning h2 { font-size:clamp(22px,6vw,28px); }
+  .pumpkin-warning p { font-size:13px; }
+  .wall-tag.tag-lime { top:93%; }
+}
+@media(prefers-reduced-motion:reduce) { .pumpkin-warning { scroll-behavior:auto; } }
+
 </style>
 </head>
 <body>
@@ -1696,9 +1769,9 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
         <a class="wanted-link" href="https://www.twitch.tv/cherrys_fox" target="_blank" rel="noopener noreferrer">Найти на Twitch ↗</a>
       </div>
       <article class="bakery-flyer" aria-label="Рекламная листовка — Пекарня: БАТОНЫ БАТОНА">
-        <a class="bakery-logo" href="https://ibb.co/Q3jz49VB" target="_blank" rel="noopener noreferrer" aria-label="Открыть изображение пекарни: БАТОНЫ БАТОНА">
+        <div class="bakery-logo" aria-label="Изображение пекарни: БАТОНЫ БАТОНА">
           <img src="https://i.ibb.co/Rk4Zq2Kn/photo-2026-10-25-10-54-20.jpg" alt="photo 2026 10 25 10 54 20" border="0" loading="lazy">
-        </a>
+        </div>
         <div class="bakery-brand">Пекарня: БАТОНЫ БАТОНА</div>
         <div class="bakery-rule" aria-hidden="true"></div>
         <h2 class="bakery-headline">Тепло. Хруст. Батон.</h2>
@@ -1714,6 +1787,17 @@ LOUD</div>
 RULES</div>
       <div class="wall-tag tag-lime" aria-hidden="true">LOCAL
 LEGENDS</div>
+      <div class="wall-square-sign" role="img" aria-label="Надпись 1°6 на чёрном квадрате"><span>1°6</span></div>
+      <article class="pumpkin-warning" aria-label="Предупреждение о неподтверждённом подозрении на скам в отношении канала ticvit">
+        <span class="pumpkin-warning-stem" aria-hidden="true"></span>
+        <div class="pumpkin-warning-content">
+          <span class="pumpkin-warning-kicker">Осторожно</span>
+          <h2>Подозрение на скам</h2>
+          <p>В отношении канала <a href="https://twitch.tv/ticvit" target="_blank" rel="noopener noreferrer">@ticvit</a> выдвинуто обвинение. Проверяйте факты самостоятельно перед донатами и переводами.</p>
+          <span class="pumpkin-warning-note">Информация не проверена независимо</span>
+        </div>
+      </article>
+
       <div class="wall-splatter splatter-a" aria-hidden="true"></div>
       <div class="wall-splatter splatter-b" aria-hidden="true"></div>
       <div class="wall-splatter splatter-c" aria-hidden="true"></div>
@@ -1793,7 +1877,11 @@ const streamers = [
     {label:"DonationAlerts", url:"https://www.donationalerts.com/r/kerik232"}
    ]},
   {name:"ribafyga", url:"https://www.twitch.tv/ribafyga", group:"others",
-   description:"ribafyga стримит общение."},
+   description:"ribafyga стримит общение.",
+   links:[
+    {label:"YouTube", url:"https://youtube.com/@ribafyga?si=4u5zC_W3j5dhTVnW"},
+    {label:"Telegram", url:"https://t.me/GLEB3545O"}
+   ]},
   {name:"mrbatosh", url:"https://www.twitch.tv/mrbatosh", group:"main",
    description:"😼 Всем привет! Тут играем, общаемся и просто кайфуем :3 🎮 Основной контент — на YouTube. 🔥 Анонсы и новости — в Telegram. P.S. Маскот создан с помощью нейросети 🐱",
    links:[
@@ -1864,6 +1952,14 @@ const streamers = [
     {label:"Telegram", url:"https://t.me/SecretBraze"},
     {label:"DonatePay", url:"https://new.donatepay.ru/@braze"}
    ]},
+  {name:"screada67", url:"https://www.twitch.tv/screada67", group:"others",
+   description:"Всем дарова",
+   links:[
+    {label:"Steam", url:"https://steamcommunity.com/profiles/76561199504766631/"},
+    {label:"DonationAlerts", url:"https://www.donationalerts.com/r/screada67"},
+    {label:"Telegram", url:"https://t.me/screada67"},
+    {label:"Discord", url:"https://discord.gg/jMMDbDkKHx"}
+   ]},
   {name:"ssh1nxx", url:"https://www.twitch.tv/ssh1nxx", group:"others",
    description:"Артём, 18 лет. Живу в Брянске. Стримлю все жанры игр, но больше всего люблю ААА проекты.",
    links:[
@@ -1906,7 +2002,12 @@ const streamers = [
    ]},
   {name:"zane5k5", url:"https://www.twitch.tv/zane5k5", group:"others",
    description:"Всем привет! Я буду стримить и копить на монитор."},
-  {name:"dima26rx1", url:"https://www.twitch.tv/dima26rx1", group:"others"},
+  {name:"dima26rx1", url:"https://www.twitch.tv/dima26rx1", group:"others",
+   links:[
+    {label:"DonateX", url:"https://donatex.gg/donate/dima26rx1"},
+    {label:"MemeAlerts", url:"https://memealerts.com/667d27403726680853c04ff5"},
+    {label:"Telegram", url:"https://t.me/domDIMI26RX1"}
+   ]},
   {name:"ishak_kodolov", url:"https://www.twitch.tv/ishak_kodolov", group:"others",
    links:[
     {label:"DonateX", url:"https://donatex.gg/donate/username"}
@@ -2350,6 +2451,8 @@ function render(filter="") {
     const i = streamIndex >= 0 ? streamIndex : streamers.length + Math.max(0, moderatorIndex);
     const card = document.createElement("div");
     card.className = "streamer card-appear";
+    // Stable login identity is separate from the display label (e.g. Z3KAT).
+    card.dataset.streamerLogin = String(name).toLowerCase();
     card.style.setProperty("--card-enter-delay", `${Math.min(cardEnterIndex * 28, 280)}ms`);
     card.addEventListener("animationend", event => {
       if (event.animationName === "streamer-card-appear") card.classList.remove("card-appear");
@@ -2697,29 +2800,16 @@ function activateTab(nextTab) {
 Object.entries(tabButtons).forEach(([tab, id]) => {
   document.getElementById(id).addEventListener("click", () => activateTab(tab));
 });
-// Moderator channel tags jump to the corresponding streamer card in the Streamers tab.
+// Clicking a streamer's tag in a moderator card opens that streamer's profile directly.
+// Capture phase prevents the parent moderator card from opening its own profile instead.
 document.addEventListener("click", event => {
   const tag = event.target.closest("[data-streamer-target]");
   if (!tag) return;
   event.preventDefault();
-  const login = String(tag.dataset.streamerTarget || "").toLowerCase();
-  const search = document.getElementById("search");
-  if (search) search.value = "";
-  activateTab("streamers");
-  requestAnimationFrame(() => {
-    const target = [...document.querySelectorAll("#creatorGrid .streamer, #mainGrid .streamer, #othersGrid .streamer")]
-      .find(card => card.querySelector(".name")?.textContent.trim().toLowerCase() === login);
-    if (target) {
-      target.scrollIntoView({ behavior: "smooth", block: "center" });
-      target.classList.remove("tag-target-highlight");
-      void target.offsetWidth;
-      target.classList.add("tag-target-highlight");
-      target.addEventListener("animationend", () => target.classList.remove("tag-target-highlight"), { once: true });
-    } else {
-      openStreamerProfile(login, true);
-    }
-  });
-});
+  event.stopPropagation();
+  const login = String(tag.dataset.streamerTarget || "").trim().toLowerCase();
+  openStreamerProfile(login, true);
+}, true);
 // Apply the tab remembered for this browser tab before the first paint.
 if (activeTab !== "streamers") activateTab(activeTab);
 document.getElementById("clipModalClose").addEventListener("click", closeClipPlayer);
@@ -2783,6 +2873,13 @@ function openStreamerProfile(login, updateHistory = false) {
   if (!person) return false;
 
   const page = document.getElementById("profilePage");
+  const profileCard = page.querySelector(".profile-card");
+  if (profileCard) {
+    profileCard.classList.remove("profile-highlight");
+    // Force a reflow so the short highlight animation restarts for each profile.
+    void profileCard.offsetWidth;
+    profileCard.classList.add("profile-highlight");
+  }
   document.title = `${person.displayName || person.name} — профиль стримера`;
   document.getElementById("profileName").textContent = person.displayName || person.name;
   document.getElementById("profileHandle").textContent = `@${person.name}`;
