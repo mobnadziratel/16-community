@@ -1699,7 +1699,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
 .wall-action-button.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
 .wall-action-button:disabled{opacity:.6;cursor:wait}
 .wall-form-message{font-size:13px!important;margin:10px 0 0!important;color:var(--muted)}
-.wall-form-message.is-error{color:#ff7777}
+.wall-form-message.is-error{color:#ff7777}.wall-form-message.is-success{color:#65e68a}
 .wall-moderator-login{display:block;margin:0 0 14px;background:transparent;border:0;border-radius:10px;padding:0;min-width:0}
 .wall-moderator-login summary{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:650;color:var(--muted);cursor:pointer;list-style:none;padding:7px 9px;border:1px solid transparent;border-radius:8px;transition:color .18s,background .18s,border-color .18s}
 .wall-moderator-login summary::-webkit-details-marker{display:none}
@@ -3363,7 +3363,7 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
   });
   form.addEventListener("submit",async event=>{
     event.preventDefault(); const button=form.querySelector('[type="submit"]'),message=byId("suggestionFormMessage");
-    button.disabled=true;message.textContent="Отправляем…";
+    button.disabled=true;message.classList.remove("is-error","is-success");message.textContent="Отправляем…";
     try{
       const wall=kind.value==="wall";
       if(wall&&imageInput.files.length&&!selectedImage)throw new Error("Подожди, пока изображение загрузится.");
@@ -3375,8 +3375,8 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
       })});
       const data=await response.json();if(!response.ok)throw new Error(data.error||"Не удалось отправить заявку.");
       form.reset();selectedImage="";imagePreview.hidden=true;imagePreview.removeAttribute("src");
-      kind.dispatchEvent(new Event("change"));message.textContent=data.message||"Отправлено на модерацию.";
-    }catch(error){message.textContent=error.message||"Ошибка отправки.";}
+      kind.dispatchEvent(new Event("change"));message.classList.remove("is-error");message.classList.add("is-success");message.textContent="Отправлено!";
+    }catch(error){message.classList.remove("is-success");message.classList.add("is-error");message.textContent="Ошибка!";}
     finally{button.disabled=false;}
   });
 
@@ -3397,7 +3397,7 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
         }
       });
       if(addedToDirectory){render();initClipStreamerPicker();refreshLiveStatuses();}
-      if(!suggested.length)streams.append(makeText("p","Пока нет одобренных предложений.","wall-muted"));
+      
       suggested.forEach(item=>{
         const card=makeText("article","","approved-streamer-card");
         const title=makeText("strong",item.twitchLogin);
@@ -3406,8 +3406,7 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
         if(item.text)card.append(makeText("p",item.text));
         card.append(makeText("small","Предложил(а): "+item.nickname,"wall-muted"));streams.append(card);
       });
-      if(!wall.length)posts.append(makeText("p","Пока нет одобренных публикаций.","wall-muted"));
-      if(wallFeed&&!wall.length)wallFeed.append(makeText("p","Пока нет одобренных публикаций.","wall-muted"));
+      
       wall.forEach(item=>{
         const makeWallCard=()=>{
           const card=makeText("article","","wall-post-card");
