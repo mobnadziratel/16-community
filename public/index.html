@@ -1960,7 +1960,7 @@ LEGENDS</div>
                   </details>
         <div class="community-wall-tools">
           <form class="wall-submit-card" id="communitySuggestionForm">
-            <h2>Предложить стримера или пост</h2>
+            <h2>Предложить стримера, пост или улучшение сайта</h2>
             <p>Предложение сначала попадёт на модерацию. Опубликуем его только после одобрения.</p>
             <label for="suggestionNickname">Твой никнейм</label>
             <input id="suggestionNickname" name="nickname" maxlength="32" minlength="2" required autocomplete="nickname" placeholder="Как тебя подписать">
@@ -1968,12 +1968,17 @@ LEGENDS</div>
             <select id="suggestionKind" name="kind">
               <option value="streamer">Стримера в каталог</option>
               <option value="wall">Публикацию на стену</option>
+              <option value="site">Изменение или улучшение сайта</option>
             </select>
             <div id="suggestionStreamerFields">
               <label for="suggestionTwitch">Ссылка на Twitch или ник канала</label>
               <input id="suggestionTwitch" name="twitch" maxlength="300" placeholder="https://twitch.tv/username">
               <label for="suggestionStreamerText">Комментарий (необязательно)</label>
               <textarea id="suggestionStreamerText" name="streamerText" maxlength="500" rows="3" placeholder="Почему стоит добавить этого стримера?"></textarea>
+            </div>
+            <div id="suggestionSiteFields" hidden>
+              <label for="suggestionSiteText">Что стоит изменить или добавить?</label>
+              <textarea id="suggestionSiteText" name="siteText" maxlength="1200" rows="4" placeholder="Опиши идею, проблему или новую функцию…"></textarea>
             </div>
             <div id="suggestionWallFields" hidden>
               <label for="suggestionWallText">Текст публикации</label>
@@ -3465,9 +3470,10 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
   const imageInput=byId("suggestionImage"), imagePreview=byId("suggestionImagePreview");
   let selectedImage="";
   kind.addEventListener("change",()=>{
-    const wall=kind.value==="wall"; streamerFields.hidden=wall; wallFields.hidden=!wall;
-    byId("suggestionTwitch").required=!wall;
+    const wall=kind.value==="wall",site=kind.value==="site"; streamerFields.hidden=wall||site; wallFields.hidden=!wall; byId("suggestionSiteFields").hidden=!site;
+    byId("suggestionTwitch").required=!wall&&!site;
     byId("suggestionWallText").required=false;
+    byId("suggestionSiteText").required=site;
   });
   imageInput.addEventListener("change",()=>{
     selectedImage=""; imagePreview.hidden=true; imagePreview.removeAttribute("src");
@@ -3484,12 +3490,12 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
     event.preventDefault(); const button=form.querySelector('[type="submit"]'),message=byId("suggestionFormMessage");
     button.disabled=true;message.classList.remove("is-error","is-success");message.textContent="Отправляем…";
     try{
-      const wall=kind.value==="wall";
+      const wall=kind.value==="wall",site=kind.value==="site";
       if(wall&&imageInput.files.length&&!selectedImage)throw new Error("Подожди, пока изображение загрузится.");
       const response=await fetch("/api/community/submissions",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
         nickname:byId("suggestionNickname").value,kind:kind.value,
         twitch:byId("suggestionTwitch").value,
-        text:wall?byId("suggestionWallText").value:byId("suggestionStreamerText").value,
+        text:wall?byId("suggestionWallText").value:site?byId("suggestionSiteText").value:byId("suggestionStreamerText").value,
         image:wall?selectedImage:""
       })});
       const data=await response.json();if(!response.ok)throw new Error(data.error||"Не удалось отправить заявку.");
@@ -3582,7 +3588,7 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
       if(!data.submissions.length)pending.append(makeText("p","Новых заявок нет.","wall-muted"));
       data.submissions.forEach(item=>{
         const card=makeText("article","","community-pending-item");
-        card.append(makeText("strong",item.kind==="streamer"?"Предложение стримера":"Публикация на стену"));
+        card.append(makeText("strong",item.kind==="streamer"?"Предложение стримера":item.kind==="site"?"Предложение по улучшению сайта":"Публикация на стену"));
         card.append(makeText("p","Автор: "+item.nickname+" · "+new Date(item.createdAt).toLocaleString("ru-RU")));
         if(item.twitchLogin){const link=document.createElement("a");link.href="https://www.twitch.tv/"+encodeURIComponent(item.twitchLogin);link.target="_blank";link.rel="noopener noreferrer";link.textContent="twitch.tv/"+item.twitchLogin;card.append(link);}
         if(item.text)card.append(makeText("p",item.text));
