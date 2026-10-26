@@ -360,38 +360,6 @@ async function fetchClips(period) {
 }
 
 
-const WALL_DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "data");
-const WALL_DB_FILE = path.join(WALL_DATA_DIR, "wall-posts.json");
-const WALL_MODERATOR_TOKENS = String(process.env.WALL_MODERATOR_TOKENS || "").split(",").map(v => v.trim()).filter(v => v.length >= 24);
-const wallRateLimits = new Map();
-function wallJson(res, status, data) { res.writeHead(status, { "Content-Type":"application/json; charset=utf-8","Cache-Control":"no-store","X-Content-Type-Options":"nosniff" }); res.end(JSON.stringify(data)); }
-async function readWallDb() {
-  try { const db=JSON.parse(await fs.promises.readFile(WALL_DB_FILE,"utf8")); return Array.isArray(db.posts)?db:{posts:[]}; }
-  catch(e) { if(e.code==="ENOENT") return {posts:[]}; throw e; }
-}
-async function writeWallDb(db) {
-  await fs.promises.mkdir(WALL_DATA_DIR,{recursive:true,mode:0o700});
-  const tmp=WALL_DB_FILE+".tmp"; await fs.promises.writeFile(tmp,JSON.stringify(db),{mode:0o600}); await fs.promises.rename(tmp,WALL_DB_FILE);
-}
-function wallImageType(b) {
-  if(b.length>=8&&b.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10])))return "image/png";
-  if(b.length>=3&&b[0]===255&&b[1]===216&&b[2]===255)return "image/jpeg";
-  if(b.length>=12&&b.toString("ascii",0,4)==="RIFF"&&b.toString("ascii",8,12)==="WEBP")return "image/webp";
-  if(b.length>=6&&["GIF87a","GIF89a"].includes(b.toString("ascii",0,6)))return "image/gif"; return null;
-}
-async function wallReadBody(req,max=3*1024*1024) {
-  const chunks=[];let size=0;for await(const chunk of req){size+=chunk.length;if(size>max)throw Object.assign(new Error("Слишком большой запрос"),{status:413});chunks.push(chunk);}
-  try{return JSON.parse(Buffer.concat(chunks).toString("utf8"));}catch{throw Object.assign(new Error("Некорректный JSON"),{status:400});}
-}
-function wallIsModerator(req) {
-  const h=String(req.headers.authorization||"");const supplied=h.startsWith("Bearer ")?h.slice(7):"";if(!supplied||!WALL_MODERATOR_TOKENS.length)return false;
-  const crypto=require("node:crypto");return WALL_MODERATOR_TOKENS.some(token=>{const a=Buffer.from(token),b=Buffer.from(supplied);return a.length===b.length&&crypto.timingSafeEqual(a,b);});
-}
-function wallRateLimit(req,res,key,limit,windowMs) {
-  const now=Date.now(),id=key+":"+String(req.socket.remoteAddress||"unknown").slice(0,80);const e=wallRateLimits.get(id);
-  if(!e||now-e.start>windowMs)wallRateLimits.set(id,{start:now,count:1});else if(++e.count>limit){wallJson(res,429,{error:"Слишком много запросов. Попробуйте позже."});return false;}
-  if(wallRateLimits.size>5000)for(const[k,v]of wallRateLimits)if(now-v.start>windowMs)wallRateLimits.delete(k);return true;
-}
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
@@ -484,38 +452,6 @@ const server = http.createServer(async (req, res) => {
   }
 
 
-  if (url.pathname.startsWith("/api/wall/")) {
-    try {
-      if(req.method==="GET"&&url.pathname==="/api/wall/posts"){
-        const db=await readWallDb();wallJson(res,200,{posts:db.posts.filter(p=>p.status==="approved").sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).map(({id,text,image,imageType,createdAt})=>({id,text,image:image?"data:"+imageType+";base64,"+image:null,createdAt}))});return;
-      }
-      if(req.method==="POST"&&url.pathname==="/api/wall/submissions"){
-        if(!wallRateLimit(req,res,"submit",5,3600000))return;
-        if(!String(req.headers["content-type"]||"").toLowerCase().startsWith("application/json")){wallJson(res,415,{error:"Ожидался JSON"});return;}
-        const body=await wallReadBody(req);const text=String(body.text||"").trim();
-        if(text.length>1200){wallJson(res,400,{error:"Текст должен быть не длиннее 1200 символов"});return;}
-        if(!text&&!body.image){wallJson(res,400,{error:"Добавьте текст или фотографию"});return;}
-        let image=null,imageType=null;
-        if(body.image){const m=/^data:(image\/(?:png|jpeg|webp|gif));base64,([A-Za-z0-9+/=]+)$/.exec(String(body.image));if(!m){wallJson(res,400,{error:"Поддерживаются PNG, JPG, WEBP и GIF"});return;}
-          const b=Buffer.from(m[2],"base64");if(!b.length||b.length>2*1024*1024||wallImageType(b)!==m[1]){wallJson(res,400,{error:"Фото не прошло проверку или превышает 2 МБ"});return;}image=b.toString("base64");imageType=m[1];}
-        const db=await readWallDb();db.posts.push({id:require("node:crypto").randomUUID(),text,image,imageType,status:"pending",createdAt:new Date().toISOString()});await writeWallDb(db);
-        wallJson(res,201,{ok:true,message:"Отправлено на модерацию. Спасибо!"});return;
-      }
-      if(req.method==="GET"&&url.pathname==="/api/wall/moderation"){
-        if(!wallIsModerator(req)){wallJson(res,WALL_MODERATOR_TOKENS.length?401:503,{error:WALL_MODERATOR_TOKENS.length?"Неверный токен модератора":"Модерация ещё не настроена на сервере"});return;}
-        const db=await readWallDb();wallJson(res,200,{posts:db.posts.filter(p=>p.status==="pending").sort((a,b)=>a.createdAt.localeCompare(b.createdAt)).map(p=>({...p,image:p.image?"data:"+p.imageType+";base64,"+p.image:null}))});return;
-      }
-      const m=/^\/api\/wall\/moderation\/([0-9a-f-]+)$/.exec(url.pathname);
-      if(req.method==="POST"&&m){
-        if(!wallIsModerator(req)){wallJson(res,WALL_MODERATOR_TOKENS.length?401:503,{error:WALL_MODERATOR_TOKENS.length?"Неверный токен модератора":"Модерация ещё не настроена на сервере"});return;}
-        if(!wallRateLimit(req,res,"moderate",120,3600000))return;
-        const body=await wallReadBody(req,4096);if(!["approved","rejected"].includes(body.status)){wallJson(res,400,{error:"Недопустимое действие"});return;}
-        const db=await readWallDb(),post=db.posts.find(p=>p.id===m[1]);if(!post){wallJson(res,404,{error:"Публикация не найдена"});return;}
-        post.status=body.status;post.moderatedAt=new Date().toISOString();await writeWallDb(db);wallJson(res,200,{ok:true});return;
-      }
-      wallJson(res,404,{error:"Маршрут не найден"});return;
-    } catch(e){wallJson(res,e.status||500,{error:e.status?e.message:"Ошибка обработки публикации"});if(!e.status)console.error("Wall API error:",e.message);return;}
-  }
 
   const requested = url.pathname === "/" ? "index.html" : decodeURIComponent(url.pathname.slice(1));
   const filePath = path.resolve(PUBLIC_DIR, requested);
