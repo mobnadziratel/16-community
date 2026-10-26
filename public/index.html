@@ -1700,7 +1700,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
 .wall-action-button:disabled{opacity:.6;cursor:wait}
 .wall-form-message{font-size:13px!important;margin:10px 0 0!important;color:var(--muted)}
 .wall-form-message.is-error{color:#ff7777}
-.wall-moderator-login{background:transparent;border:0;border-radius:10px;padding:0;min-width:0}
+.wall-moderator-login{display:block;margin:0 0 14px;background:transparent;border:0;border-radius:10px;padding:0;min-width:0}
 .wall-moderator-login summary{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:650;color:var(--muted);cursor:pointer;list-style:none;padding:7px 9px;border:1px solid transparent;border-radius:8px;transition:color .18s,background .18s,border-color .18s}
 .wall-moderator-login summary::-webkit-details-marker{display:none}
 .wall-moderator-login summary::before{content:"⌁";font-size:15px;opacity:.7}
@@ -1902,6 +1902,27 @@ LEGENDS</div>
   </section>
   <section id="suggestionsPanel" aria-label="Предложка" hidden>
       <div class="community-submission-area">
+                  <details class="wall-moderator-login" id="wallModeratorDetails">
+                    <summary>Вход для модераторов</summary>
+                    <div class="wall-moderator-login-inner">
+                      <h2 id="wallModerationTitle">Модерация</h2>
+                      <p class="wall-muted">Вход доступен владельцу и модераторам с выданным доступом.</p>
+                      <form id="communityModeratorLogin">
+                        <label for="moderatorUsername">Логин модератора</label>
+                        <input id="moderatorUsername" name="username" autocomplete="username" required placeholder="Ваш логин">
+                        <label for="moderatorPassword">Пароль</label>
+                        <input id="moderatorPassword" name="password" type="password" autocomplete="current-password" required>
+                        <button class="wall-action-button" type="submit">Войти</button>
+                      </form>
+                      <div id="communityModeratorPanel" hidden>
+                        <p class="wall-form-message" id="moderatorSessionLabel"></p>
+                        <button class="wall-action-button" id="communityModeratorRefresh" type="button">Обновить заявки</button>
+                        <button class="wall-action-button" id="communityModeratorLogout" type="button">Выйти</button>
+                        <div id="communityPendingList" class="community-pending-list"></div>
+                      </div>
+                      <p class="wall-form-message" id="moderatorFormMessage" aria-live="polite"></p>
+                    </div>
+                  </details>
         <div class="community-wall-tools">
           <form class="wall-submit-card" id="communitySuggestionForm">
             <h2>Предложить стримера или пост</h2>
@@ -1929,27 +1950,7 @@ LEGENDS</div>
             <button class="wall-action-button" type="submit">Отправить на модерацию</button>
             <p class="wall-form-message" id="suggestionFormMessage" aria-live="polite"></p>
           </form>
-          <details class="wall-moderator-login" id="wallModeratorDetails">
-            <summary>Вход для модераторов</summary>
-            <div class="wall-moderator-login-inner">
-              <h2 id="wallModerationTitle">Модерация</h2>
-              <p class="wall-muted">Вход доступен владельцу и модераторам с выданным доступом.</p>
-              <form id="communityModeratorLogin">
-                <label for="moderatorUsername">Логин модератора</label>
-                <input id="moderatorUsername" name="username" autocomplete="username" required placeholder="Ваш логин">
-                <label for="moderatorPassword">Пароль</label>
-                <input id="moderatorPassword" name="password" type="password" autocomplete="current-password" required>
-                <button class="wall-action-button" type="submit">Войти</button>
-              </form>
-              <div id="communityModeratorPanel" hidden>
-                <p class="wall-form-message" id="moderatorSessionLabel"></p>
-                <button class="wall-action-button" id="communityModeratorRefresh" type="button">Обновить заявки</button>
-                <button class="wall-action-button" id="communityModeratorLogout" type="button">Выйти</button>
-                <div id="communityPendingList" class="community-pending-list"></div>
-              </div>
-              <p class="wall-form-message" id="moderatorFormMessage" aria-live="polite"></p>
-            </div>
-          </details>
+
         </div>
         <section class="wall-posts-section">
           <h2>Одобренные предложения стримеров</h2>
