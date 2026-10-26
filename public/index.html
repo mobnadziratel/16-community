@@ -1710,7 +1710,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
 .wall-moderator-login .wall-muted{margin:0 0 12px;line-height:1.45}
 .wall-moderator-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .wall-posts-section{margin:24px 0}
-.wall-posts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:14px}
+.wall-posts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:14px}.wall-posts-on-mural{position:relative;z-index:5;margin:36px 0 0;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));align-items:start}.wall-posts-on-mural:empty{display:none}.wall-posts-on-mural .wall-post-card{background:rgba(20,14,12,.88);border-color:rgba(255,255,255,.25);box-shadow:0 8px 18px rgba(0,0,0,.35);color:#fff}.wall-posts-on-mural .wall-post-copy{color:#fff}.wall-posts-on-mural .wall-post-date{color:#ddd}
 .wall-post-card{min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
 .wall-post-card img{display:block;width:100%;max-height:420px;object-fit:contain;background:#08080a}
 .wall-post-copy{padding:14px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55}
@@ -1894,11 +1894,8 @@ LEGENDS</div>
       <div class="wall-paint-mark mark-one" aria-hidden="true"></div>
       <div class="wall-paint-mark mark-two" aria-hidden="true"></div>
       <div class="wall-footing" aria-hidden="true"></div>
+      <div class="wall-posts-grid wall-posts-on-mural" id="communityWallFeed" aria-label="Публикации сообщества"></div>
     </div>
-    <section class="wall-posts-section community-wall-feed" aria-label="Публикации сообщества">
-      <h2>Публикации сообщества</h2>
-      <div class="wall-posts-grid" id="communityWallFeed"><p class="wall-muted">Загружаем публикации…</p></div>
-    </section>
   </section>
   <section id="suggestionsPanel" aria-label="Предложка" hidden>
       <div class="community-submission-area">
@@ -1952,14 +1949,6 @@ LEGENDS</div>
           </form>
 
         </div>
-        <section class="wall-posts-section">
-          <h2>Одобренные предложения стримеров</h2>
-          <div class="wall-approved-streamers" id="approvedStreamerList"><p class="wall-muted">Загружаем предложения…</p></div>
-        </section>
-        <section class="wall-posts-section">
-          <h2>Публикации сообщества</h2>
-          <div class="wall-posts-grid" id="approvedWallPosts"><p class="wall-muted">Загружаем публикации…</p></div>
-        </section>
       </div>
   </section>
 </main>
@@ -3382,10 +3371,11 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
 
   function makeText(tag,text,className){const el=document.createElement(tag);if(className)el.className=className;el.textContent=text||"";return el;}
   async function loadApproved(){
-    const streams=byId("approvedStreamerList"),posts=byId("approvedWallPosts"),wallFeed=byId("communityWallFeed");
+    const wallFeed=byId("communityWallFeed");
     try{
-      const response=await fetch("/api/community/posts",{cache:"no-store"}),data=await response.json();if(!response.ok)throw new Error(data.error||"Не удалось загрузить публикации.");
-      streams.replaceChildren();posts.replaceChildren();if(wallFeed)wallFeed.replaceChildren();
+      const response=await fetch("/api/community/posts",{cache:"no-store"}),data=await response.json();
+      if(!response.ok)throw new Error(data.error||"Не удалось загрузить публикации.");
+      if(wallFeed)wallFeed.replaceChildren();
       const suggested=(data.submissions||[]).filter(item=>item.kind==="streamer");
       const wall=(data.submissions||[]).filter(item=>item.kind==="wall");
       let addedToDirectory=false;
@@ -3397,31 +3387,16 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
         }
       });
       if(addedToDirectory){render();initClipStreamerPicker();refreshLiveStatuses();}
-      
-      suggested.forEach(item=>{
-        const card=makeText("article","","approved-streamer-card");
-        const title=makeText("strong",item.twitchLogin);
-        const link=document.createElement("a");link.href="https://www.twitch.tv/"+encodeURIComponent(item.twitchLogin);link.target="_blank";link.rel="noopener noreferrer";link.textContent="Открыть на Twitch ↗";
-        card.append(title,document.createElement("br"),link);
-        if(item.text)card.append(makeText("p",item.text));
-        card.append(makeText("small","Предложил(а): "+item.nickname,"wall-muted"));streams.append(card);
-      });
-      
       wall.forEach(item=>{
-        const makeWallCard=()=>{
-          const card=makeText("article","","wall-post-card");
-          if(item.imageData){const img=document.createElement("img");img.className="wall-approved-image";img.src=item.imageData;img.alt="Изображение от "+item.nickname;img.loading="lazy";card.append(img);}
-          if(item.text)card.append(makeText("div",item.text,"wall-post-copy"));
-          card.append(makeText("small","Отправил(а): "+item.nickname,"wall-post-date"));
-          return card;
-        };
-        posts.append(makeWallCard());
-        if(wallFeed)wallFeed.append(makeWallCard());
+        const card=makeText("article","","wall-post-card");
+        if(item.imageData){const img=document.createElement("img");img.className="wall-approved-image";img.src=item.imageData;img.alt="Изображение от "+item.nickname;img.loading="lazy";card.append(img);}
+        if(item.text)card.append(makeText("div",item.text,"wall-post-copy"));
+        card.append(makeText("small","Отправил(а): "+item.nickname,"wall-post-date"));
+        if(wallFeed)wallFeed.append(card);
       });
     }catch(error){
-      streams.replaceChildren(makeText("p","Предложения временно недоступны.","wall-muted"));
-      posts.replaceChildren(makeText("p","Публикации временно недоступны.","wall-muted"));
-      if(wallFeed)wallFeed.replaceChildren(makeText("p","Публикации временно недоступны.","wall-muted"));
+      if(wallFeed)wallFeed.replaceChildren();
+      console.error("Не удалось загрузить публикации сообщества:",error);
     }
   }
 
