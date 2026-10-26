@@ -2756,42 +2756,43 @@ function applyDirectoryFilter(filter="") {
   const normalizedFilter = String(filter).toLocaleLowerCase("ru").trim();
   let visibleCount = 0;
   const visibleByGroup = {};
-  Object.entries(grids).forEach(([group, grid]) => {
-    let groupCount = 0;
-    grid.querySelectorAll(".streamer").forEach(card => {
-      const name = card.querySelector(".name")?.textContent || "";
-      const show = name.toLocaleLowerCase("ru").includes(normalizedFilter);
-      if (show) {
-        if (card.hidden) {
-          card.hidden = false;
-          card.classList.add("is-filter-entering");
-          requestAnimationFrame(() => {
-            if (!card.hidden) card.classList.remove("is-filter-entering");
-          });
-        } else {
-          // If the user changes the query before the fade-out finishes, cancel it.
-          card.classList.remove("is-filter-hiding");
-        }
-      } else if (!card.hidden && !card.classList.contains("is-filter-hiding")) {
-        card.classList.add("is-filter-hiding");
-        window.setTimeout(() => {
-          if (card.classList.contains("is-filter-hiding")) {
-            card.hidden = true;
+  // Skip directory-card scans and filter animations on non-directory tabs.
+  if (activeTab === "streamers" || activeTab === "moderators") {
+    Object.entries(grids).forEach(([group, grid]) => {
+      let groupCount = 0;
+      grid.querySelectorAll(".streamer").forEach(card => {
+        const name = card.querySelector(".name")?.textContent || "";
+        const show = name.toLocaleLowerCase("ru").includes(normalizedFilter);
+        if (show) {
+          if (card.hidden) {
+            card.hidden = false;
+            card.classList.add("is-filter-entering");
+            requestAnimationFrame(() => {
+              if (!card.hidden) card.classList.remove("is-filter-entering");
+            });
+          } else {
             card.classList.remove("is-filter-hiding");
           }
-        }, 205);
-      }
-      if (show) { groupCount++; visibleCount++; }
+        } else if (!card.hidden && !card.classList.contains("is-filter-hiding")) {
+          card.classList.add("is-filter-hiding");
+          window.setTimeout(() => {
+            if (card.classList.contains("is-filter-hiding")) {
+              card.hidden = true;
+              card.classList.remove("is-filter-hiding");
+            }
+          }, 205);
+        }
+        if (show) { groupCount++; visibleCount++; }
+      });
+      visibleByGroup[group] = groupCount;
     });
-    visibleByGroup[group] = groupCount;
-  });
+  }
   Object.entries(categories).forEach(([group, section]) => {
     section.hidden = activeTab !== "streamers" || (visibleByGroup[group] || 0) === 0;
   });
   document.getElementById("editorsCategory").hidden = activeTab !== "moderators" || (visibleByGroup.editors || 0) === 0;
   return visibleCount;
 }
-
 function getStreamState(streams, login) {
   const key = String(login || "").trim().toLowerCase();
   if (!streams || !key) return null;
