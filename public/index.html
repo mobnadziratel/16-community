@@ -1038,16 +1038,20 @@ html[data-theme="light"] .tabs .tab-button + .tab-button::before {
 
 @media(max-width:650px){
  .tabs{grid-template-columns:repeat(2,minmax(0,1fr));}.tabs .tab-button#clipsTab{grid-column:auto;}.tabs .tab-button#clipsTab::before{display:none;}
- .wall-mural{min-height:1900px;padding:25px 12px 38px;border-radius:12px;}
- .wall-graffiti{font-size:clamp(26px,7.2vw,38px);line-height:1.18;}
- .wall-paint-mark.mark-one{left:2%;width:48px;top:43%;}.wall-paint-mark.mark-two{right:3%;top:47%;height:44px;}
- .wanted-poster{margin:22px auto 28px;width:min(260px,88%);}
- .wall-tag{max-width:70%;}
- .wall-square-sign{top:34%;right:5%;width:clamp(100px,30vw,132px);font-size:clamp(30px,9vw,42px);}
- .wall-tag.tag-purple{top:24%;left:3%;font-size:clamp(28px,9vw,44px);}
- .wall-tag.tag-cyan{top:47%;right:3%;font-size:clamp(26px,8vw,40px);}
- .wall-tag.tag-orange{top:68%;left:4%;font-size:clamp(27px,8.5vw,42px);}
- .wall-tag.tag-lime{top:85%;right:4%;font-size:clamp(25px,7.8vw,39px);}
+ /* Keep wall content in normal document flow on narrow screens so cards never collide. */
+ #wallPanel,.wall-mural{min-width:0;width:100%;max-width:100%}
+ .wall-mural{min-height:0;padding:25px 12px 30px;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:18px}
+ .wall-graffiti{width:100%;font-size:clamp(24px,7.2vw,38px);line-height:1.18;padding:8px 0 12px;overflow-wrap:anywhere}
+ .wall-graffiti-line{max-width:100%;overflow-wrap:anywhere}
+ .wall-paint-mark,.wall-splatter,.wall-tag,.wall-square-sign{display:none}
+ .wanted-poster{position:relative;top:auto;left:auto;right:auto;margin:0 auto;width:min(260px,100%);max-width:100%;transform:rotate(1deg)}
+ .bakery-flyer{position:relative;top:auto;left:auto;right:auto;width:min(330px,100%);max-width:100%;margin:0 auto;transform:rotate(-1deg)}
+ .pumpkin-warning{position:relative;top:auto;left:auto;right:auto;bottom:auto;width:100%;max-width:100%;margin:0}
+ .wall-submit-card,.wall-moderator-login{min-width:0;width:100%;padding:15px}
+ .community-wall-tools{grid-template-columns:minmax(0,1fr);min-width:0}
+ .wall-posts-grid{grid-template-columns:minmax(0,1fr)}
+ .wall-post-card,.wall-post-copy,.wall-post-actions{min-width:0;overflow-wrap:anywhere}
+ .wall-post-actions>*{max-width:100%;white-space:normal}
 }
 @media(prefers-reduced-motion:reduce){.wall-graffiti a{transition:none;}}
 
@@ -1822,7 +1826,6 @@ LEGENDS</div>
           <span class="pumpkin-warning-kicker">Осторожно</span>
           <h2>Подозрение на скам</h2>
           <p>В отношении канала <a href="https://twitch.tv/ticvit" target="_blank" rel="noopener noreferrer">@ticvit</a> выдвинуто обвинение. Проверяйте факты самостоятельно перед донатами и переводами.</p>
-          <span class="pumpkin-warning-note">Информация не проверена независимо</span>
         </div>
       </article>
 
