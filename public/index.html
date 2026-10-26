@@ -2998,63 +2998,24 @@ function activateTab(nextTab) {
   ];
   const reduceWordmarkMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (reduceWordmarkMotion || !Element.prototype.animate) {
-    brandTop.textContent = brandCopy.top;
-    brandMainLead.textContent = brandCopy.main;
-    brandBottom.textContent = brandCopy.bottom;
-  } else {
-    const wordmarkRect = brandWordmark.getBoundingClientRect();
-    const lineRects = wordmarkLines.map(([element]) => element.getBoundingClientRect());
-    const movingWords = wordmarkLines.map(([element]) => {
-      const clone = element.cloneNode(true);
-      const rect = element.getBoundingClientRect();
-      clone.removeAttribute("id");
-      clone.setAttribute("aria-hidden", "true");
-      Object.assign(clone.style, {
-        position: "fixed",
-        left: rect.left + "px",
-        top: rect.top + "px",
-        width: rect.width + "px",
-        height: rect.height + "px",
-        margin: "0",
-        padding: "0",
-        zIndex: "9999",
-        pointerEvents: "none",
-        whiteSpace: "nowrap",
-        transformOrigin: "top left"
-      });
-      document.body.appendChild(clone);
-      return { element, clone, rect };
-    });
-    wordmarkLines.forEach(([element]) => { element.style.visibility = "hidden"; });
     wordmarkLines.forEach(([element, nextText]) => { element.textContent = nextText; });
-    requestAnimationFrame(() => {
-      if (brandWordmark.dataset.motionId !== String(wordmarkMotionId)) {
-        movingWords.forEach(({ clone }) => clone.remove());
-        wordmarkLines.forEach(([element]) => { element.style.visibility = ""; });
-        return;
-      }
-      const destinations = wordmarkLines.map(([element]) => element.getBoundingClientRect());
-      movingWords.forEach(({ clone, rect }, index) => {
-        const text = clone.textContent;
-        const destinationIndex = wordmarkLines.findIndex(([, nextText]) => nextText === text);
-        const destination = destinations[destinationIndex < 0 ? index : destinationIndex];
-        const dx = destination.left - rect.left;
-        const dy = destination.top - rect.top;
-        const scaleX = rect.width ? destination.width / rect.width : 1;
-        clone.animate([
-          { transform: "translate3d(0,0,0) scale(1,1)", opacity: 1 },
-          { transform: `translate3d(${dx}px,${dy}px,0) scale(${scaleX},1)`, opacity: 1 }
-        ], {
-          duration: 1050,
-          delay: index * 45,
-          easing: "cubic-bezier(.22, 1, .36, 1)",
-          fill: "forwards"
-        }).onfinish = () => {
-          clone.remove();
-          if (brandWordmark.dataset.motionId === String(wordmarkMotionId)) {
-            wordmarkLines.forEach(([element]) => { element.style.visibility = ""; });
-          }
-        };
+  } else {
+    // Keep the layout in normal document flow; animate the real text, not fixed-position clones.
+    const changedLines = wordmarkLines.filter(([element, nextText]) => element.textContent !== nextText);
+    changedLines.forEach(([element]) => {
+      element.getAnimations().forEach(animation => animation.cancel());
+      element.style.visibility = "";
+    });
+    wordmarkLines.forEach(([element, nextText]) => { element.textContent = nextText; });
+    changedLines.forEach(([element], index) => {
+      element.animate([
+        { transform: "translate3d(0, 9px, 0)", opacity: 0.72 },
+        { transform: "translate3d(0, 0, 0)", opacity: 1 }
+      ], {
+        duration: 680,
+        delay: index * 45,
+        easing: "cubic-bezier(.22, 1, .36, 1)",
+        fill: "none"
       });
     });
   }
