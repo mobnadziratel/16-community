@@ -2567,6 +2567,9 @@ function updateBackToTopVisibility() {
   }
 }
 
+const CLIPS_PAGE_SIZE = 60;
+let clipsRenderLimit = CLIPS_PAGE_SIZE;
+
 function renderClips() {
   const grid = document.getElementById("clipsGrid");
   const period = document.getElementById("clipPeriod").value;
@@ -2576,26 +2579,43 @@ function renderClips() {
   let items = clipsData.filter(clip => {
     const login = String(clip.broadcasterLogin || clip.broadcasterName || "").toLowerCase();
     const streamerMatch = selectedClipStreamers.has(login);
-    const periodMatch = period === "all" || (Date.parse(clip.createdAt || "") >= now - ranges[period]);
+    const periodMatch = period === "all" || (Date.parse(clip.createdAt || "") >= now - (ranges[period] || 0));
     return streamerMatch && periodMatch;
   });
   items.sort((a,b) => sort === "popular" ? (Number(b.viewCount)||0)-(Number(a.viewCount)||0) : sort === "newest" ? (Date.parse(b.createdAt)||0)-(Date.parse(a.createdAt)||0) : (Date.parse(a.createdAt)||0)-(Date.parse(b.createdAt)||0));
-  grid.innerHTML = "";
-  items.forEach(clip => {
+  grid.replaceChildren();
+  const visibleItems = items.slice(0, clipsRenderLimit);
+  const fragment = document.createDocumentFragment();
+  visibleItems.forEach(clip => {
     const card = document.createElement("button");
     card.type = "button";
     card.className = "clip-card";
     card.setAttribute("aria-label", `Смотреть клип: ${clip.title || clip.broadcasterName || "Twitch"}`);
     card.addEventListener("click", () => openClipPlayer(clip));
-    const thumb = document.createElement("img"); thumb.className = "clip-thumb"; thumb.loading = "lazy"; thumb.alt = `Клип ${clip.title || "Twitch"}`; thumb.src = clip.thumbnailUrl || "";
+    const thumb = document.createElement("img");
+    thumb.className = "clip-thumb"; thumb.loading = "lazy"; thumb.decoding = "async";
+    thumb.alt = `Клип ${clip.title || "Twitch"}`; thumb.src = clip.thumbnailUrl || "";
     const body = document.createElement("div"); body.className = "clip-body";
     const author = document.createElement("div"); author.className = "clip-author"; author.textContent = clip.broadcasterName || clip.broadcasterLogin || "Twitch";
     const title = document.createElement("div"); title.className = "clip-title"; title.textContent = clip.title || "Клип Twitch";
     const meta = document.createElement("div"); meta.className = "clip-meta";
     const views = document.createElement("span"); views.textContent = `${(Number(clip.viewCount)||0).toLocaleString("ru-RU")} просмотров`;
     const date = document.createElement("span"); date.textContent = formatClipDate(clip.createdAt);
-    meta.append(views,date); body.append(author,title,meta); card.append(thumb,body); grid.appendChild(card);
+    meta.append(views,date); body.append(author,title,meta); card.append(thumb,body); fragment.appendChild(card);
   });
+  grid.appendChild(fragment);
+  if (visibleItems.length < items.length) {
+    const more = document.createElement("button");
+    more.type = "button";
+    more.className = "clip-load-more";
+    more.textContent = `Показать ещё (${items.length - visibleItems.length})`;
+    more.style.cssText = "display:block;margin:20px auto;padding:12px 22px;border:1px solid var(--border-color, #444);border-radius:12px;background:var(--card-bg, #222);color:inherit;cursor:pointer;font:inherit";
+    more.addEventListener("click", () => {
+      clipsRenderLimit += CLIPS_PAGE_SIZE;
+      renderClips();
+    });
+    grid.appendChild(more);
+  }
   document.getElementById("clipsEmpty").style.display = items.length ? "none" : "block";
   requestAnimationFrame(updateBackToTopVisibility);
 }
@@ -2621,9 +2641,10 @@ async function loadClips(force=false) {
     clipsData = Array.isArray(payload.clips) ? payload.clips : [];
     clipsLoaded = true;
     note.textContent = `Клипы каналов из вкладки «СТРИМЕРЫ». Найдено: ${clipsData.length}. Сортировка выполняется на этой странице.`;
+    clipsRenderLimit = CLIPS_PAGE_SIZE;
     renderClips();
   } catch (error) {
-    note.textContent = "Не удалось загрузить клипы. Попробуйте обновить страницу.";
+    note.textContent = `Не удалось загрузить клипы: ${error && error.message ? error.message : "неизвестная ошибка"}. Попробуйте обновить страницу.`;
     document.getElementById("clipsGrid").innerHTML = "";
     document.getElementById("clipsEmpty").style.display = "block";
   } finally { clipsLoading = false; }
