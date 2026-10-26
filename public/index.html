@@ -3037,7 +3037,7 @@ document.getElementById("moderatorSearch").addEventListener("input", e => {
   let avatarClicks = 0;
   let avatarClickTimer = null;
   const triggerFlyout = () => {
-    if (activeTab !== "wall" && activeTab !== "suggestions") return;
+    if (activeTab !== "wall" && activeTab !== "suggestions" && activeTab !== "clips") { avatarClicks = 0; return; }
     avatarClicks += 1;
     if (avatarClickTimer) clearTimeout(avatarClickTimer);
     if (avatarClicks < 5) {
@@ -3046,7 +3046,9 @@ document.getElementById("moderatorSearch").addEventListener("input", e => {
     }
     avatarClicks = 0;
     avatarClickTimer = null;
-    const cards = document.querySelectorAll("#creatorGrid .streamer, #mainGrid .streamer, #othersGrid .streamer, #moderatorsGrid .streamer, #editorsGrid .streamer");
+    const cards = activeTab === "clips"
+      ? [...document.querySelectorAll("#creatorGrid .streamer[data-streamer-login], #mainGrid .streamer[data-streamer-login], #othersGrid .streamer[data-streamer-login]")].filter(card => selectedClipStreamers.has(card.dataset.streamerLogin))
+      : [...document.querySelectorAll("#creatorGrid .streamer, #mainGrid .streamer, #othersGrid .streamer, #moderatorsGrid .streamer, #editorsGrid .streamer")];
     cards.forEach((card, index) => {
       card.classList.remove("secret-flyout");
       card.style.setProperty("--fly-x", ((index % 2 ? 1 : -1) * (window.innerWidth + 240)) + "px");
