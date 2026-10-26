@@ -8,8 +8,5 @@
   },
   "engines": {
     "node": ">=18"
-  },
-  "dependencies": {
-    "pg": "^8.16.3"
   }
 }
