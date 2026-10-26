@@ -465,6 +465,18 @@ const server = http.createServer(async (req, res) => {
     };
     const dataDir = process.env.WALL_DATA_DIR || path.join(__dirname, "data");
     const dataFile = path.join(dataDir, "community-submissions.json");
+    const usePostgres = Boolean(process.env.DATABASE_URL);
+    let pgPool = null;
+    let pgInitPromise = null;
+    if (usePostgres && !globalThis.__communityPgPool) {
+      const { Pool } = require("pg");
+      globalThis.__communityPgPool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: process.env.DATABASE_URL.includes("localhost") ? false : { rejectUnauthorized: false },
+        max: 5, connectionTimeoutMillis: 10000
+      });
+    }
+    if (usePostgres) pgPool = globalThis.__communityPgPool;
     const maxImageChars = 2 * 1024 * 1024 * 1.38;
     const sessions = globalThis.__communitySessions || (globalThis.__communitySessions = new Map());
     const ip = String(req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown").split(",")[0].trim();
@@ -479,7 +491,7 @@ const server = http.createServer(async (req, res) => {
       try { return chunks.length ? JSON.parse(Buffer.concat(chunks).toString("utf8")) : {}; }
       catch { throw Object.assign(new Error("Некорректный JSON."), { statusCode: 400 }); }
     }
-    async function loadDb() {
+    async function readFileDb() {
       await fs.promises.mkdir(dataDir, { recursive: true });
       try {
         const parsed = JSON.parse(await fs.promises.readFile(dataFile, "utf8"));
@@ -489,7 +501,36 @@ const server = http.createServer(async (req, res) => {
         return { submissions: [] };
       }
     }
+    async function ensurePostgres() {
+      if (!usePostgres) return;
+      if (!pgInitPromise) {
+        pgInitPromise = (async () => {
+          await pgPool.query("CREATE TABLE IF NOT EXISTS community_state (id SMALLINT PRIMARY KEY CHECK (id = 1), data JSONB NOT NULL, updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW())");
+          const found = await pgPool.query("SELECT id FROM community_state WHERE id = 1");
+          if (found.rowCount === 0) {
+            const legacy = await readFileDb();
+            await pgPool.query("INSERT INTO community_state (id, data) VALUES (1, $1::jsonb) ON CONFLICT (id) DO NOTHING", [JSON.stringify(legacy)]);
+            console.log("Community data initialized in PostgreSQL (existing JSON data imported if available).");
+          }
+        })().catch(error => { pgInitPromise = null; throw error; });
+      }
+      await pgInitPromise;
+    }
+    async function loadDb() {
+      if (usePostgres) {
+        await ensurePostgres();
+        const result = await pgPool.query("SELECT data FROM community_state WHERE id = 1");
+        const parsed = result.rows[0]?.data || { submissions: [] };
+        return { submissions: Array.isArray(parsed.submissions) ? parsed.submissions : [] };
+      }
+      return readFileDb();
+    }
     async function saveDb(db) {
+      if (usePostgres) {
+        await ensurePostgres();
+        await pgPool.query("INSERT INTO community_state (id, data, updated_at) VALUES (1, $1::jsonb, NOW()) ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, updated_at = NOW()", [JSON.stringify(db)]);
+        return;
+      }
       await fs.promises.mkdir(dataDir, { recursive: true });
       const tmp = dataFile + ".tmp";
       await fs.promises.writeFile(tmp, JSON.stringify(db, null, 2), { mode: 0o600 });
