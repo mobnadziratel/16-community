@@ -1774,7 +1774,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
 .wall-posts-section{min-width:0}
 @media(max-width:700px){.community-wall-tools{grid-template-columns:minmax(0,1fr)}.wall-submit-card,.wall-moderator-login{min-width:0;width:100%;padding:15px}.community-submission-area .wall-action-button{width:100%}.community-pending-actions{display:grid;grid-template-columns:minmax(0,1fr)}}
 
-</style>
+\n/* Animated three-line community wordmark */\n.brand-wordmark{position:relative;display:flex!important;flex-direction:column;align-items:flex-start;justify-content:center;gap:0;line-height:1.02;letter-spacing:-.045em;min-width:0;transition:gap .45s ease}\n.brand-wordmark .brand-top,.brand-wordmark .brand-bottom{display:block;max-width:100%;font-size:.56em;font-weight:750;letter-spacing:-.025em;color:var(--muted);opacity:.88;transform:translateY(0);transition:transform .48s cubic-bezier(.2,.75,.25,1),opacity .35s ease,color .35s ease}\n.brand-wordmark .brand-main{display:block;font-size:1em;font-weight:900;white-space:nowrap;transition:transform .48s cubic-bezier(.2,.75,.25,1),color .35s ease}\n.brand-wordmark .brand-main #brandMainLead{color:var(--accent)}\n.brand-wordmark[data-brand-state="moderators"] .brand-top{transform:translateY(1px)}\n.brand-wordmark[data-brand-state="moderators"] .brand-bottom{opacity:.9}\n.brand-wordmark[data-brand-state="community"] .brand-top{transform:translateY(1px)}\n.brand-wordmark[data-brand-state="community"] .brand-main #brandMainLead{color:var(--accent)}\n@media(max-width:500px){.brand-wordmark .brand-top,.brand-wordmark .brand-bottom{font-size:.52em}.brand-wordmark .brand-main{font-size:.9em}}\n@media(prefers-reduced-motion:reduce){.brand-wordmark,.brand-wordmark *{transition:none!important}}\n</style>
 </head>
 <body>
 <header><div class="wrap nav">
@@ -1784,7 +1784,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
       <path d="m20 17.5 10 6-10 6z" fill="currentColor"/>
       <path d="M36.5 5.5v5M34 8h5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
     </svg>
-  </span><span>Стримерское комьюнити</span></span>
+  </span><span class="brand-wordmark" id="brandWordmark" data-brand-state="streamers" aria-label="Модераторское Стримерское комьюнити Наше затенённое"><span class="brand-top" id="brandTop">Модераторское</span><span class="brand-main" id="brandMain"><span id="brandMainLead">Стримерское</span> комьюнити</span><span class="brand-bottom" id="brandBottom">Наше затенённое</span></span></span>
   <button class="theme-toggle" id="themeToggle" type="button" aria-label="Переключить тему"><span class="theme-icon" id="themeIcon">☀️</span><span id="themeLabel">Светлая тема</span></button>
 </div></header>
 <main class="wrap">
@@ -2967,6 +2967,22 @@ function activateTab(nextTab) {
     suggestions: ["ПРЕДЛОЖКА", "Предложи нового стримера или добавь фото и подпись на стену. Публикации появляются после модерации."]
   };
   const [heading, description] = sectionCopy[nextTab] || sectionCopy.streamers;
+  const brandWordmark = document.getElementById("brandWordmark");
+  const brandTop = document.getElementById("brandTop");
+  const brandMainLead = document.getElementById("brandMainLead");
+  const brandBottom = document.getElementById("brandBottom");
+  const brandState = nextTab === "streamers" ? "streamers" : nextTab === "moderators" ? "moderators" : "community";
+  brandWordmark.dataset.brandState = brandState;
+  if (brandState === "streamers") {
+    brandTop.textContent = "Модераторское"; brandMainLead.textContent = "Стримерское"; brandBottom.textContent = "Наше затенённое";
+    brandWordmark.setAttribute("aria-label", "Модераторское Стримерское комьюнити Наше затенённое");
+  } else if (brandState === "moderators") {
+    brandTop.textContent = "Стримерское"; brandMainLead.textContent = "Модераторское"; brandBottom.textContent = "Наше затенённое";
+    brandWordmark.setAttribute("aria-label", "Стримерское Модераторское комьюнити Наше затенённое");
+  } else {
+    brandTop.textContent = "Стримерское"; brandMainLead.textContent = "Наше"; brandBottom.textContent = "Модераторское";
+    brandWordmark.setAttribute("aria-label", "Стримерское Наше комьюнити Модераторское");
+  }
   document.getElementById("sectionHeading").querySelector("span").textContent = heading;
   document.getElementById("sectionDescription").textContent = description;
   const selectedButtonId = tabButtons[nextTab];
