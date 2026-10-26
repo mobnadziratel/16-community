@@ -1784,13 +1784,13 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
       <path d="m20 17.5 10 6-10 6z" fill="currentColor"/>
       <path d="M36.5 5.5v5M34 8h5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
     </svg>
-  </span><span>Стримеры</span></span>
+  </span><span>Стримерское комьюнити</span></span>
   <button class="theme-toggle" id="themeToggle" type="button" aria-label="Переключить тему"><span class="theme-icon" id="themeIcon">☀️</span><span id="themeLabel">Светлая тема</span></button>
 </div></header>
 <main class="wrap">
   <section class="hero">
-    <h1><span>СТРИМЕРЫ</span></h1>
-    <p class="lead">Выбирай канал, чтобы открыть Twitch и посмотреть трансляцию.</p>
+    <h1 id="sectionHeading"><span>СТРИМЕРЫ</span></h1>
+    <p class="lead" id="sectionDescription">Выбирай канал, чтобы открыть Twitch и посмотреть трансляцию.</p>
   </section>
   <div class="tabs" role="tablist" aria-label="Разделы сообщества">
     <button class="tab-button active" id="streamersTab" role="tab" aria-selected="true" type="button">СТРИМЕРЫ</button>
@@ -2959,6 +2959,16 @@ const tabButtons = {
 function activateTab(nextTab) {
   activeTab = nextTab;
   try { sessionStorage.setItem("small-streamers-active-tab", nextTab); } catch (_) {}
+  const sectionCopy = {
+    streamers: ["СТРИМЕРЫ", "Выбирай канал, чтобы открыть Twitch и посмотреть трансляцию."],
+    moderators: ["МОДЕРАТОРЫ", "Команда, которая помогает сообществу и поддерживает порядок на каналах."],
+    clips: ["КЛИПЫ", "Лучшие моменты со стримов — выбирай период, сортировку и смотри подборку."],
+    wall: ["СТЕНА СООБЩЕСТВА", "Общие мемы, картинки и подписи — всё, что делает наше комьюнити живым."],
+    suggestions: ["ПРЕДЛОЖКА", "Предложи нового стримера или добавь фото и подпись на стену. Публикации появляются после модерации."]
+  };
+  const [heading, description] = sectionCopy[nextTab] || sectionCopy.streamers;
+  document.getElementById("sectionHeading").querySelector("span").textContent = heading;
+  document.getElementById("sectionDescription").textContent = description;
   const selectedButtonId = tabButtons[nextTab];
   Object.values(tabButtons).forEach(id => {
     const button = document.getElementById(id);
