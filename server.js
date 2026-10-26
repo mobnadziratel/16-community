@@ -453,6 +453,159 @@ const server = http.createServer(async (req, res) => {
 
 
 
+
+  // Community suggestion box: submissions remain private until moderator approval.
+  if (url.pathname.startsWith("/api/community/")) {
+    const sendJson = (status, payload, extraHeaders = {}) => {
+      res.writeHead(status, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store", ...extraHeaders });
+      res.end(JSON.stringify(payload));
+    };
+    const dataDir = process.env.WALL_DATA_DIR || path.join(__dirname, "data");
+    const dataFile = path.join(dataDir, "community-submissions.json");
+    const maxImageChars = 2 * 1024 * 1024 * 1.38;
+    const sessions = globalThis.__communitySessions || (globalThis.__communitySessions = new Map());
+    const ip = String(req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown").split(",")[0].trim();
+    const rateStore = globalThis.__communityRateStore || (globalThis.__communityRateStore = new Map());
+    async function readBody(limit = 3 * 1024 * 1024) {
+      const chunks = []; let size = 0;
+      for await (const chunk of req) {
+        size += chunk.length;
+        if (size > limit) throw Object.assign(new Error("Размер отправки слишком большой."), { statusCode: 413 });
+        chunks.push(chunk);
+      }
+      try { return chunks.length ? JSON.parse(Buffer.concat(chunks).toString("utf8")) : {}; }
+      catch { throw Object.assign(new Error("Некорректный JSON."), { statusCode: 400 }); }
+    }
+    async function loadDb() {
+      await fs.promises.mkdir(dataDir, { recursive: true });
+      try {
+        const parsed = JSON.parse(await fs.promises.readFile(dataFile, "utf8"));
+        return { submissions: Array.isArray(parsed.submissions) ? parsed.submissions : [] };
+      } catch (error) {
+        if (error.code !== "ENOENT") console.error("Community data file could not be read:", error.message);
+        return { submissions: [] };
+      }
+    }
+    async function saveDb(db) {
+      await fs.promises.mkdir(dataDir, { recursive: true });
+      const tmp = dataFile + ".tmp";
+      await fs.promises.writeFile(tmp, JSON.stringify(db, null, 2), { mode: 0o600 });
+      await fs.promises.rename(tmp, dataFile);
+    }
+    function cleanText(value, max) { return String(value || "").replace(/\u0000/g, "").trim().slice(0, max); }
+    function getSession() {
+      const cookie = String(req.headers.cookie || "").split(";").map(v => v.trim()).find(v => v.startsWith("community_session="));
+      const sessionId = cookie ? cookie.slice("community_session=".length) : "";
+      const session = sessions.get(sessionId);
+      if (!session || session.expiresAt < Date.now()) { if (sessionId) sessions.delete(sessionId); return null; }
+      return { ...session, sessionId };
+    }
+    function moderatorsConfig() {
+      let configured = {};
+      try { configured = JSON.parse(process.env.WALL_MODERATORS || "{}"); } catch (_) {}
+      return configured && typeof configured === "object" && !Array.isArray(configured) ? configured : {};
+    }
+    function verifyCredentials(username, password) {
+      const normalized = cleanText(username, 40);
+      if (normalized.toLowerCase() === "admin" && process.env.WALL_ADMIN_PASSWORD && password === process.env.WALL_ADMIN_PASSWORD) return { username: "admin", role: "admin" };
+      const found = Object.entries(moderatorsConfig()).find(([name, secret]) => name.toLowerCase() === normalized.toLowerCase() && typeof secret === "string" && secret && password === secret);
+      return found ? { username: found[0], role: "moderator" } : null;
+    }
+    const method = req.method || "GET";
+    try {
+      if (url.pathname === "/api/community/submissions" && method === "POST") {
+        const now = Date.now(), bucket = rateStore.get(ip) || [], recent = bucket.filter(time => now - time < 60 * 60_000);
+        if (recent.length >= 5) return sendJson(429, { error: "Слишком много отправок. Попробуйте позже." });
+        const body = await readBody();
+        const nickname = cleanText(body.nickname, 32);
+        const kind = body.kind === "streamer" ? "streamer" : body.kind === "wall" ? "wall" : "";
+        const text = cleanText(body.text, 1200);
+        if (!/^[\p{L}\p{N}_ .-]{2,32}$/u.test(nickname)) return sendJson(400, { error: "Укажите никнейм длиной от 2 до 32 символов." });
+        if (!kind) return sendJson(400, { error: "Выберите тип предложения." });
+        let twitchLogin = "";
+        if (kind === "streamer") {
+          const raw = cleanText(body.twitch, 300);
+          try {
+            const candidate = new URL(raw.includes("://") ? raw : "https://" + raw);
+            const login = candidate.pathname.split("/").filter(Boolean)[0] || "";
+            if (!/^(?:www\.)?twitch\.tv$/i.test(candidate.hostname) || !/^[a-zA-Z0-9_]{1,25}$/.test(login)) throw new Error("invalid");
+            twitchLogin = login.toLowerCase();
+          } catch (_) { return sendJson(400, { error: "Введите корректную ссылку на Twitch или ник канала." }); }
+        }
+        let imageData = "";
+        if (body.image) {
+          if (typeof body.image !== "string" || body.image.length > maxImageChars) return sendJson(413, { error: "Изображение слишком большое (максимум 2 МБ)." });
+          const match = body.image.match(/^data:(image\/(?:jpeg|png|webp|gif));base64,([A-Za-z0-9+/=]+)$/);
+          if (!match) return sendJson(400, { error: "Поддерживаются изображения JPG, PNG, WEBP или GIF." });
+          const bytes = Buffer.from(match[2], "base64");
+          if (!bytes.length || bytes.length > 2 * 1024 * 1024) return sendJson(413, { error: "Изображение должно быть не больше 2 МБ." });
+          const signatures = {
+            "image/jpeg": bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff,
+            "image/png": bytes.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10])),
+            "image/webp": bytes.toString("ascii", 0, 4) === "RIFF" && bytes.toString("ascii", 8, 12) === "WEBP",
+            "image/gif": bytes.toString("ascii", 0, 3) === "GIF"
+          };
+          if (!signatures[match[1]]) return sendJson(400, { error: "Формат файла не совпадает с содержимым изображения." });
+          imageData = body.image;
+        }
+        if (kind === "wall" && !text && !imageData) return sendJson(400, { error: "Добавьте текст и/или изображение для стены." });
+        if (kind === "streamer" && !twitchLogin) return sendJson(400, { error: "Нужен Twitch-канал." });
+        const db = await loadDb();
+        if (kind === "streamer" && db.submissions.some(item => item.kind === "streamer" && item.twitchLogin === twitchLogin && item.status !== "rejected")) return sendJson(409, { error: "Этот канал уже предложен или опубликован." });
+        db.submissions.push({
+          id: require("node:crypto").randomUUID(), kind, nickname, text, twitchLogin, imageData,
+          status: "pending", createdAt: new Date().toISOString(), reviewedAt: null, reviewedBy: null
+        });
+        await saveDb(db);
+        recent.push(now); rateStore.set(ip, recent);
+        return sendJson(201, { ok: true, message: "Отправлено на модерацию. Спасибо!" });
+      }
+      if (url.pathname === "/api/community/posts" && method === "GET") {
+        const db = await loadDb();
+        return sendJson(200, { submissions: db.submissions.filter(item => item.status === "approved").map(item => ({
+          id: item.id, kind: item.kind, nickname: item.nickname, text: item.text, twitchLogin: item.twitchLogin, imageData: item.imageData, createdAt: item.createdAt
+        })) });
+      }
+      if (url.pathname === "/api/community/login" && method === "POST") {
+        if (!process.env.WALL_ADMIN_PASSWORD && !Object.keys(moderatorsConfig()).length) return sendJson(503, { error: "Модерация ещё не настроена владельцем сайта." });
+        const body = await readBody(20 * 1024);
+        const identity = verifyCredentials(body.username, String(body.password || ""));
+        if (!identity) return sendJson(401, { error: "Неверный логин или пароль." });
+        const sessionId = require("node:crypto").randomBytes(32).toString("hex");
+        sessions.set(sessionId, { ...identity, expiresAt: Date.now() + 12 * 60 * 60_000 });
+        return sendJson(200, { ok: true, username: identity.username, role: identity.role }, {
+          "Set-Cookie": "community_session=" + sessionId + "; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=43200"
+        });
+      }
+      if (url.pathname === "/api/community/logout" && method === "POST") {
+        const session = getSession(); if (session) sessions.delete(session.sessionId);
+        return sendJson(200, { ok: true }, { "Set-Cookie": "community_session=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0" });
+      }
+      if (url.pathname === "/api/community/moderation" && method === "GET") {
+        const session = getSession(); if (!session) return sendJson(401, { error: "Нужен вход модератора." });
+        const db = await loadDb();
+        return sendJson(200, { submissions: db.submissions.filter(item => item.status === "pending").map(item => ({
+          id: item.id, kind: item.kind, nickname: item.nickname, text: item.text, twitchLogin: item.twitchLogin, imageData: item.imageData, createdAt: item.createdAt
+        })), moderator: session.username, role: session.role });
+      }
+      const actionMatch = url.pathname.match(/^\/api\/community\/moderation\/([a-f0-9-]+)$/i);
+      if (actionMatch && method === "POST") {
+        const session = getSession(); if (!session) return sendJson(401, { error: "Нужен вход модератора." });
+        const body = await readBody(20 * 1024), action = String(body.action || "");
+        if (!["approve", "reject", "delete"].includes(action)) return sendJson(400, { error: "Неизвестное действие." });
+        const db = await loadDb(), item = db.submissions.find(entry => entry.id === actionMatch[1]);
+        if (!item) return sendJson(404, { error: "Заявка не найдена." });
+        if (action === "delete") db.submissions = db.submissions.filter(entry => entry.id !== item.id);
+        else { item.status = action === "approve" ? "approved" : "rejected"; item.reviewedAt = new Date().toISOString(); item.reviewedBy = session.username; }
+        await saveDb(db); return sendJson(200, { ok: true });
+      }
+      return sendJson(404, { error: "Неизвестный маршрут." });
+    } catch (error) {
+      console.error("Community suggestion API error:", error.message);
+      return sendJson(error.statusCode || 500, { error: error.statusCode ? error.message : "Не удалось обработать запрос. Попробуйте позже." });
+    }
+  }
+
   const requested = url.pathname === "/" ? "index.html" : decodeURIComponent(url.pathname.slice(1));
   const filePath = path.resolve(PUBLIC_DIR, requested);
   if (!filePath.startsWith(PUBLIC_DIR + path.sep) && filePath !== path.join(PUBLIC_DIR, "index.html")) {
