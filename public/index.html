@@ -1700,7 +1700,14 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
 .wall-action-button:disabled{opacity:.6;cursor:wait}
 .wall-form-message{font-size:13px!important;margin:10px 0 0!important;color:var(--muted)}
 .wall-form-message.is-error{color:#ff7777}
-.wall-moderator-login summary{font-weight:850;cursor:pointer}
+.wall-moderator-login{background:transparent;border:0;border-radius:10px;padding:0;min-width:0}
+.wall-moderator-login summary{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:650;color:var(--muted);cursor:pointer;list-style:none;padding:7px 9px;border:1px solid transparent;border-radius:8px;transition:color .18s,background .18s,border-color .18s}
+.wall-moderator-login summary::-webkit-details-marker{display:none}
+.wall-moderator-login summary::before{content:"⌁";font-size:15px;opacity:.7}
+.wall-moderator-login summary:hover,.wall-moderator-login[open] summary{color:var(--text);background:var(--panel2);border-color:var(--line)}
+.wall-moderator-login-inner{margin-top:8px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+.wall-moderator-login h2{margin:0 0 8px;font-size:17px}
+.wall-moderator-login .wall-muted{margin:0 0 12px;line-height:1.45}
 .wall-moderator-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .wall-posts-section{margin:24px 0}
 .wall-posts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:14px}
@@ -1922,24 +1929,27 @@ LEGENDS</div>
             <button class="wall-action-button" type="submit">Отправить на модерацию</button>
             <p class="wall-form-message" id="suggestionFormMessage" aria-live="polite"></p>
           </form>
-          <section class="wall-moderator-login" aria-labelledby="wallModerationTitle">
-            <h2 id="wallModerationTitle">Модерация</h2>
-            <p class="wall-muted">Вход доступен владельцу и модераторам с выданным доступом.</p>
-            <form id="communityModeratorLogin">
-              <label for="moderatorUsername">Логин модератора</label>
-              <input id="moderatorUsername" name="username" autocomplete="username" required placeholder="admin или ваш логин">
-              <label for="moderatorPassword">Пароль</label>
-              <input id="moderatorPassword" name="password" type="password" autocomplete="current-password" required>
-              <button class="wall-action-button" type="submit">Войти</button>
-            </form>
-            <div id="communityModeratorPanel" hidden>
-              <p class="wall-form-message" id="moderatorSessionLabel"></p>
-              <button class="wall-action-button" id="communityModeratorRefresh" type="button">Обновить заявки</button>
-              <button class="wall-action-button" id="communityModeratorLogout" type="button">Выйти</button>
-              <div id="communityPendingList" class="community-pending-list"></div>
+          <details class="wall-moderator-login" id="wallModeratorDetails">
+            <summary>Вход для модераторов</summary>
+            <div class="wall-moderator-login-inner">
+              <h2 id="wallModerationTitle">Модерация</h2>
+              <p class="wall-muted">Вход доступен владельцу и модераторам с выданным доступом.</p>
+              <form id="communityModeratorLogin">
+                <label for="moderatorUsername">Логин модератора</label>
+                <input id="moderatorUsername" name="username" autocomplete="username" required placeholder="admin или ваш логин">
+                <label for="moderatorPassword">Пароль</label>
+                <input id="moderatorPassword" name="password" type="password" autocomplete="current-password" required>
+                <button class="wall-action-button" type="submit">Войти</button>
+              </form>
+              <div id="communityModeratorPanel" hidden>
+                <p class="wall-form-message" id="moderatorSessionLabel"></p>
+                <button class="wall-action-button" id="communityModeratorRefresh" type="button">Обновить заявки</button>
+                <button class="wall-action-button" id="communityModeratorLogout" type="button">Выйти</button>
+                <div id="communityPendingList" class="community-pending-list"></div>
+              </div>
+              <p class="wall-form-message" id="moderatorFormMessage" aria-live="polite"></p>
             </div>
-            <p class="wall-form-message" id="moderatorFormMessage" aria-live="polite"></p>
-          </section>
+          </details>
         </div>
         <section class="wall-posts-section">
           <h2>Одобренные предложения стримеров</h2>
@@ -3390,7 +3400,7 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
 
   const loginForm=byId("communityModeratorLogin"),panel=byId("communityModeratorPanel"),pending=byId("communityPendingList");
   const moderatorMessage=byId("moderatorFormMessage");
-  function setModeratorSignedIn(signedIn){loginForm.hidden=signedIn;panel.hidden=!signedIn;}
+  function setModeratorSignedIn(signedIn){loginForm.hidden=signedIn;panel.hidden=!signedIn;byId("wallModeratorDetails").open=signedIn;}
   async function apiJson(url,options={}){
     const response=await fetch(url,{credentials:"same-origin",...options});
     const data=await response.json().catch(()=>({}));
@@ -3429,7 +3439,7 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
     try{
       const data=await apiJson("/api/community/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:byId("moderatorUsername").value,password:byId("moderatorPassword").value})});
       byId("moderatorPassword").value="";moderatorMessage.textContent="Вход выполнен.";setModeratorSignedIn(true);byId("moderatorSessionLabel").textContent="Вошёл: "+data.username;await loadPending();
-    }catch(error){moderatorMessage.textContent=error.message;}finally{button.disabled=false;}
+    }catch(error){byId("wallModeratorDetails").open=true;moderatorMessage.textContent=error.message;}finally{button.disabled=false;}
   });
   byId("communityModeratorRefresh").addEventListener("click",loadPending);
   byId("communityModeratorLogout").addEventListener("click",async()=>{
