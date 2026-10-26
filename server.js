@@ -140,7 +140,8 @@ async function getAppToken() {
   const response = await fetch("https://id.twitch.tv/oauth2/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body
+    body,
+    signal: AbortSignal.timeout(12000)
   });
   if (!response.ok) throw new Error(`Twitch token request failed (${response.status})`);
   const data = await response.json();
@@ -265,7 +266,8 @@ async function helix(pathname, params) {
   if (!CLIENT_ID || !CLIENT_SECRET) throw new Error("Set TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET in Render environment.");
   const accessToken = await getAppToken();
   const response = await fetch(`https://api.twitch.tv/helix/${pathname}?${params.toString()}`, {
-    headers: { "Client-Id": CLIENT_ID, "Authorization": `Bearer ${accessToken}` }
+    headers: { "Client-Id": CLIENT_ID, "Authorization": `Bearer ${accessToken}` },
+    signal: AbortSignal.timeout(12000)
   });
   if (!response.ok) {
     if (response.status === 401) { token = null; tokenExpiresAt = 0; }
@@ -319,13 +321,13 @@ async function fetchClips(period) {
   const all = [];
   let failedChannels = 0;
 
-  // Keep API traffic modest: at most 3 pages (300 clips) per channel per refresh.
-  // One failing channel must not prevent clips from all other channels from loading.
+  // Limit each channel to one page per refresh. The browser renders results in
+  // small batches, so returning thousands of cards at once is unnecessary.
   async function worker() {
     while (queue.length) {
       const user = queue.shift();
       let cursor = null;
-      for (let page = 0; page < 3; page++) {
+      for (let page = 0; page < 1; page++) {
         const params = new URLSearchParams({ broadcaster_id: user.id, first: "100" });
         if (startedAt) {
           params.set("started_at", startedAt);
@@ -367,7 +369,14 @@ async function fetchClips(period) {
 
 
 const server = http.createServer(async (req, res) => {
-  const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
+  let url;
+  try {
+    url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
+  } catch (_) {
+    res.writeHead(400, { "Content-Type": "text/plain; charset=utf-8" });
+    res.end("Bad Request");
+    return;
+  }
   if (url.pathname === "/api/followers") {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.setHeader("Cache-Control", "no-store");
