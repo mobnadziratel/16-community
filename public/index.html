@@ -1146,6 +1146,20 @@ html[data-theme="light"] .tabs .tab-button.active {
   #wallPanel.tab-section-arrive, #suggestionsPanel.tab-section-arrive { animation: none !important; }
 }
 
+/* Secret five-click easter egg: directory cards fly away from the wall/suggestion tabs. */
+@keyframes secret-directory-flyout {
+  0% { opacity: 1; transform: translate(0, 0) rotate(0) scale(1); }
+  35% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--fly-x, 100vw), var(--fly-y, -100vh)) rotate(var(--fly-rotate, 35deg)) scale(.35); }
+}
+.streamer.secret-flyout {
+  pointer-events: none;
+  animation: secret-directory-flyout .95s cubic-bezier(.55,.05,.9,.45) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .streamer.secret-flyout { animation-duration: .01ms; }
+}
+
 /* Streamer cards: refined hierarchy, depth and accessible interaction states. */
 .streamer {
   min-height: 116px;
@@ -3017,6 +3031,49 @@ document.getElementById("moderatorSearch").addEventListener("input", e => {
   document.getElementById("moderatorCount").textContent = visibleCount;
   document.getElementById("moderatorEmpty").style.display = activeTab === "moderators" && visibleCount === 0 ? "block" : "none";
 });
+// Hidden easter egg: click the site avatar five times on WALL or SUGGESTIONS.
+{
+  const siteAvatar = document.querySelector(".brand .logo");
+  let avatarClicks = 0;
+  let avatarClickTimer = null;
+  const triggerFlyout = () => {
+    if (activeTab !== "wall" && activeTab !== "suggestions") return;
+    avatarClicks += 1;
+    if (avatarClickTimer) clearTimeout(avatarClickTimer);
+    if (avatarClicks < 5) {
+      avatarClickTimer = setTimeout(() => { avatarClicks = 0; }, 1800);
+      return;
+    }
+    avatarClicks = 0;
+    avatarClickTimer = null;
+    const cards = document.querySelectorAll("#creatorGrid .streamer, #mainGrid .streamer, #othersGrid .streamer, #moderatorsGrid .streamer, #editorsGrid .streamer");
+    cards.forEach((card, index) => {
+      card.classList.remove("secret-flyout");
+      card.style.setProperty("--fly-x", ((index % 2 ? 1 : -1) * (window.innerWidth + 240)) + "px");
+      card.style.setProperty("--fly-y", ((index % 3 === 0 ? -1 : 1) * (window.innerHeight + 180)) + "px");
+      card.style.setProperty("--fly-rotate", ((index % 2 ? 1 : -1) * (25 + index % 55)) + "deg");
+      void card.offsetWidth;
+      card.classList.add("secret-flyout");
+    });
+    window.setTimeout(() => {
+      cards.forEach(card => {
+        card.classList.remove("secret-flyout");
+        card.style.removeProperty("--fly-x");
+        card.style.removeProperty("--fly-y");
+        card.style.removeProperty("--fly-rotate");
+      });
+    }, 1200);
+  };
+  if (siteAvatar) {
+    siteAvatar.addEventListener("click", triggerFlyout);
+    siteAvatar.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        triggerFlyout();
+      }
+    });
+  }
+}
 const tabButtons = {
   streamers: "streamersTab",
   moderators: "moderatorsTab",
