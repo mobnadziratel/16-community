@@ -3047,7 +3047,15 @@ document.getElementById("moderatorSearch").addEventListener("input", e => {
     avatarClicks = 0;
     avatarClickTimer = null;
     const cards = activeTab === "clips"
-      ? [...document.querySelectorAll("#creatorGrid .streamer[data-streamer-login], #mainGrid .streamer[data-streamer-login], #othersGrid .streamer[data-streamer-login]")].filter(card => selectedClipStreamers.has(card.dataset.streamerLogin))
+      ? (() => {
+          // Read the live checkbox state directly so the easter egg always matches the visible clip filter.
+          const selected = new Set(
+            [...document.querySelectorAll("#clipStreamerList input[type=checkbox]:checked")]
+              .map(box => String(box.value).trim().toLowerCase())
+          );
+          return [...document.querySelectorAll("#creatorGrid .streamer[data-streamer-login], #mainGrid .streamer[data-streamer-login], #othersGrid .streamer[data-streamer-login]")]
+            .filter(card => selected.has(String(card.dataset.streamerLogin || "").trim().toLowerCase()));
+        })()
       : [...document.querySelectorAll("#creatorGrid .streamer, #mainGrid .streamer, #othersGrid .streamer, #moderatorsGrid .streamer, #editorsGrid .streamer")];
     cards.forEach((card, index) => {
       card.classList.remove("secret-flyout");
