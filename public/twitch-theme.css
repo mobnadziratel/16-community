@@ -1,0 +1,31 @@
+/* Twitch-inspired visual refresh */
+:root{--bg:#0e0e10;--panel:#18181b;--panel2:#1f1f23;--text:#efeff1;--muted:#adadb8;--accent:#a970ff;--line:#303036}
+body{background:radial-gradient(ellipse at 50% -20%,#211a2e 0,transparent 48%),var(--bg)}
+header{background:rgba(14,14,16,.94);border-bottom:1px solid #303036;padding:18px 0 16px}
+.logo{background:#9147ff;color:#fff;box-shadow:0 0 28px #9147ff30;border-radius:12px}
+.navtag{border-radius:8px;letter-spacing:.08em}
+.hero{padding:48px 0 28px}
+.eyebrow{color:#bf94ff}.eyebrow:before{background:#9147ff}
+h1 span,.category-title span{color:#bf94ff}
+.tab-button{background:#18181b;border-color:#303036;border-radius:8px;color:#adadb8;padding:11px 17px}
+.tab-button:hover{background:#26262c;color:#efeff1}
+.tab-button.active{background:#9147ff;border-color:#9147ff;color:#fff}
+.search input{background:#18181b;border-color:#303036;border-radius:8px}
+.search input:focus{border-color:#a970ff;box-shadow:0 0 0 2px #9147ff35}
+.streamer{background:#18181b;border-color:#303036;border-radius:12px;padding:15px;box-shadow:0 2px 5px #0002}
+.streamer:hover{background:#1f1f23;border-color:#a970ff;transform:translateY(-2px)}
+.avatar{border-radius:12px}
+.arrow{color:#adadb8}.streamer:hover .arrow{color:#bf94ff}
+.random-streamer-button{background:#9147ff;border-color:#9147ff;color:#fff;border-radius:8px;box-shadow:none}
+.random-streamer-button:hover:not(:disabled){background:#772ce8;box-shadow:0 4px 18px #9147ff30}
+.clip-card{background:#18181b;border-color:#303036;border-radius:12px}
+.clip-card:hover{border-color:#a970ff}
+.clip-author{color:#bf94ff}
+.clip-filter select,.refresh-clips,.clip-streamer-picker,.theme-toggle{background:#18181b;border-color:#303036;border-radius:8px}
+.clip-streamer-option input,.clip-picker-heading input{accent-color:#9147ff}
+.profile-back,.clip-modal-close{background:#1f1f23;border-color:#303036;border-radius:8px}
+.profile-card{background:linear-gradient(145deg,#1f1f23,#18181b);border-color:#303036;border-radius:16px}
+.profile-social-link{border-color:#9147ff55;background:#9147ff12;border-radius:10px}
+.card-social-icon,.destination-icon{border-color:#9147ff55}
+.live-status.is-loading::before{background:#a970ff;box-shadow:0 0 8px #9147ff77}
+@media(min-width:1000px){.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}}
