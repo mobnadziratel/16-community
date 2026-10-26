@@ -2982,16 +2982,41 @@ function activateTab(nextTab) {
   const brandMainLead = document.getElementById("brandMainLead");
   const brandBottom = document.getElementById("brandBottom");
   const brandState = nextTab === "streamers" ? "streamers" : nextTab === "moderators" ? "moderators" : "community";
+  const brandCopy = brandState === "streamers"
+    ? { top: "Модераторское", main: "Стримерское", bottom: "Наше", label: "Модераторское Стримерское комьюнити Наше" }
+    : brandState === "moderators"
+      ? { top: "Наше", main: "Модераторское", bottom: "Стримерское", label: "Наше Модераторское комьюнити Стримерское" }
+      : { top: "Стримерское", main: "Наше", bottom: "Модераторское", label: "Стримерское Наше комьюнити Модераторское" };
   brandWordmark.dataset.brandState = brandState;
-  if (brandState === "streamers") {
-    brandTop.textContent = "Модераторское"; brandMainLead.textContent = "Стримерское"; brandBottom.textContent = "Наше";
-    brandWordmark.setAttribute("aria-label", "Модераторское Стримерское комьюнити Наше");
-  } else if (brandState === "moderators") {
-    brandTop.textContent = "Наше"; brandMainLead.textContent = "Модераторское"; brandBottom.textContent = "Стримерское";
-    brandWordmark.setAttribute("aria-label", "Наше Модераторское комьюнити Стримерское");
+  brandWordmark.setAttribute("aria-label", brandCopy.label);
+  const wordmarkMotionId = (Number(brandWordmark.dataset.motionId) || 0) + 1;
+  brandWordmark.dataset.motionId = String(wordmarkMotionId);
+  const wordmarkLines = [
+    [brandTop, brandCopy.top, -1],
+    [brandMainLead, brandCopy.main, 1],
+    [brandBottom, brandCopy.bottom, -1]
+  ];
+  const reduceWordmarkMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduceWordmarkMotion || !Element.prototype.animate) {
+    brandTop.textContent = brandCopy.top;
+    brandMainLead.textContent = brandCopy.main;
+    brandBottom.textContent = brandCopy.bottom;
   } else {
-    brandTop.textContent = "Стримерское"; brandMainLead.textContent = "Наше"; brandBottom.textContent = "Модераторское";
-    brandWordmark.setAttribute("aria-label", "Стримерское Наше комьюнити Модераторское");
+    wordmarkLines.forEach(([element, nextText, direction], index) => {
+      if (element.textContent === nextText) return;
+      element.getAnimations().forEach(animation => animation.cancel());
+      element.animate([
+        { transform: "translate3d(0, 0, 0)", opacity: 1, filter: "blur(0)" },
+        { transform: `translate3d(0, ${direction * -12}px, 0)`, opacity: 0, filter: "blur(3px)" }
+      ], { duration: 420, easing: "cubic-bezier(.65, 0, .35, 1)", fill: "forwards" }).onfinish = () => {
+        if (brandWordmark.dataset.motionId !== String(wordmarkMotionId)) return;
+        element.textContent = nextText;
+        element.animate([
+          { transform: `translate3d(0, ${direction * 14}px, 0)`, opacity: 0, filter: "blur(3px)" },
+          { transform: "translate3d(0, 0, 0)", opacity: 1, filter: "blur(0)" }
+        ], { duration: 760, delay: index * 70, easing: "cubic-bezier(.16, 1, .3, 1)", fill: "both" });
+      };
+    });
   }
   document.getElementById("sectionHeading").querySelector("span").textContent = heading;
   document.getElementById("sectionDescription").textContent = description;
