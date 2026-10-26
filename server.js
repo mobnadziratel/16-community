@@ -583,7 +583,7 @@ const server = http.createServer(async (req, res) => {
         if (recent.length >= 5) return sendJson(429, { error: "Слишком много отправок. Попробуйте позже." });
         const body = await readBody();
         const nickname = cleanText(body.nickname, 32);
-        const kind = body.kind === "streamer" ? "streamer" : body.kind === "wall" ? "wall" : "";
+        const kind = body.kind === "streamer" ? "streamer" : body.kind === "wall" ? "wall" : body.kind === "site" ? "site" : "";
         const text = cleanText(body.text, 1200);
         if (!/^[\p{L}\p{N}_ .-]{2,32}$/u.test(nickname)) return sendJson(400, { error: "Укажите никнейм длиной от 2 до 32 символов." });
         if (!kind) return sendJson(400, { error: "Выберите тип предложения." });
@@ -618,6 +618,7 @@ const server = http.createServer(async (req, res) => {
           imageData = body.image;
         }
         if (kind === "wall" && !text && !imageData) return sendJson(400, { error: "Добавьте текст и/или изображение для стены." });
+        if (kind === "site" && !text) return sendJson(400, { error: "Опишите предложение по улучшению сайта." });
         if (kind === "streamer" && !twitchLogin) return sendJson(400, { error: "Нужен Twitch-канал." });
         const db = await loadDb();
         if (kind === "streamer" && db.submissions.some(item => item.kind === "streamer" && item.twitchLogin === twitchLogin && item.status !== "rejected")) return sendJson(409, { error: "Этот канал уже предложен или опубликован." });
