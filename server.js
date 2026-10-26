@@ -2,6 +2,8 @@ const http = require("node:http");
 const fs = require("node:fs");
 const path = require("node:path");
 
+const { S3Client, GetObjectCommand, PutObjectCommand } = require("@aws-sdk/client-s3");
+
 const PORT = Number(process.env.PORT || 3000);
 const CLIENT_ID = process.env.TWITCH_CLIENT_ID;
 const CLIENT_SECRET = process.env.TWITCH_CLIENT_SECRET;
@@ -465,6 +467,18 @@ const server = http.createServer(async (req, res) => {
     };
     const dataDir = process.env.WALL_DATA_DIR || path.join(__dirname, "data");
     const dataFile = path.join(dataDir, "community-submissions.json");
+    const r2AccountId = process.env.R2_ACCOUNT_ID;
+    const r2Bucket = process.env.R2_BUCKET_NAME;
+    const r2Enabled = Boolean(r2AccountId && r2Bucket && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY);
+    const r2Client = r2Enabled ? new S3Client({
+      region: "auto",
+      endpoint: process.env.R2_ENDPOINT || `https://${r2AccountId}.r2.cloudflarestorage.com`,
+      credentials: {
+        accessKeyId: process.env.R2_ACCESS_KEY_ID,
+        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY
+      }
+    }) : null;
+    const r2ObjectKey = process.env.R2_OBJECT_KEY || "community-submissions.json";
 
     const maxImageChars = 2 * 1024 * 1024 * 1.38;
     const sessions = globalThis.__communitySessions || (globalThis.__communitySessions = new Map());
@@ -480,20 +494,58 @@ const server = http.createServer(async (req, res) => {
       try { return chunks.length ? JSON.parse(Buffer.concat(chunks).toString("utf8")) : {}; }
       catch { throw Object.assign(new Error("Некорректный JSON."), { statusCode: 400 }); }
     }
-    async function loadDb() {
+    async function bodyToString(body) {
+      const chunks = [];
+      for await (const chunk of body) chunks.push(Buffer.from(chunk));
+      return Buffer.concat(chunks).toString("utf8");
+    }
+    async function readLocalDb() {
       await fs.promises.mkdir(dataDir, { recursive: true });
       try {
         const parsed = JSON.parse(await fs.promises.readFile(dataFile, "utf8"));
         return { submissions: Array.isArray(parsed.submissions) ? parsed.submissions : [] };
       } catch (error) {
-        if (error.code !== "ENOENT") console.error("Community data file could not be read:", error.message);
+        if (error.code !== "ENOENT") throw error;
         return { submissions: [] };
       }
     }
+    async function loadDb() {
+      if (r2Enabled) {
+        try {
+          const result = await r2Client.send(new GetObjectCommand({ Bucket: r2Bucket, Key: r2ObjectKey }));
+          const parsed = JSON.parse(await bodyToString(result.Body));
+          return { submissions: Array.isArray(parsed.submissions) ? parsed.submissions : [] };
+        } catch (error) {
+          const missing = error.name === "NoSuchKey" || error.Code === "NoSuchKey" || error.$metadata?.httpStatusCode === 404;
+          if (!missing) {
+            console.error("Community R2 data could not be read:", error.message);
+            throw new Error("Не удалось прочитать данные заявок из R2. Изменения остановлены, чтобы не потерять данные.");
+          }
+          // First R2 run: migrate the existing local JSON once, if present.
+          const localDb = await readLocalDb();
+          if (localDb.submissions.length) {
+            await r2Client.send(new PutObjectCommand({
+              Bucket: r2Bucket, Key: r2ObjectKey,
+              Body: JSON.stringify(localDb, null, 2), ContentType: "application/json"
+            }));
+          }
+          return localDb;
+        }
+      }
+      return readLocalDb();
+    }
     async function saveDb(db) {
+      const serialized = JSON.stringify(db, null, 2);
+      if (r2Enabled) {
+        await r2Client.send(new PutObjectCommand({
+          Bucket: r2Bucket, Key: r2ObjectKey,
+          Body: serialized, ContentType: "application/json"
+        }));
+        return;
+      }
       await fs.promises.mkdir(dataDir, { recursive: true });
       const tmp = dataFile + ".tmp";
-      await fs.promises.writeFile(tmp, JSON.stringify(db, null, 2), { mode: 0o600 });
+      await fs.promises.writeFile(tmp, serialized, { mode: 0o600 });
       await fs.promises.rename(tmp, dataFile);
     }
     function cleanText(value, max) { return String(value || "").replace(/\u0000/g, "").trim().slice(0, max); }
