@@ -2070,7 +2070,7 @@ function getModeratorDirectory() {
 }
 async function refreshModeratorDirectory() {
   try {
-    const response = await fetch("/api/moderators", { cache: "no-store" });
+    const response = await fetch("https://small-streamers.onrender.com/api/moderators", { cache: "no-store" });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const payload = await response.json();
     apiModeratorPeople = Array.isArray(payload.people) ? payload.people : [];
@@ -2273,7 +2273,7 @@ async function loadTwitchAvatar(name, img) {
   // Load avatars through our own server so mobile browsers do not depend on a third-party lookup/CORS.
   if (avatarCache.has(name)) { img.src = avatarCache.get(name); return; }
   try {
-    const response = await fetch(`/api/avatar?login=${encodeURIComponent(name)}`, { cache: "no-store" });
+    const response = await fetch(`https://small-streamers.onrender.com/api/avatar?login=${encodeURIComponent(name)}`, { cache: "no-store" });
     if (!response.ok) throw new Error(`Avatar endpoint unavailable (${response.status})`);
     const payload = await response.json();
     const avatarUrl = String(payload.avatarUrl || "").trim();
@@ -2448,7 +2448,7 @@ async function loadClips(force=false) {
   note.textContent = "Загружаем клипы с каналов из вкладки «СТРИМЕРЫ»…";
   try {
     const period = document.getElementById("clipPeriod").value;
-    const response = await fetch(`/api/clips?period=${encodeURIComponent(period)}`, {cache:"no-store"});
+    const response = await fetch(`https://small-streamers.onrender.com/api/clips?period=${encodeURIComponent(period)}`, {cache:"no-store"});
     const raw = await response.text();
     let payload;
     try { payload = JSON.parse(raw); }
@@ -2734,7 +2734,7 @@ async function refreshLiveStatuses() {
   lastStatusAttemptAt = Date.now();
   statusRequestInFlight = (async () => {
     try {
-      const response = await fetch("/api/streams", { cache: "no-store" });
+      const response = await fetch("https://small-streamers.onrender.com/api/streams", { cache: "no-store" });
       if (!response.ok) throw new Error(`Status endpoint unavailable (${response.status})`);
       const payload = await response.json();
       if (!payload || !payload.streams || typeof payload.streams !== "object") {
@@ -2775,7 +2775,7 @@ async function refreshLiveStatuses() {
     if (label) label.textContent = "Проверяем эфиры…";
     // Keep the previous message in place while checking so the button does not jump back.
     try {
-      const response = await fetch("/api/streams", { cache: "no-store" });
+      const response = await fetch("https://small-streamers.onrender.com/api/streams", { cache: "no-store" });
       if (!response.ok) throw new Error(`Status endpoint unavailable (${response.status})`);
       const payload = await response.json();
       if (!payload || !payload.streams || typeof payload.streams !== "object") {
@@ -2894,7 +2894,7 @@ async function loadProfileFollowerCount(login, requestSequence) {
 
   text.textContent = `${baseSubtitle} · загружаем фолловеров…`;
   try {
-    const response = await fetch(`/api/followers?login=${encodeURIComponent(key)}`, { cache: "no-store" });
+    const response = await fetch(`https://small-streamers.onrender.com/api/followers?login=${encodeURIComponent(key)}`, { cache: "no-store" });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok || !Number.isFinite(Number(payload.total))) {
       throw new Error(payload.error || "Follower count unavailable");
