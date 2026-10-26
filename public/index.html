@@ -3355,6 +3355,15 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
       streams.replaceChildren();posts.replaceChildren();
       const suggested=(data.submissions||[]).filter(item=>item.kind==="streamer");
       const wall=(data.submissions||[]).filter(item=>item.kind==="wall");
+      let addedToDirectory=false;
+      suggested.forEach(item=>{
+        const login=String(item.twitchLogin||"").toLowerCase();
+        if(login&&/^[a-z0-9_]{1,25}$/.test(login)&&!streamers.some(person=>String(person.name||"").toLowerCase()===login)){
+          streamers.push({name:login,url:"https://www.twitch.tv/"+encodeURIComponent(login),group:"others",displayName:login});
+          addedToDirectory=true;
+        }
+      });
+      if(addedToDirectory){render();initClipStreamerPicker();refreshLiveStatuses();}
       if(!suggested.length)streams.append(makeText("p","Пока нет одобренных предложений.","wall-muted"));
       suggested.forEach(item=>{
         const card=makeText("article","","approved-streamer-card");
