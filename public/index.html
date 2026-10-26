@@ -1774,7 +1774,13 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
 .wall-posts-section{min-width:0}
 @media(max-width:700px){.community-wall-tools{grid-template-columns:minmax(0,1fr)}.wall-submit-card,.wall-moderator-login{min-width:0;width:100%;padding:15px}.community-submission-area .wall-action-button{width:100%}.community-pending-actions{display:grid;grid-template-columns:minmax(0,1fr)}}
 
-\n/* Animated three-line community wordmark */
+\n/* Prevent the three brand lines from sharing a line box or overlapping. */
+.brand{align-items:center}
+.brand-wordmark{display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;gap:4px!important;line-height:1.2!important;height:auto!important;min-height:0!important;overflow:visible!important}
+.brand-wordmark .brand-top,.brand-wordmark .brand-main,.brand-wordmark .brand-bottom{position:static!important;display:block!important;float:none!important;clear:both!important;line-height:1.2!important;margin:0!important;padding:0!important;transform:none!important;flex:none!important}
+.brand-wordmark .brand-top,.brand-wordmark .brand-bottom{font-size:.56em}
+.brand-wordmark .brand-main{font-size:1em}
+/* Animated three-line community wordmark */
 .brand-wordmark{position:relative;display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center;gap:2px;line-height:1.02;letter-spacing:-.045em;min-width:0;width:max-content;max-width:100%;white-space:normal;flex:0 1 auto;transition:gap .45s ease}
 .brand-wordmark .brand-top,.brand-wordmark .brand-bottom{display:block!important;flex:0 0 auto;width:max-content;max-width:100%;font-size:.56em;font-weight:750;letter-spacing:-.025em;color:var(--muted);opacity:.88;transform:translateY(0);transition:transform .48s cubic-bezier(.2,.75,.25,1),opacity .35s ease,color .35s ease}
 .brand-wordmark .brand-main{display:block!important;flex:0 0 auto;width:max-content;max-width:100%;font-size:1em;font-weight:900;white-space:nowrap;transition:transform .48s cubic-bezier(.2,.75,.25,1),color .35s ease}
