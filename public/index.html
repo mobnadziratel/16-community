@@ -1118,6 +1118,31 @@ html[data-theme="light"] .tabs .tab-button.active {
 }
 
 
+
+/* Smooth tab switching: clear active-state motion and gentle section entrance. */
+.tabs .tab-button {
+  transition: background-color .32s cubic-bezier(.22,1,.36,1),
+    color .32s cubic-bezier(.22,1,.36,1),
+    border-color .32s cubic-bezier(.22,1,.36,1),
+    box-shadow .38s cubic-bezier(.22,1,.36,1),
+    transform .38s cubic-bezier(.22,1,.36,1);
+  will-change: transform;
+}
+.tabs .tab-button:hover { transform: translateY(-2px); }
+.tabs .tab-button:active { transform: translateY(0) scale(.98); }
+.tabs .tab-button.active { transform: translateY(0); }
+@keyframes tab-section-arrive {
+  from { opacity: .35; transform: translateY(10px); filter: blur(2px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+.hero.tab-section-arrive, .tab-content.tab-section-arrive, .grid.tab-section-arrive {
+  animation: tab-section-arrive .48s cubic-bezier(.22,1,.36,1) both;
+}
+@media(prefers-reduced-motion:reduce) {
+  .tabs .tab-button { transition: none !important; transform: none !important; }
+  .hero.tab-section-arrive, .tab-content.tab-section-arrive, .grid.tab-section-arrive { animation: none !important; }
+}
+
 /* Streamer cards: refined hierarchy, depth and accessible interaction states. */
 .streamer {
   min-height: 116px;
@@ -3019,8 +3044,16 @@ function activateTab(nextTab) {
       });
     });
   }
-  document.getElementById("sectionHeading").querySelector("span").textContent = heading;
-  document.getElementById("sectionDescription").textContent = description;
+  const heroSection = document.querySelector(".hero");
+  const sectionHeading = document.getElementById("sectionHeading").querySelector("span");
+  const sectionDescription = document.getElementById("sectionDescription");
+  sectionHeading.textContent = heading;
+  sectionDescription.textContent = description;
+  [heroSection, ...Object.values(grids)].filter(Boolean).forEach(node => {
+    node.classList.remove("tab-section-arrive");
+    void node.offsetWidth;
+    node.classList.add("tab-section-arrive");
+  });
   const selectedButtonId = tabButtons[nextTab];
   Object.values(tabButtons).forEach(id => {
     const button = document.getElementById(id);
