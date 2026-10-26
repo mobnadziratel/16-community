@@ -1790,6 +1790,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
     <button class="tab-button" id="moderatorsTab" role="tab" aria-selected="false" type="button">МОДЕРАТОРЫ</button>
     <button class="tab-button" id="clipsTab" role="tab" aria-selected="false" type="button">КЛИПЫ</button>
     <button class="tab-button" id="wallTab" role="tab" aria-selected="false" aria-controls="wallPanel" type="button">СТЕНА</button>
+    <button class="tab-button" id="suggestionsTab" role="tab" aria-selected="false" aria-controls="suggestionsPanel" type="button">ПРЕДЛОЖКА</button>
   </div>
   <section id="streamersPanel" aria-label="Список стримеров">
     <div class="toolbar">
@@ -1891,6 +1892,8 @@ LEGENDS</div>
       <div class="wall-paint-mark mark-two" aria-hidden="true"></div>
       <div class="wall-footing" aria-hidden="true"></div>
     </div>
+  </section>
+  <section id="suggestionsPanel" aria-label="Предложка" hidden>
       <div class="community-submission-area">
         <div class="community-wall-tools">
           <form class="wall-submit-card" id="communitySuggestionForm">
@@ -2586,7 +2589,7 @@ function updateStreamerCount(count) {
 
 function render(filter="") {
   Object.values(grids).forEach(grid => grid.innerHTML = "");
-  const directory = activeTab === "moderators" ? [...moderators, ...editors] : (activeTab === "wall" ? [] : streamers);
+  const directory = activeTab === "moderators" ? [...moderators, ...editors] : (activeTab === "streamers" ? streamers : []);
   // Build cards once per tab change. Search keystrokes only hide/show existing cards.
   directory.forEach(({name,url,group,displayName}, cardEnterIndex) => {
     const cardLabel = displayName || name;
@@ -2675,6 +2678,7 @@ function render(filter="") {
   document.getElementById("moderatorsPanel").hidden = activeTab !== "moderators";
   document.getElementById("clipsPanel").hidden = activeTab !== "clips";
   document.getElementById("wallPanel").hidden = activeTab !== "wall";
+  document.getElementById("suggestionsPanel").hidden = activeTab !== "suggestions";
   if (activeTab === "clips") loadClips();
   updateStreamerCount(visibleCount);
   document.getElementById("empty").style.display = activeTab === "streamers" && visibleCount ? "none" : (activeTab === "streamers" ? "block" : "none");
@@ -2932,7 +2936,8 @@ const tabButtons = {
   streamers: "streamersTab",
   moderators: "moderatorsTab",
   clips: "clipsTab",
-  wall: "wallTab"
+  wall: "wallTab",
+  suggestions: "suggestionsTab"
 };
 function activateTab(nextTab) {
   activeTab = nextTab;
