@@ -1119,28 +1119,31 @@ html[data-theme="light"] .tabs .tab-button.active {
 
 
 
-/* Smooth tab switching: clear active-state motion and gentle section entrance. */
+/* Smooth but lightweight tab transitions (avoid blur filters on large grids). */
 .tabs .tab-button {
-  transition: background-color .32s cubic-bezier(.22,1,.36,1),
-    color .32s cubic-bezier(.22,1,.36,1),
-    border-color .32s cubic-bezier(.22,1,.36,1),
-    box-shadow .38s cubic-bezier(.22,1,.36,1),
-    transform .38s cubic-bezier(.22,1,.36,1);
-  will-change: transform;
+  transition: background-color .28s cubic-bezier(.22,1,.36,1),
+    color .28s cubic-bezier(.22,1,.36,1),
+    border-color .28s cubic-bezier(.22,1,.36,1),
+    box-shadow .3s cubic-bezier(.22,1,.36,1),
+    transform .3s cubic-bezier(.22,1,.36,1);
 }
-.tabs .tab-button:hover { transform: translateY(-2px); }
-.tabs .tab-button:active { transform: translateY(0) scale(.98); }
-.tabs .tab-button.active { transform: translateY(0); }
+.tabs .tab-button:hover { transform: translateY(-1px); }
+.tabs .tab-button:active { transform: scale(.985); }
+.tabs .tab-button.active { transform: none; }
 @keyframes tab-section-arrive {
-  from { opacity: .35; transform: translateY(10px); filter: blur(2px); }
-  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+  from { opacity: .65; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-.hero.tab-section-arrive, .tab-content.tab-section-arrive, .grid.tab-section-arrive {
-  animation: tab-section-arrive .48s cubic-bezier(.22,1,.36,1) both;
+.hero.tab-section-arrive, #streamersPanel.tab-section-arrive,
+#moderatorsPanel.tab-section-arrive, #clipsPanel.tab-section-arrive,
+#wallPanel.tab-section-arrive, #suggestionsPanel.tab-section-arrive {
+  animation: tab-section-arrive .34s cubic-bezier(.22,1,.36,1) both;
 }
 @media(prefers-reduced-motion:reduce) {
   .tabs .tab-button { transition: none !important; transform: none !important; }
-  .hero.tab-section-arrive, .tab-content.tab-section-arrive, .grid.tab-section-arrive { animation: none !important; }
+  .hero.tab-section-arrive, #streamersPanel.tab-section-arrive,
+  #moderatorsPanel.tab-section-arrive, #clipsPanel.tab-section-arrive,
+  #wallPanel.tab-section-arrive, #suggestionsPanel.tab-section-arrive { animation: none !important; }
 }
 
 /* Streamer cards: refined hierarchy, depth and accessible interaction states. */
@@ -2640,7 +2643,10 @@ function updateStreamerCount(count) {
 }
 
 function render(filter="") {
-  Object.values(grids).forEach(grid => grid.innerHTML = "");
+  // Keep streamer/moderator cards and their loaded avatars intact when switching to other panels.
+  if (activeTab === "streamers" || activeTab === "moderators") {
+    Object.values(grids).forEach(grid => grid.innerHTML = "");
+  }
   const directory = activeTab === "moderators" ? [...moderators, ...editors] : (activeTab === "streamers" ? streamers : []);
   // Build cards once per tab change. Search keystrokes only hide/show existing cards.
   directory.forEach(({name,url,group,displayName}, cardEnterIndex) => {
@@ -3049,7 +3055,14 @@ function activateTab(nextTab) {
   const sectionDescription = document.getElementById("sectionDescription");
   sectionHeading.textContent = heading;
   sectionDescription.textContent = description;
-  [heroSection, ...Object.values(grids)].filter(Boolean).forEach(node => {
+  const activePanel = document.getElementById({
+    streamers: "streamersPanel",
+    moderators: "moderatorsPanel",
+    clips: "clipsPanel",
+    wall: "wallPanel",
+    suggestions: "suggestionsPanel"
+  }[nextTab]);
+  [heroSection, activePanel].filter(Boolean).forEach(node => {
     node.classList.remove("tab-section-arrive");
     void node.offsetWidth;
     node.classList.add("tab-section-arrive");
