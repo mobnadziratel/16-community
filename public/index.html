@@ -1789,6 +1789,14 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
 .wall-posts-section{min-width:0}
 @media(max-width:700px){.community-wall-tools{grid-template-columns:minmax(0,1fr)}.wall-submit-card,.wall-moderator-login{min-width:0;width:100%;padding:15px}.community-submission-area .wall-action-button{width:100%}.community-pending-actions{display:grid;grid-template-columns:minmax(0,1fr)}}
 
+
+/* Keep the description and tabs inside one wide, shared frame. */
+.section-switcher{width:100%;max-width:none;box-sizing:border-box}
+.section-switcher .hero{width:100%;max-width:none}
+.section-switcher .lead{max-width:900px}
+.section-switcher .hero:before,.section-switcher .hero:after{display:none!important;content:none!important}
+.section-switcher .tabs{width:100%;box-sizing:border-box;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;border-radius:0!important}
+html[data-theme="light"] .section-switcher .tabs{background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}
 </style>
 </head>
 <body>
