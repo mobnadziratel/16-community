@@ -1794,7 +1794,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
       <path d="m20 17.5 10 6-10 6z" fill="currentColor"/>
       <path d="M36.5 5.5v5M34 8h5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
     </svg>
-  </span><span class="brand-wordmark" id="brandWordmark" data-brand-state="streamers" aria-label="Модераторское Стримерское комьюнити Наше затенённое"><span class="brand-top" id="brandTop">Модераторское</span><span class="brand-main" id="brandMain"><span id="brandMainLead">Стримерское</span> комьюнити</span><span class="brand-bottom" id="brandBottom">Наше затенённое</span></span></span>
+  </span><span class="brand-wordmark" id="brandWordmark" data-brand-state="streamers" aria-label="Модераторское Стримерское комьюнити Наше"><span class="brand-top" id="brandTop">Модераторское</span><span class="brand-main" id="brandMain"><span id="brandMainLead">Стримерское</span> комьюнити</span><span class="brand-bottom" id="brandBottom">Наше</span></span></span>
   <button class="theme-toggle" id="themeToggle" type="button" aria-label="Переключить тему"><span class="theme-icon" id="themeIcon">☀️</span><span id="themeLabel">Светлая тема</span></button>
 </div></header>
 <main class="wrap">
@@ -2984,11 +2984,11 @@ function activateTab(nextTab) {
   const brandState = nextTab === "streamers" ? "streamers" : nextTab === "moderators" ? "moderators" : "community";
   brandWordmark.dataset.brandState = brandState;
   if (brandState === "streamers") {
-    brandTop.textContent = "Модераторское"; brandMainLead.textContent = "Стримерское"; brandBottom.textContent = "Наше затенённое";
-    brandWordmark.setAttribute("aria-label", "Модераторское Стримерское комьюнити Наше затенённое");
+    brandTop.textContent = "Модераторское"; brandMainLead.textContent = "Стримерское"; brandBottom.textContent = "Наше";
+    brandWordmark.setAttribute("aria-label", "Модераторское Стримерское комьюнити Наше");
   } else if (brandState === "moderators") {
-    brandTop.textContent = "Стримерское"; brandMainLead.textContent = "Модераторское"; brandBottom.textContent = "Наше затенённое";
-    brandWordmark.setAttribute("aria-label", "Стримерское Модераторское комьюнити Наше затенённое");
+    brandTop.textContent = "Стримерское"; brandMainLead.textContent = "Модераторское"; brandBottom.textContent = "Наше";
+    brandWordmark.setAttribute("aria-label", "Стримерское Модераторское комьюнити Наше");
   } else {
     brandTop.textContent = "Стримерское"; brandMainLead.textContent = "Наше"; brandBottom.textContent = "Модераторское";
     brandWordmark.setAttribute("aria-label", "Стримерское Наше комьюнити Модераторское");
