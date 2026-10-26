@@ -1682,6 +1682,32 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
 }
 @media(prefers-reduced-motion:reduce) { .pumpkin-warning { scroll-behavior:auto; } }
 
+
+/* Community wall submissions and moderation */
+.community-wall-tools{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,.7fr);gap:16px;margin:0 0 24px}
+.wall-submit-card,.wall-moderator-login{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:20px;min-width:0}
+.wall-submit-card h2,.wall-posts-section h2{margin:0 0 10px;font-size:20px;letter-spacing:-.03em}
+.wall-submit-card p{color:var(--muted);line-height:1.5;margin:0 0 16px}
+.wall-submit-card label,.wall-moderator-login label{display:block;font-size:13px;font-weight:750;margin:12px 0 7px}
+.wall-submit-card textarea,.wall-moderator-login input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;color:var(--text);font:inherit}
+.wall-submit-card input[type=file]{display:block;width:100%;font-size:12px;color:var(--muted);margin:8px 0 14px}
+.wall-action-button{border:0;border-radius:10px;background:var(--accent);color:#111;font:inherit;font-weight:850;padding:11px 14px;cursor:pointer}
+.wall-action-button.secondary{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+.wall-action-button:disabled{opacity:.6;cursor:wait}
+.wall-form-message{font-size:13px!important;margin:10px 0 0!important;color:var(--muted)}
+.wall-form-message.is-error{color:#ff7777}
+.wall-moderator-login summary{font-weight:850;cursor:pointer}
+.wall-moderator-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.wall-posts-section{margin:24px 0}
+.wall-posts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:14px}
+.wall-post-card{min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.wall-post-card img{display:block;width:100%;max-height:420px;object-fit:contain;background:#08080a}
+.wall-post-copy{padding:14px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55}
+.wall-post-date{display:block;color:var(--muted);font-size:11px;padding:0 14px 12px}
+.wall-post-actions{display:flex;gap:8px;flex-wrap:wrap;padding:0 14px 14px}
+.wall-muted{color:var(--muted);font-size:14px}
+@media(max-width:700px){.community-wall-tools{grid-template-columns:1fr}.wall-submit-card,.wall-moderator-login{padding:15px}}
+
 </style>
 </head>
 <body>
@@ -1758,6 +1784,27 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
     <div class="empty" id="moderatorEmpty">Никого не нашли. Попробуй другой ник.</div>
   </section>
   <section id="wallPanel" aria-label="Стена сообщества" hidden>
+    <div class="community-wall-tools">
+      <form id="wallSubmissionForm" class="wall-submit-card">
+        <h2>Оставить след на стене</h2>
+        <p>Текст или фото отправятся на проверку модераторам. Публикация появится здесь после одобрения.</p>
+        <label for="wallPostText">Текст (необязательно, до 1200 символов)</label>
+        <textarea id="wallPostText" maxlength="1200" rows="4" placeholder="Напиши что-нибудь для сообщества…"></textarea>
+        <label for="wallPostImage">Фотография (PNG, JPG, WEBP или GIF; до 2 МБ)</label>
+        <input id="wallPostImage" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+        <button class="wall-action-button" type="submit" id="wallSubmitButton">Отправить на модерацию</button>
+        <p id="wallSubmitMessage" class="wall-form-message" role="status" aria-live="polite"></p>
+      </form>
+      <details class="wall-moderator-login">
+        <summary>Вход для модераторов</summary>
+        <label for="wallModeratorToken">Токен модератора</label>
+        <input id="wallModeratorToken" type="password" autocomplete="current-password" placeholder="Вставь выданный администратором токен">
+        <div class="wall-moderator-actions"><button type="button" class="wall-action-button" id="wallModeratorLogin">Открыть очередь</button><button type="button" class="wall-action-button secondary" id="wallModeratorLogout" hidden>Выйти</button></div>
+        <p id="wallModerationMessage" class="wall-form-message" role="status" aria-live="polite"></p>
+      </details>
+    </div>
+    <section id="wallModerationQueue" class="wall-posts-section" hidden><h2>Публикации на проверке</h2><div id="wallPendingPosts" class="wall-posts-grid"></div></section>
+    <section class="wall-posts-section"><h2>Публикации сообщества</h2><div id="wallApprovedPosts" class="wall-posts-grid"><p class="wall-muted">Загружаем публикации…</p></div></section>
     <div class="wall-mural" role="img" aria-label="Длинная кирпичная стена с белой граффити-надписью: Хотите что-то добавить? Пишите @MNIVPI в тг!">
       <div class="wall-graffiti" aria-label="Хотите что-то добавить? Пишите @MNIVPI в тг!">
         <span class="wall-graffiti-line">Хотите что-то добавить?</span>
@@ -3160,6 +3207,47 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
     }
   });
 })();
+
+/* Moderated community wall */
+(function initCommunityWall(){
+  const $=id=>document.getElementById(id);
+  const form=$("wallSubmissionForm"); if(!form)return;
+  let moderatorToken="";
+  const message=(el,text,error=false)=>{el.textContent=text;el.classList.toggle("is-error",error);};
+  function safeImageData(file){
+    return new Promise((resolve,reject)=>{
+      if(!file)return resolve(null);
+      if(file.size>2*1024*1024)return reject(new Error("Файл больше 2 МБ."));
+      if(!["image/png","image/jpeg","image/webp","image/gif"].includes(file.type))return reject(new Error("Поддерживаются PNG, JPG, WEBP и GIF."));
+      const reader=new FileReader();reader.onerror=()=>reject(new Error("Не удалось прочитать файл."));
+      reader.onload=()=>resolve(String(reader.result));reader.readAsDataURL(file);
+    });
+  }
+  function renderPosts(target,posts,moderation){
+    target.replaceChildren();
+    if(!posts.length){const p=document.createElement("p");p.className="wall-muted";p.textContent=moderation?"Очередь пуста.":"Пока нет опубликованных постов — стань первым!";target.append(p);return;}
+    posts.forEach(post=>{
+      const card=document.createElement("article");card.className="wall-post-card";
+      if(post.image){const img=document.createElement("img");img.src=post.image;img.alt="Фотография из публикации";img.loading="lazy";card.append(img);}
+      if(post.text){const copy=document.createElement("div");copy.className="wall-post-copy";copy.textContent=post.text;card.append(copy);}
+      const date=document.createElement("time");date.className="wall-post-date";date.dateTime=post.createdAt;date.textContent=new Date(post.createdAt).toLocaleString("ru-RU");card.append(date);
+      if(moderation){const actions=document.createElement("div");actions.className="wall-post-actions";
+        [["approved","Одобрить"],["rejected","Отклонить"]].forEach(([status,label])=>{const b=document.createElement("button");b.type="button";b.className="wall-action-button"+(status==="rejected"?" secondary":"");b.textContent=label;b.addEventListener("click",async()=>{b.disabled=true;try{const r=await fetch("/api/wall/moderation/"+encodeURIComponent(post.id),{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+moderatorToken},body:JSON.stringify({status})});const d=await r.json();if(!r.ok)throw new Error(d.error||"Ошибка модерации");await loadQueue();await loadApproved();}catch(e){message($("wallModerationMessage"),e.message,true);b.disabled=false;}});actions.append(b);});card.append(actions);}
+      target.append(card);
+    });
+  }
+  async function loadApproved(){const target=$("wallApprovedPosts");try{const r=await fetch("/api/wall/posts",{cache:"no-store"});const d=await r.json();if(!r.ok)throw new Error(d.error||"Ошибка загрузки");renderPosts(target,d.posts||[],false);}catch(e){target.textContent="Не удалось загрузить стену. Попробуйте обновить страницу.";}}
+  async function loadQueue(){const r=await fetch("/api/wall/moderation",{headers:{"Authorization":"Bearer "+moderatorToken},cache:"no-store"});const d=await r.json();if(!r.ok)throw new Error(d.error||"Не удалось загрузить очередь");$("wallModerationQueue").hidden=false;$("wallModeratorLogout").hidden=false;renderPosts($("wallPendingPosts"),d.posts||[],true);}
+  form.addEventListener("submit",async event=>{
+    event.preventDefault();const btn=$("wallSubmitButton"),msg=$("wallSubmitMessage");btn.disabled=true;
+    try{const image=await safeImageData($("wallPostImage").files[0]);const r=await fetch("/api/wall/submissions",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:$("wallPostText").value,image})});const d=await r.json();if(!r.ok)throw new Error(d.error||"Не удалось отправить");form.reset();message(msg,d.message||"Отправлено на проверку.");}
+    catch(e){message(msg,e.message,true);}finally{btn.disabled=false;}
+  });
+  $("wallModeratorLogin").addEventListener("click",async()=>{const value=$("wallModeratorToken").value.trim();if(value.length<24){message($("wallModerationMessage"),"Введи токен модератора.",true);return;}moderatorToken=value;try{await loadQueue();$("wallModeratorToken").value="";message($("wallModerationMessage"),"Вход выполнен.");}catch(e){moderatorToken="";$("wallModerationQueue").hidden=true;message($("wallModerationMessage"),e.message,true);}});
+  $("wallModeratorLogout").addEventListener("click",()=>{moderatorToken="";$("wallModerationQueue").hidden=true;$("wallModeratorLogout").hidden=true;$("wallPendingPosts").replaceChildren();message($("wallModerationMessage"),"Вы вышли из панели.");});
+  loadApproved();
+})();
+
 </script>
 </body>
 </html>
