@@ -1977,7 +1977,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
  const samples=["Всем привет! Как вам сегодняшний стрим?","ХАХАХА, отличный момент 😂","Привет чату 💜","!discord","Классная катка 🔥","Как настроение?","Вот это поворот 👀","Зашёл на стрим, всем привет!","Кто тоже это заметил?","Имба момент","Удачи на стриме!","АХАХАХА","Чат сегодня активный 😎","Давай ещё одну катку!","Кто откуда смотрит?","Музыка топовая 🎵","Это надо было видеть","Клип уже готов 😂","ПОВТОРИ ЭТО","легендарно","стрим как всегда уютный","!соцсети","гоооо 🔥","ну это база","минус мораль у соперника","лучший момент за сегодня","всем хорошего вечера","+вайб","неожиданно получилось","чат, вы это видели?!","я так и знал","подписка оформлена 💜","с возвращением!","не отвлекайся, мы верим","АХАХА, не могу","чисто случайно получилось","пора в хайлайты","сильная игра","ещё раз GG","красиво сыграно 👏"];
  preview.innerHTML="";
  pool.forEach((person,i)=>{if(!person)return;const line=document.createElement("div");line.className="chat-line";
-  const messagePreset=messages[i%messages.length];if(messagePreset.badge){const badge=document.createElement("span");badge.className="chat-badge "+messagePreset.badge;badge.setAttribute("aria-label",i===1?"Модератор Twitch":i===2?"Подписчик Twitch":"Значок Twitch");line.appendChild(badge)}
+  const isOwner=person.login.toLowerCase()==="mob_nadziratel";if(isOwner){const badge=document.createElement("span");badge.className="chat-badge chat-twitch";badge.setAttribute("aria-label","Владелец канала Twitch");badge.title="Владелец канала";line.appendChild(badge)}
   const name=document.createElement("span");name.className="chat-name";name.textContent=person.name;name.dataset.twitchLogin=person.login;name.style.color=["#ff7a59","#55c7ff","#d78bff","#b9ff36","#f2a1d1","#72dfbd"][i%6];line.appendChild(name);
   const message=document.createElement("span");message.className="chat-message";message.textContent=random(samples);line.appendChild(message);preview.appendChild(line);
  });
@@ -1999,19 +1999,16 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
      const response=await fetch("/api/chat-badges");
      if(!response.ok)throw new Error("Badges unavailable");
      const data=await response.json();
-     const map=[["chat-twitch","broadcaster"],["chat-mod","moderator"],["chat-sub","vip"]];
-     for(const [cls,key] of map){
-       const versions=data.badges?.[key]?.versions;
-       if(!versions?.length)continue;
-       const badge=versions.find(v=>v.id==="1")||versions[0];
-       preview.querySelectorAll(".chat-badge."+cls).forEach(el=>{
-         const img=document.createElement("img");img.src=badge.url;img.alt=badge.title;img.title=badge.title;
-         img.width=18;img.height=18;img.style.cssText="width:18px;height:18px;object-fit:contain;vertical-align:middle";
-         img.onerror=()=>{el.replaceChildren();el.classList.add("chat-hidden")};
-         el.replaceChildren(img);el.style.cssText="display:inline-flex;align-items:center;background:transparent;padding:0;margin:1px 2px 0 0";
-         el.dataset.officialBadge="true";
-       });
-     }
+     const versions=data.badges?.broadcaster?.versions;
+     if(!versions?.length)return;
+     const badge=versions.find(v=>v.id==="1")||versions[0];
+     preview.querySelectorAll(".chat-badge.chat-twitch").forEach(el=>{
+       const img=document.createElement("img");img.src=badge.url;img.alt="Владелец канала";img.title="Владелец канала Twitch";
+       img.width=18;img.height=18;img.style.cssText="width:18px;height:18px;object-fit:contain;vertical-align:middle";
+       img.onerror=()=>{el.replaceChildren();el.classList.add("chat-hidden")};
+       el.replaceChildren(img);el.style.cssText="display:inline-flex;align-items:center;background:transparent;padding:0;margin:1px 2px 0 0";
+       el.dataset.officialBadge="true";
+     });
    }catch(_){}
  }
  async function loadTwitchColors(){
