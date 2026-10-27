@@ -2010,14 +2010,24 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
  async function loadOfficialBadges(){
    if(!$("showBadges").checked)return;
    try{
-     const response=await fetch("/api/chat-badges");
+     const response=await fetch("/api/chat-badges?channel=mob_nadziratel");
      if(!response.ok)throw new Error("Badges unavailable");
      const data=await response.json();
-     const versions=data.badges?.broadcaster?.versions;
-     if(!versions?.length)return;
-     const badge=versions.find(v=>v.id==="1")||versions[0];
-     preview.querySelectorAll(".chat-badge.chat-twitch").forEach(el=>{
-       const img=document.createElement("img");img.src=badge.url;img.alt="Владелец канала";img.title="Владелец канала Twitch";
+     const sets={
+       "chat-twitch":["broadcaster","1"],
+       "chat-mod":["moderator","1"],
+       "chat-vip":["vip","1"],
+       "chat-supermod":["moderator","1"]
+     };
+     preview.querySelectorAll(".chat-badge").forEach(el=>{
+       const match=Object.entries(sets).find(([cls])=>el.classList.contains(cls));
+       if(!match)return;
+       const [cls,[setId,preferredId]]=match;
+       const versions=data.badges?.[setId]?.versions;
+       if(!versions?.length)return;
+       const version=versions.find(v=>v.id===preferredId)||versions[0];
+       const img=document.createElement("img");
+       img.src=version.url;img.alt=el.title||version.title;img.title=el.title||version.title;
        img.width=18;img.height=18;img.style.cssText="width:18px;height:18px;object-fit:contain;vertical-align:middle";
        img.onerror=()=>{el.replaceChildren();el.classList.add("chat-hidden")};
        el.replaceChildren(img);el.style.cssText="display:inline-flex;align-items:center;background:transparent;padding:0;margin:1px 2px 0 0";
