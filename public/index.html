@@ -1997,6 +1997,7 @@ LEGENDS</div>
               <option value="streamer">Стримера в каталог</option>
               <option value="wall">Публикацию на стену</option>
               <option value="site">Изменение или улучшение сайта</option>
+              <option value="moderator">Добавление модератора</option>
             </select>
             <div id="suggestionStreamerFields">
               <label for="suggestionTwitch">Ссылка на Twitch или ник канала</label>
@@ -2007,6 +2008,13 @@ LEGENDS</div>
             <div id="suggestionSiteFields" hidden>
               <label for="suggestionSiteText">Что стоит изменить или добавить?</label>
               <textarea id="suggestionSiteText" name="siteText" maxlength="1200" rows="4" placeholder="Опиши идею, проблему или новую функцию…"></textarea>
+            </div>
+            <div id="suggestionModeratorFields" hidden>
+              <label for="suggestionModeratorName">Ник модератора</label>
+              <input id="suggestionModeratorName" name="moderatorName" maxlength="32" placeholder="Ник человека">
+              <label for="suggestionModeratorOf">Где человек модератор? (обязательно)</label>
+              <input id="suggestionModeratorOf" name="moderatorOf" maxlength="300" placeholder="Twitch-ники каналов через запятую">
+              <p class="wall-muted">Укажи Twitch-ники каналов, где человек будет модератором.</p>
             </div>
             <div id="suggestionWallFields" hidden>
               <label for="suggestionWallText">Текст публикации</label>
@@ -3551,8 +3559,9 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
   const imageInput=byId("suggestionImage"), imagePreview=byId("suggestionImagePreview");
   let selectedImage="";
   kind.addEventListener("change",()=>{
-    const wall=kind.value==="wall",site=kind.value==="site"; streamerFields.hidden=wall||site; wallFields.hidden=!wall; byId("suggestionSiteFields").hidden=!site;
-    byId("suggestionTwitch").required=!wall&&!site;
+    const wall=kind.value==="wall",site=kind.value==="site",moderator=kind.value==="moderator"; streamerFields.hidden=wall||site||moderator; wallFields.hidden=!wall; byId("suggestionSiteFields").hidden=!site; byId("suggestionModeratorFields").hidden=!moderator;
+    byId("suggestionTwitch").required=!wall&&!site&&!moderator;
+    byId("suggestionModeratorName").required=moderator; byId("suggestionModeratorOf").required=moderator;
     byId("suggestionWallText").required=false;
     byId("suggestionSiteText").required=site;
   });
@@ -3576,7 +3585,8 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
       const response=await fetch("/api/community/submissions",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
         nickname:byId("suggestionNickname").value,kind:kind.value,
         twitch:byId("suggestionTwitch").value,
-        text:wall?byId("suggestionWallText").value:site?byId("suggestionSiteText").value:byId("suggestionStreamerText").value,
+        moderatorName:byId("suggestionModeratorName").value,moderatorOf:byId("suggestionModeratorOf").value,
+        text:wall?byId("suggestionWallText").value:site?byId("suggestionSiteText").value:kind.value==="moderator"?byId("suggestionModeratorName").value:byId("suggestionStreamerText").value,
         image:wall?selectedImage:""
       })});
       const data=await response.json();if(!response.ok)throw new Error(data.error||"Не удалось отправить заявку.");
@@ -3593,7 +3603,20 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
       const response=await fetch("/api/community/posts",{cache:"no-store"}),data=await response.json();
       if(!response.ok)throw new Error(data.error||"Не удалось загрузить публикации.");
       if(wallFeed)wallFeed.replaceChildren();
-      const suggested=(data.submissions||[]).filter(item=>item.kind==="streamer");
+      const allApproved=data.submissions||[];
+      const suggested=allApproved.filter(item=>item.kind==="streamer");
+      const moderatorGrid=byId("moderatorsGrid");
+      if(moderatorGrid){
+        moderatorGrid.querySelectorAll("[data-community-moderator]").forEach(card=>card.remove());
+        allApproved.filter(item=>item.kind==="moderator").forEach(item=>{
+          const card=makeText("article","","streamer");card.dataset.communityModerator="true";
+          card.append(makeText("h3",String(item.moderatorName||item.nickname||"Модератор")));
+          card.append(makeText("p","Модератор сообщества","streamer-description"));
+          const channels=Array.isArray(item.moderatorOf)?item.moderatorOf:[];
+          if(channels.length){card.append(makeText("p","Модерирует каналы:","streamer-description"));channels.forEach(login=>{const a=document.createElement("a");a.href="https://www.twitch.tv/"+encodeURIComponent(login);a.target="_blank";a.rel="noopener noreferrer";a.textContent="@"+login;a.style.marginRight="8px";card.append(a);});}
+          moderatorGrid.append(card);
+        });
+      }
       let addedToDirectory=false;
       suggested.forEach(item=>{
         const login=String(item.twitchLogin||"").toLowerCase();
@@ -3676,8 +3699,9 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
       if(!data.submissions.length)pending.append(makeText("p","Новых заявок нет.","wall-muted"));
       data.submissions.forEach(item=>{
         const card=makeText("article","","community-pending-item");
-        card.append(makeText("strong",item.kind==="streamer"?"Предложение стримера":item.kind==="site"?"Предложение по улучшению сайта":"Публикация на стену"));
+        card.append(makeText("strong",item.kind==="streamer"?"Предложение стримера":item.kind==="site"?"Предложение по улучшению сайта":item.kind==="moderator"?"Предложение модератора":"Публикация на стену"));
         card.append(makeText("p","Автор: "+item.nickname+" · "+new Date(item.createdAt).toLocaleString("ru-RU")));
+        if(item.kind==="moderator"){card.append(makeText("p","Предлагаемый модератор: "+String(item.moderatorName||item.nickname)));card.append(makeText("p","Каналы: "+(Array.isArray(item.moderatorOf)?item.moderatorOf.map(login=>"@"+login).join(", "):"")));}
         if(item.twitchLogin){const link=document.createElement("a");link.href="https://www.twitch.tv/"+encodeURIComponent(item.twitchLogin);link.target="_blank";link.rel="noopener noreferrer";link.textContent="twitch.tv/"+item.twitchLogin;card.append(link);}
         if(item.text)card.append(makeText("p",item.text));
         if(item.imageData){const img=document.createElement("img");img.src=item.imageData;img.alt="Изображение на проверке";img.loading="lazy";card.append(img);}
