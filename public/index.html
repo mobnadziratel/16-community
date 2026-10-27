@@ -2912,6 +2912,8 @@ function normalizeDirectorySearch(value="") {
     [/вишн(?:ёвая|евая)/g, "cherry"],
     [/лиса|лису|лисы|лисе|лисой|лисами|лисах/g, "fox"],
     [/cherrys?|cherries/g, "cherry"],
+    // Treat these spellings as the same streamer/search alias.
+    [/charakoi|чарик|чарон/g, "charakoi"],
     [/foxes?/g, "fox"]
   ];
   for (const [pattern, replacement] of aliases) normalized = normalized.replace(pattern, replacement);
