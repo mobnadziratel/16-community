@@ -2897,8 +2897,23 @@ function render(filter="") {
     refreshLiveStatuses();
   }
 }
+function normalizeDirectorySearch(value="") {
+  // Make streamer search forgiving: Cyrillic transliteration and common 1/i substitutions.
+  const transliteration = {
+    а:"a", б:"b", в:"v", г:"g", д:"d", е:"e", ё:"yo", ж:"zh", з:"z",
+    и:"i", й:"y", к:"k", л:"l", м:"m", н:"n", о:"o", п:"p", р:"r",
+    с:"s", т:"t", у:"u", ф:"f", х:"h", ц:"ts", ч:"ch", ш:"sh",
+    щ:"shch", ы:"y", э:"e", ю:"yu", я:"ya", ь:"", ъ:""
+  };
+  return String(value)
+    .toLocaleLowerCase("ru")
+    .replace(/[а-яё]/g, char => transliteration[char] ?? char)
+    .replace(/1/g, "i")
+    .replace(/[\s._-]+/g, "")
+    .trim();
+}
 function applyDirectoryFilter(filter="") {
-  const normalizedFilter = String(filter).toLocaleLowerCase("ru").trim();
+  const normalizedFilter = normalizeDirectorySearch(filter);
   let visibleCount = 0;
   const visibleByGroup = {};
   // Skip directory-card scans and filter animations on non-directory tabs.
@@ -2907,7 +2922,9 @@ function applyDirectoryFilter(filter="") {
       let groupCount = 0;
       grid.querySelectorAll(".streamer").forEach(card => {
         const name = card.querySelector(".name")?.textContent || "";
-        const show = name.toLocaleLowerCase("ru").includes(normalizedFilter);
+        const handle = card.querySelector(".handle")?.textContent || "";
+        const searchableName = normalizeDirectorySearch(name + " " + handle);
+        const show = !normalizedFilter || searchableName.includes(normalizedFilter);
         if (show) {
           if (card.hidden) {
             card.hidden = false;
