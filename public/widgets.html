@@ -1868,7 +1868,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
 .chat-field{display:flex;flex-direction:column;gap:7px;min-width:0}.chat-field label{font-size:13px;color:var(--muted)}.chat-field input,.chat-field select{width:100%;min-width:0;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit}
 .chat-check{display:flex;align-items:center;gap:8px;color:var(--text);font-size:13px}.chat-check input{accent-color:var(--accent)}
 .chat-preview{min-height:310px;border-radius:14px;padding:18px;overflow:hidden;background:var(--chat-bg,#111116);color:var(--chat-text,#f5f5f7);font-family:Arial,sans-serif;font-size:var(--chat-size,16px)}
-.chat-line{display:flex;align-items:flex-start;gap:7px;margin:0 0 13px;line-height:1.5;overflow-wrap:anywhere}.chat-name{font-weight:800}.chat-badge{display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;border-radius:3px;padding:1px 4px;margin:2px 2px 0 0;vertical-align:middle}.chat-twitch{background:#9147ff;color:white}.chat-mod{background:#2e9d65;color:white}.chat-sub{background:#d84b9b;color:white}.chat-message{min-width:0}
+.chat-line{display:flex;align-items:flex-start;gap:7px;margin:0 0 13px;line-height:1.5;overflow-wrap:anywhere}.chat-name{font-weight:800}.chat-badge{display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;border-radius:3px;padding:1px 4px;margin:2px 2px 0 0;vertical-align:middle}.chat-twitch{background:#9147ff;color:white}.chat-mod{background:#2e9d65;color:white}.chat-sub{background:#d84b9b;color:white}.chat-vip{background:#e5b83d;color:#211800}.chat-supermod{background:#d84b4b;color:white}.chat-message{min-width:0}
 .chat-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.chat-action{border:0;border-radius:10px;padding:11px 15px;background:var(--accent);color:#111;font-weight:800;cursor:pointer}.chat-secondary{background:transparent;color:var(--text);border:1px solid var(--line)}
 .chat-note{font-size:12px;color:var(--muted);line-height:1.5;margin:12px 0 0}.chat-hidden{display:none!important}
 @media(max-width:760px){.chat-layout{grid-template-columns:1fr}.chat-controls{grid-template-columns:1fr 1fr}.chat-panel{padding:14px}}
@@ -1977,7 +1977,21 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
  const samples=["Всем привет! Как вам сегодняшний стрим?","ХАХАХА, отличный момент 😂","Привет чату 💜","!discord","Классная катка 🔥","Как настроение?","Вот это поворот 👀","Зашёл на стрим, всем привет!","Кто тоже это заметил?","Имба момент","Удачи на стриме!","АХАХАХА","Чат сегодня активный 😎","Давай ещё одну катку!","Кто откуда смотрит?","Музыка топовая 🎵","Это надо было видеть","Клип уже готов 😂","ПОВТОРИ ЭТО","легендарно","стрим как всегда уютный","!соцсети","гоооо 🔥","ну это база","минус мораль у соперника","лучший момент за сегодня","всем хорошего вечера","+вайб","неожиданно получилось","чат, вы это видели?!","я так и знал","подписка оформлена 💜","с возвращением!","не отвлекайся, мы верим","АХАХА, не могу","чисто случайно получилось","пора в хайлайты","сильная игра","ещё раз GG","красиво сыграно 👏"];
  preview.innerHTML="";
  pool.forEach((person,i)=>{if(!person)return;const line=document.createElement("div");line.className="chat-line";
-  const isOwner=person.login.toLowerCase()==="mob_nadziratel";if(isOwner){const badge=document.createElement("span");badge.className="chat-badge chat-twitch";badge.setAttribute("aria-label","Владелец канала Twitch");badge.title="Владелец канала";line.appendChild(badge)}
+  const login=person.login.toLowerCase();
+  const roleBadges={
+   "mob_nadziratel":[["chat-twitch","Владелец канала"]],
+   "wildefild":[["chat-mod","Модератор"]],
+   "dmitriy_okak":[["chat-mod","Модератор"]],
+   "d1unizi":[["chat-mod","Модератор"]],
+   "rueumur":[["chat-vip","VIP"]],
+   "cherrys_fox":[["chat-vip","VIP"]],
+   "kerik232tv":[["chat-vip","VIP"]],
+   "ne_twig":[["chat-vip","VIP"]],
+   "medverina":[["chat-vip","VIP"]],
+   "agyha1":[["chat-supermod","Супермодератор"]],
+   "1dnel":[["chat-supermod","Супермодератор"]]
+  };
+  (roleBadges[login]||[]).forEach(([cls,label])=>{const badge=document.createElement("span");badge.className="chat-badge "+cls;badge.setAttribute("aria-label",label);badge.title=label;badge.textContent=label==="VIP"?"VIP":label==="Модератор"?"MOD":label==="Супермодератор"?"S-MOD":"";line.appendChild(badge)});
   const name=document.createElement("span");name.className="chat-name";name.textContent=person.name;name.dataset.twitchLogin=person.login;name.style.color=["#ff7a59","#55c7ff","#d78bff","#b9ff36","#f2a1d1","#72dfbd"][i%6];line.appendChild(name);
   const message=document.createElement("span");message.className="chat-message";message.textContent=random(samples);line.appendChild(message);preview.appendChild(line);
  });
