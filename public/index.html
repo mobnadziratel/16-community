@@ -2078,7 +2078,7 @@ LEGENDS</div>
     <button class="clip-modal-close" id="clipModalClose" type="button" aria-label="Закрыть плеер">×</button>
     <div class="clip-modal-top"><div><a class="clip-modal-author" id="clipModalAuthor" href="https://www.twitch.tv/" target="_blank" rel="noopener noreferrer"><img class="clip-modal-author-avatar" id="clipModalAuthorAvatar" alt="Аватар стримера"><span class="clip-modal-author-name" id="clipModalAuthorName">Twitch</span><span class="clip-destination-icon" aria-label="Ссылка на Twitch"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3 2.5 7v12h5v3h3l3-3h4l4-4V3H4zm15 11-2.5 2.5h-4L10 19v-2.5H5V5h14v9zM10 8h2v5h-2V8zm5 0h2v5h-2V8z"/></svg></span></a></div></div>
     <iframe class="clip-player-frame" id="clipPlayerFrame" title="Встроенный плеер Twitch-клипов" allowfullscreen="true" scrolling="no" allow="autoplay; fullscreen"></iframe>
-    <div class="clip-modal-caption"><div class="clip-modal-title" id="clipModalTitle">Клип Twitch</div><button class="refresh-clips clip-share-button" id="clipShareButton" type="button">Поделиться клипом</button></div>
+    <div class="clip-modal-caption"><div class="clip-modal-title" id="clipModalTitle">Клип Twitch</div></div>
     <p class="clip-modal-help">Нажми кнопку воспроизведения в плеере, чтобы посмотреть клип. Если видео не загрузилось, проверь доступность Twitch и домен сайта.</p>
   </div>
 </div>
@@ -2616,33 +2616,6 @@ function openClipPlayer(clip, updateAddress = true) {
   params.set("autoplay", "false");
   params.set("muted", "true");
   frame.src = `https://clips.twitch.tv/embed?${params.toString()}`;
-  const shareButton = document.getElementById("clipShareButton");
-  if (shareButton) {
-    shareButton.disabled = false;
-    shareButton.textContent = "Поделиться клипом";
-    shareButton.onclick = async () => {
-      const shareUrl = makeClipShareUrl(clip);
-      if (!shareUrl) return;
-      try {
-        if (navigator.share) {
-          await navigator.share({title: clip.title || "Клип", url: shareUrl});
-        } else if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(shareUrl);
-          shareButton.textContent = "Ссылка скопирована!";
-        } else {
-          const input = document.createElement("textarea");
-          input.value = shareUrl; input.readOnly = true;
-          input.style.cssText = "position:fixed;left:-9999px;top:0";
-          document.body.appendChild(input); input.select();
-          const copied = document.execCommand("copy"); input.remove();
-          shareButton.textContent = copied ? "Ссылка скопирована!" : shareUrl;
-        }
-      } catch (error) {
-        if (error && error.name !== "AbortError") shareButton.textContent = "Не удалось поделиться";
-      }
-      window.setTimeout(() => { if (shareButton.isConnected) shareButton.textContent = "Поделиться клипом"; }, 2200);
-    };
-  }
   if (updateAddress) {
     const shareUrl = makeClipShareUrl(clip);
     if (shareUrl && window.location.href !== shareUrl) history.pushState({sharedClip: slug}, "", shareUrl);
