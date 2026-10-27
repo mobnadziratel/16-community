@@ -1856,8 +1856,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
 .brand-wordmark .brand-top,.brand-wordmark .brand-bottom{display:block!important;flex:0 0 auto;width:max-content;max-width:100%;font-size:.56em;font-weight:750;letter-spacing:-.025em;color:var(--muted);opacity:.88;transform:translateY(0);transition:transform .48s cubic-bezier(.2,.75,.25,1),opacity .35s ease,color .35s ease}
 .brand-wordmark .brand-main{display:block!important;flex:0 0 auto;width:max-content;max-width:100%;font-size:1em;font-weight:900;white-space:nowrap;transition:transform .48s cubic-bezier(.2,.75,.25,1),color .35s ease}
 .brand-wordmark .brand-main #brandMainLead{color:var(--accent)}\n.brand-wordmark[data-brand-state="moderators"] .brand-top{transform:translateY(1px)}\n.brand-wordmark[data-brand-state="moderators"] .brand-bottom{opacity:.9}\n.brand-wordmark[data-brand-state="community"] .brand-top{transform:translateY(1px)}\n.brand-wordmark[data-brand-state="community"] .brand-main #brandMainLead{color:var(--accent)}\n@media(max-width:500px){.brand-wordmark .brand-top,.brand-wordmark .brand-bottom{font-size:.52em}.brand-wordmark .brand-main{font-size:.9em}}\n@media(prefers-reduced-motion:reduce){.brand-wordmark,.brand-wordmark *{transition:none!important}}\n</style>
-</head>
-<body>
+</head><body>
 <header><div class="wrap nav">
   <span class="brand"><span class="logo" role="button" tabindex="0" aria-label="Нажмите 5 раз для анимации аватарок">
     <svg viewBox="0 0 48 48" role="presentation" focusable="false">
@@ -1871,23 +1870,21 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
 <main class="wrap" style="min-height:55vh"></main>
 <footer class="wrap"><span>Открывай каналы и поддерживай стримеров на Twitch <span style="color:var(--accent)">✦</span></span></footer>
 <script>
-(function(){
- const button=document.getElementById("themeToggle");
- const icon=document.getElementById("themeIcon");
- const label=document.getElementById("themeLabel");
- function setTheme(theme){
-  document.documentElement.dataset.theme=theme;
-  if(icon) icon.textContent=theme==="light"?"🌙":"☀️";
-  if(label) label.textContent=theme==="light"?"Тёмная тема":"Светлая тема";
- }
- let saved="dark";
- try{saved=localStorage.getItem("community-theme")||"dark"}catch(e){}
- setTheme(saved);
- if(button) button.addEventListener("click",function(){
-  const next=document.documentElement.dataset.theme==="light"?"dark":"light";
-  setTheme(next);
-  try{localStorage.setItem("community-theme",next)}catch(e){}
- });
+(function initThemeSwitcher(){
+ const root=document.documentElement,button=document.getElementById("themeToggle"),icon=document.getElementById("themeIcon"),label=document.getElementById("themeLabel");
+ if(!button||!icon||!label)return;
+ let saved=null;try{saved=localStorage.getItem("small-streamers-theme")}catch(_){}
+ function applyTheme(theme){root.dataset.theme=theme;const light=theme==="light";icon.textContent=light?"🌙":"☀️";label.textContent=light?"Тёмная тема":"Светлая тема";button.setAttribute("aria-label",light?"Включить тёмную тему":"Включить светлую тему");const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=light?"#f6f5fb":"#101014";try{localStorage.setItem("small-streamers-theme",theme)}catch(_){}}
+ applyTheme(saved==="light"||saved==="dark"?saved:"dark");
+ button.addEventListener("click",()=>{const next=root.dataset.theme==="light"?"dark":"light",rect=button.getBoundingClientRect(),x=rect.left+rect.width/2,y=rect.top+rect.height/2,radius=Math.hypot(Math.max(x,innerWidth-x),Math.max(y,innerHeight-y));root.style.setProperty("--theme-x",x+"px");root.style.setProperty("--theme-y",y+"px");root.style.setProperty("--theme-radius",radius+"px");if(document.startViewTransition&&!matchMedia("(prefers-reduced-motion: reduce)").matches)document.startViewTransition(()=>applyTheme(next));else applyTheme(next)});
+})();
+(function animateBrand(){
+ const top=document.getElementById("brandTop"),main=document.getElementById("brandMainLead"),bottom=document.getElementById("brandBottom"),wordmark=document.getElementById("brandWordmark");
+ if(!top||!main||!bottom||!wordmark)return;
+ const states=[["Модераторское","Стримерское","Наше","Модераторское Стримерское комьюнити Наше"],["Наше","Модераторское","Стримерское","Наше Модераторское комьюнити Стримерское"],["Стримерское","Наше","Модераторское","Стримерское Наше комьюнити Модераторское"]];
+ let index=0;
+ function next(){index=(index+1)%states.length;const vals=states[index];wordmark.setAttribute("aria-label",vals[3]);[[top,vals[0]],[main,vals[1]],[bottom,vals[2]]].forEach(([el,txt],i)=>{el.getAnimations().forEach(a=>a.cancel());el.textContent=txt;if(!matchMedia("(prefers-reduced-motion: reduce)").matches&&el.animate)el.animate([{transform:"translate3d(0,9px,0)",opacity:.72},{transform:"translate3d(0,0,0)",opacity:1}],{duration:680,delay:i*45,easing:"cubic-bezier(.22,1,.36,1)"})})}
+ if(!matchMedia("(prefers-reduced-motion: reduce)").matches)setInterval(next,4200);
 })();
 </script>
 </body>
