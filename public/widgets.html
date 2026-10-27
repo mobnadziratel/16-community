@@ -1860,11 +1860,12 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
 .chat-builder{padding:30px 0 42px;min-height:55vh}
 .widget-tabs{display:flex;gap:10px;margin:0 0 22px;flex-wrap:wrap}
 .widget-tab{border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:12px 18px;border-radius:12px;font:inherit;font-weight:850;cursor:pointer;transition:background .2s ease,color .2s ease,border-color .2s ease,transform .2s ease}
+.widget-tab.active{background:var(--accent);color:#111;border-color:var(--accent)}
 .widget-tab:hover{border-color:var(--accent);color:var(--text)}
 .widget-tab:active{transform:translateY(1px)}
 .widget-tab:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .widget-tab.active{background:var(--accent);color:#111;border-color:var(--accent)}
-@media(max-width:560px){.widget-tabs{gap:8px}.widget-tab{padding:11px 15px;min-height:44px}}
+@media(max-width:650px){.widget-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.widget-tab{width:100%;padding:12px 8px;text-align:center;min-height:44px}}
 .chat-intro{margin-bottom:20px}.chat-intro h1{font-size:clamp(25px,4vw,38px);margin:0 0 8px}.chat-intro p{color:var(--muted);margin:0}
 .city-widget-panel{padding:28px;border:1px solid var(--line);border-radius:18px;background:var(--panel);min-height:180px}.city-widget-panel h2{margin:0 0 12px;font-size:clamp(26px,4vw,38px);letter-spacing:-.04em}.city-widget-panel p{margin:0;color:var(--muted)}
 .chat-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.95fr);gap:18px;align-items:start}
@@ -1892,8 +1893,8 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
   <button class="theme-toggle" id="themeToggle" type="button" aria-label="Переключить тему"><span class="theme-icon" id="themeIcon">☀️</span><span id="themeLabel">Светлая тема</span></button>
 </div></header>
 <main class="wrap chat-builder">
-  <nav class="widget-tabs" role="tablist" aria-label="Разделы"><button class="widget-tab active" id="chatWidgetTab" type="button" role="tab" aria-selected="true" aria-controls="chatWidgetPanel">Чат</button><button class="widget-tab" id="cityWidgetTab" type="button" role="tab" aria-selected="false" aria-controls="cityWidgetPanel">Город</button></nav>
   <section class="chat-intro"><h1>Виджет чата для OBS</h1><p>Настрой оформление, цвета ников и Twitch-значки. Справа — живой пример того, как будет выглядеть чат.</p></section>
+  <nav class="widget-tabs tabs" role="tablist" aria-label="Разделы"><button class="tab-button active" id="chatWidgetTab" type="button" role="tab" aria-selected="true" aria-controls="chatWidgetPanel">Чат</button><button class="tab-button" id="cityWidgetTab" type="button" role="tab" aria-selected="false" aria-controls="cityWidgetPanel">Город</button></nav>
   <div class="chat-layout" id="chatWidgetPanel" role="tabpanel" aria-labelledby="chatWidgetTab">
     <section class="chat-panel">
       <h2>Оформление</h2>
