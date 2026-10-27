@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <title>Стрим-виджеты — 1°6 Community</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0e0e10;--panel:#18181b;--line:#303036;--muted:#adadb8;--accent:#9147ff}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#24153b 0,transparent 48%),var(--bg);color:#efeff1;font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+    main{width:min(1100px,100% - 32px);margin:0 auto;padding:48px 0}
+    .eyebrow{color:#bf94ff;text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:800}
+    h1{font-size:clamp(30px,5vw,48px);line-height:1.1;margin:10px 0 12px}
+    .intro{max-width:680px;color:var(--muted);margin:0 0 28px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:18px}
+    .widget{background:rgba(24,24,27,.92);border:1px solid var(--line);border-radius:18px;overflow:hidden;min-width:0}
+    .widget-head{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .widget-head h2{font-size:17px;margin:0;overflow-wrap:anywhere}
+    .pill{font-size:11px;color:#d6baff;background:#39215b;padding:4px 9px;border-radius:999px;white-space:nowrap}
+    .placeholder{min-height:190px;padding:24px;display:grid;place-items:center;text-align:center;color:var(--muted)}
+    .placeholder strong{display:block;color:#efeff1;margin-bottom:6px}
+    .placeholder code{color:#d6baff;overflow-wrap:anywhere}
+    .note{margin-top:24px;border:1px dashed #494052;border-radius:14px;padding:14px 16px;color:var(--muted);font-size:14px}
+    @media(max-width:480px){main{width:calc(100% - 22px);padding:30px 0}.widget-head{padding:14px}}
+  </style>
+</head>
+<body>
+  <main>
+    <div class="eyebrow">1°6 Community · отдельная страница</div>
+    <h1>Стрим-виджеты</h1>
+    <p class="intro">Отдельная площадка для виджетов трансляций. Эта страница не добавлена в навигацию основного сайта; блоки подготовлены для дальнейшего подключения стримов.</p>
+    <section class="grid" aria-label="Места для стрим-виджетов">
+      <article class="widget">
+        <header class="widget-head"><h2>Виджет стрима №1</h2><span class="pill">Место свободно</span></header>
+        <div class="placeholder"><div><strong>Здесь будет трансляция</strong>Подключим Twitch-канал и при необходимости чат.</div></div>
+      </article>
+      <article class="widget">
+        <header class="widget-head"><h2>Виджет стрима №2</h2><span class="pill">Место свободно</span></header>
+        <div class="placeholder"><div><strong>Здесь будет трансляция</strong>Можно разместить второй канал или другой стрим-виджет.</div></div>
+      </article>
+    </section>
+    <div class="note">Страница скрыта от индексации поисковиками, но сам адрес не является паролем: любой, кто узнает ссылку, сможет её открыть.</div>
+  </main>
+</body>
+</html>
