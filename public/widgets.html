@@ -1954,7 +1954,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
   const login=channel.value.trim().replace(/^@/,"").toLowerCase();
   if(!login){link.value="";open.href="#";open.style.pointerEvents="none";status.textContent="";return}
   if(!/^[a-z0-9_]{1,25}$/.test(login)){link.value="";open.href="#";open.style.pointerEvents="none";status.textContent="Введи корректный логин Twitch: латинские буквы, цифры и подчёркивание.";return}
-  const url=new URL("/chat-overlay.html",location.origin);url.searchParams.set("channel",login);
+  const url=new URL("https://www.twitch.tv/embed/"+encodeURIComponent(login)+"/chat");url.searchParams.set("parent",location.hostname);url.searchParams.set("darkpopout","");
   link.value=url.href;open.href=url.href;open.style.pointerEvents="auto";status.textContent="Ссылка готова для OBS.";
  }
  channel.addEventListener("input",update);
