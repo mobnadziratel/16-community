@@ -2727,7 +2727,21 @@ function render(filter="") {
     });
     const moderator = activeTab === "moderators";
     const modData = moderator ? [...moderators, ...editors, ...communityModerators].find(item => item.name === name && item.group === group) : null;
-    if (modData && !modData.communitySubmitted) {
+    if (!moderator) {
+      card.setAttribute("role", "link");
+      card.tabIndex = 0;
+      card.setAttribute("aria-label", `Открыть профиль стримера ${cardLabel}`);
+      card.addEventListener("click", event => {
+        if (!event.target.closest("a,button")) openStreamerProfile(name, true);
+      });
+      card.addEventListener("keydown", event => {
+        if (event.target !== card) return;
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openStreamerProfile(name, true);
+        }
+      });
+    } else if (modData && !modData.communitySubmitted) {
       card.setAttribute("role", "link");
       card.tabIndex = 0;
       card.setAttribute("aria-label", `Открыть анкету модератора ${cardLabel}`);
