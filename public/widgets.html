@@ -1911,10 +1911,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
     <section class="chat-panel">
       <h2>Предпросмотр</h2>
       <div class="chat-preview" id="chatPreview">
-        <div class="chat-line"><span class="chat-badge chat-twitch">★</span><span class="chat-name" style="color:#ff7a59">Rueumur</span><span class="chat-message">Всем привет! Как вам сегодняшний стрим?</span></div>
-        <div class="chat-line"><span class="chat-badge chat-mod">МОД</span><span class="chat-name" style="color:#55c7ff">NightFox</span><span class="chat-message">Отличный момент, клип уже сделал 🔥</span></div>
-        <div class="chat-line"><span class="chat-badge chat-sub">♥</span><span class="chat-name" style="color:#d78bff">luna_live</span><span class="chat-message">Привет чату 💜</span></div>
-        <div class="chat-line"><span class="chat-name" style="color:#b9ff36">stream_friend</span><span class="chat-message">!discord</span></div>
+        <div id="chatPreviewMessages" aria-live="polite"></div>
       </div>
     </section>
   </div>
@@ -1959,6 +1956,28 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
  }
  channel.addEventListener("input",update);
  copy.addEventListener("click",async()=>{if(!link.value){status.textContent="Сначала введи логин Twitch-канала.";return}try{await navigator.clipboard.writeText(link.value);status.textContent="Ссылка скопирована."}catch(_){link.select();status.textContent="Выделил ссылку — нажми Ctrl+C."}});
+})();
+(function loadRealPreviewNames(){
+ const streamers=[{"name":"AliceFagg","login":"alicefagg"},{"name":"mob_nadziratel","login":"mob_nadziratel"},{"name":"d1unizi","login":"d1unizi"},{"name":"plovecmolodec","login":"plovecmolodec"},{"name":"charakoi","login":"charakoi"},{"name":"kerik232tv","login":"kerik232tv"},{"name":"ribafyga","login":"ribafyga"},{"name":"mrbatosh","login":"mrbatosh"},{"name":"roman16rus","login":"roman16rus"},{"name":"rueumur","login":"rueumur"},{"name":"cherrys_fox","login":"cherrys_fox"},{"name":"hdr_straiker","login":"hdr_straiker"},{"name":"kostyan_321r","login":"kostyan_321r"},{"name":"sayjos","login":"sayjos"},{"name":"lo4kalove","login":"lo4kalove"},{"name":"slavabraze","login":"slavabraze"},{"name":"screada67","login":"screada67"},{"name":"ssh1nxx","login":"ssh1nxx"},{"name":"zavryz1el","login":"zavryz1el"},{"name":"ilyuha_lake","login":"ilyuha_lake"},{"name":"brill1antt","login":"brill1antt"},{"name":"helgard_simbirskiy","login":"helgard_simbirskiy"},{"name":"pickachu2281","login":"pickachu2281"},{"name":"zane5k5","login":"zane5k5"},{"name":"dima26rx1","login":"dima26rx1"},{"name":"ishak_kodolov","login":"ishak_kodolov"},{"name":"mandarin555q","login":"mandarin555q"},{"name":"ne_twig","login":"ne_twig"},{"name":"homka20_","login":"homka20_"},{"name":"medverina","login":"medverina"},{"name":"wildefild","login":"wildefild"},{"name":"dmitriy_okak","login":"dmitriy_okak"},{"name":"d1unizi","login":"d1unizi"},{"name":"agyha1","login":"agyha1"},{"name":"1dnel","login":"1dnel"},{"name":"wijwoetttt","login":"wijwoetttt"},{"name":"cherrys_fox","login":"cherrys_fox"},{"name":"mob_nadziratel","login":"mob_nadziratel"},{"name":"crazyhuman0577","login":"crazyhuman0577"},{"name":"luigi_2068","login":"luigi_2068"},{"name":"kerik232tv","login":"kerik232tv"},{"name":"theax0lotl1k","login":"theax0lotl1k"},{"name":"agyha1","login":"agyha1"}];
+ const moderators=[{"name":"wildefild","login":"wildefild"},{"name":"dmitriy_okak","login":"dmitriy_okak"},{"name":"d1unizi","login":"d1unizi"},{"name":"agyha1","login":"agyha1"},{"name":"1dnel","login":"1dnel"},{"name":"wijwoetttt","login":"wijwoetttt"},{"name":"cherrys_fox","login":"cherrys_fox"},{"name":"mob_nadziratel","login":"mob_nadziratel"},{"name":"crazyhuman0577","login":"crazyhuman0577"},{"name":"luigi_2068","login":"luigi_2068"},{"name":"kerik232tv","login":"kerik232tv"},{"name":"theax0lotl1k","login":"theax0lotl1k"}];
+ const preview=document.getElementById("chatPreviewMessages");
+ if(!preview)return;
+ const messages=[
+  {text:"Всем привет! Как вам сегодняшний стрим?",badge:"chat-twitch"},
+  {text:"Отличный момент, клип уже сделал 🔥",badge:"chat-mod"},
+  {text:"Привет чату 💜",badge:"chat-sub"},
+  {text:"!discord",badge:""}
+ ];
+ const pick=(arr,i)=>arr.length?arr[i%arr.length]:null;
+ const pool=[pick(streamers,8),pick(moderators,0),pick(streamers,3),pick(streamers,1)];
+ preview.innerHTML="";
+ pool.forEach((person,i)=>{
+  if(!person)return;
+  const line=document.createElement("div");line.className="chat-line";
+  if(messages[i].badge){const badge=document.createElement("span");badge.className="chat-badge "+messages[i].badge;badge.setAttribute("aria-label",i===1?"Модератор Twitch":i===2?"Подписчик Twitch":"Значок Twitch");line.appendChild(badge)}
+  const name=document.createElement("span");name.className="chat-name";name.textContent=person.name;name.dataset.twitchLogin=person.login;name.style.color=["#ff7a59","#55c7ff","#d78bff","#b9ff36"][i];line.appendChild(name);
+  const message=document.createElement("span");message.className="chat-message";message.textContent=messages[i].text;line.appendChild(message);preview.appendChild(line);
+ });
 })();
 (function chatWidgetBuilder(){
  const $=id=>document.getElementById(id),preview=$("chatPreview");
