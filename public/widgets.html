@@ -2025,7 +2025,9 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
    }catch(_){preview.querySelectorAll(".chat-name").forEach(el=>delete el.dataset.twitchColor)}
    apply();
  }
+ $("showBadges").addEventListener("change",()=>{apply();if($("showBadges").checked)loadOfficialBadges()});
  $("twitchNameColors").addEventListener("change",loadTwitchColors);
+ loadOfficialBadges();
 })();
 </script>
 </body>
