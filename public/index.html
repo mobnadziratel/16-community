@@ -2606,16 +2606,22 @@ function openClipPlayer(clip, updateAddress = true) {
   authorAvatar.alt = `Аватар ${authorName}`;
   if (login) loadTwitchAvatar(login, authorAvatar);
   if (!slug) {
+    frame.src = "about:blank";
     document.getElementById("clipModalTitle").textContent = "Не удалось определить клип";
     return;
   }
-  // Twitch embeds require parent= for the exact hosting domain. Never omit it.
-  const params = new URLSearchParams();
-  params.set("clip", slug);
-  params.set("parent", window.location.hostname || "small-streamers.onrender.com");
-  params.set("autoplay", "false");
-  params.set("muted", "true");
-  frame.src = `https://clips.twitch.tv/embed?${params.toString()}`;
+
+  // Twitch's clip player requires the exact parent hostname. Build the URL safely
+  // and reload it only after the modal has been opened.
+  const playerUrl = new URL("https://clips.twitch.tv/embed");
+  playerUrl.searchParams.set("clip", slug);
+  playerUrl.searchParams.set("parent", window.location.hostname || "small-streamers.onrender.com");
+  playerUrl.searchParams.set("autoplay", "false");
+  playerUrl.searchParams.set("muted", "true");
+  frame.setAttribute("allow", "autoplay; fullscreen; picture-in-picture");
+  frame.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
+  frame.src = playerUrl.toString();
+
   if (updateAddress) {
     const shareUrl = makeClipShareUrl(clip);
     if (shareUrl && window.location.href !== shareUrl) history.pushState({sharedClip: slug}, "", shareUrl);
