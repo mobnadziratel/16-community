@@ -49,7 +49,14 @@ if(background==="dark")document.body.classList.add("dark");
 const chat=document.getElementById("chat"),status=document.getElementById("status");let socket=null,retry=1000,closed=false;
 const badgeImages=new Map();
 function makeBadge(targetRoles,setId,version,label,cls){const url=badgeImages.get(setId+"/"+version)||badgeImages.get(setId+"/1");if(url){const img=document.createElement("img");img.className="role-badge";img.src=url;img.alt=label;img.title=label;img.loading="lazy";targetRoles.append(img)}else{const b=document.createElement("span");b.className="role-badge fallback "+cls;b.textContent=label;b.dataset.setId=setId;b.dataset.version=version;b.dataset.label=label;b.dataset.badgeClass=cls;targetRoles.append(b)}}
-async function loadOfficialBadges(){try{const res=await fetch("https://badges.twitch.tv/v1/badges/global/display");if(!res.ok)return;const data=await res.json();for(const [setId,set] of Object.entries(data.badge_sets||{})){for(const version of Object.values(set.versions||{})){if(version.image_url_1x)badgeImages.set(setId+"/"+version.id,version.image_url_1x);}}document.querySelectorAll(".role-badge.fallback[data-set-id]").forEach(old=>{const url=badgeImages.get(old.dataset.setId+"/"+old.dataset.version)||badgeImages.get(old.dataset.setId+"/1");if(!url)return;const img=document.createElement("img");img.className="role-badge";img.src=url;img.alt=old.dataset.label;img.title=old.dataset.label;img.loading="lazy";old.replaceWith(img)});}catch(e){console.warn("Twitch badge lookup unavailable",e)}}
+async function loadOfficialBadges(){
+  async function loadBadgeSet(url){try{const res=await fetch(url);if(!res.ok)return;const data=await res.json();for(const [setId,set] of Object.entries(data.badge_sets||{})){for(const version of Object.values(set.versions||{})){if(version.image_url_1x)badgeImages.set(setId+"/"+version.id,version.image_url_1x);}}}catch(e){console.warn("Twitch badge lookup unavailable:",url,e)}}
+  await Promise.all([
+    loadBadgeSet("https://badges.twitch.tv/v1/badges/global/display"),
+    loadBadgeSet("https://badges.twitch.tv/v1/badges/"+encodeURIComponent(channel)+"/display")
+  ]);
+  document.querySelectorAll(".role-badge.fallback[data-set-id]").forEach(old=>{const url=badgeImages.get(old.dataset.setId+"/"+old.dataset.version)||badgeImages.get(old.dataset.setId+"/1");if(!url)return;const img=document.createElement("img");img.className="role-badge";img.src=url;img.alt=old.dataset.label;img.title=old.dataset.label;img.loading="lazy";old.replaceWith(img)});
+}
 loadOfficialBadges();
 function renderBadge(targetRoles,setId,version,label,cls){makeBadge(targetRoles,setId,version,label,cls)}
 function showStatus(s){status.textContent=s}
