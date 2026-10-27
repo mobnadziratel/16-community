@@ -30,17 +30,93 @@
     <div class="eyebrow">1°6 Community · отдельная страница</div>
     <h1>Стрим-виджеты</h1>
     <p class="intro">Отдельная площадка для виджетов трансляций. Эта страница не добавлена в навигацию основного сайта; блоки подготовлены для дальнейшего подключения стримов.</p>
-    <section class="grid" aria-label="Места для стрим-виджетов">
-      <article class="widget">
-        <header class="widget-head"><h2>Виджет стрима №1</h2><span class="pill">Место свободно</span></header>
-        <div class="placeholder"><div><strong>Здесь будет трансляция</strong>Подключим Twitch-канал и при необходимости чат.</div></div>
-      </article>
-      <article class="widget">
-        <header class="widget-head"><h2>Виджет стрима №2</h2><span class="pill">Место свободно</span></header>
-        <div class="placeholder"><div><strong>Здесь будет трансляция</strong>Можно разместить второй канал или другой стрим-виджет.</div></div>
+    <section class="grid" aria-label="Виджет чата Twitch">
+      <article class="widget" style="grid-column:1/-1">
+        <header class="widget-head"><h2>Чат Twitch поверх стрима</h2><span class="pill">Для OBS</span></header>
+        <div style="padding:18px;display:grid;gap:12px">
+          <label for="channel" style="color:var(--muted);font-size:14px">Логин Twitch-канала</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <input id="channel" value="rueumer" placeholder="например, rueumer" autocomplete="off" style="flex:1;min-width:180px;background:#0e0e10;color:#efeff1;border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit">
+            <button id="loadChat" type="button" style="background:var(--accent);color:white;border:0;border-radius:10px;padding:12px 16px;font:600 14px system-ui;cursor:pointer">Показать чат</button>
+          </div>
+          <p style="color:var(--muted);font-size:13px;margin:0">Укажи логин канала без символа @. Для прозрачного наложения используй ссылку виджета в OBS как источник «Браузер».</p>
+          <div id="chatFrameWrap" style="height:520px;min-height:320px;background:transparent;border:1px solid var(--line);border-radius:12px;overflow:hidden">
+            <iframe id="chatFrame" title="Чат Twitch" src="https://www.twitch.tv/embed/rueumer/chat?parent=small-streamers.onrender.com&darkpopout" style="display:block;width:100%;height:100%;border:0" allow="clipboard-read; clipboard-write"></iframe>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button id="copyOverlay" type="button" style="background:#303036;color:#efeff1;border:1px solid #494950;border-radius:10px;padding:11px 14px;font:600 14px system-ui;cursor:pointer">Скопировать ссылку для OBS</button>
+            <span id="status" role="status" style="align-self:center;color:var(--muted);font-size:13px"></span>
+          </div>
+          <div class="note" style="margin:0">Примечание: встроенный чат Twitch имеет собственное оформление и может не быть полностью прозрачным. Если нужен именно прозрачный чат с отдельным стилем сообщений, потребуется отдельный overlay, получающий сообщения чата.</div>
+        </div>
       </article>
     </section>
     <div class="note">Страница скрыта от индексации поисковиками, но сам адрес не является паролем: любой, кто узнает ссылку, сможет её открыть.</div>
+    <script>
+      (() => {
+        const channelInput = document.getElementById("channel");
+        const frame = document.getElementById("chatFrame");
+        const status = document.getElementById("status");
+        const validChannel = value => /^[a-zA-Z0-9_]{1,25}$/.test(value);
+        function currentChannel(){ return channelInput.value.trim().replace(/^@/, "").toLowerCase(); }
+        function overlayUrl(){
+          const url = new URL(window.location.href);
+          url.search = "";
+          url.searchParams.set("channel", currentChannel());
+          url.searchParams.set("overlay", "1");
+          return url.toString();
+        }
+        function loadChat(){
+          const channel = currentChannel();
+          if(!validChannel(channel)){ status.textContent = "Проверь логин Twitch-канала."; return false; }
+          frame.src = "https://www.twitch.tv/embed/" + encodeURIComponent(channel) + "/chat?parent=small-streamers.onrender.com&darkpopout";
+          const url = new URL(window.location.href);
+          url.searchParams.set("channel", channel);
+          history.replaceState(null, "", url);
+          status.textContent = "Чат канала " + channel + " загружен.";
+          return true;
+        }
+        document.getElementById("loadChat").addEventListener("click", loadChat);
+        document.getElementById("copyOverlay").addEventListener("click", async () => {
+          if(!loadChat()) return;
+          try { await navigator.clipboard.writeText(overlayUrl()); status.textContent = "Ссылка для OBS скопирована."; }
+          catch { status.textContent = "Не удалось скопировать автоматически — скопируй адрес страницы вручную."; }
+        });
+        const params = new URLSearchParams(location.search);
+        if(params.get("channel") && validChannel(params.get("channel"))){
+          channelInput.value = params.get("channel").toLowerCase();
+          frame.src = "https://www.twitch.tv/embed/" + encodeURIComponent(channelInput.value) + "/chat?parent=small-streamers.onrender.com&darkpopout";
+        }
+        if(params.get("overlay") === "1"){
+          document.body.style.background = "transparent";
+          document.body.style.backgroundImage = "none";
+          document.querySelector("main").style.width = "100%";
+          document.querySelector("main").style.margin = "0";
+          document.querySelector("main").style.padding = "0";
+          document.querySelector(".eyebrow").style.display = "none";
+          document.querySelector("h1").style.display = "none";
+          document.querySelector(".intro").style.display = "none";
+          document.querySelector(".note").style.display = "none";
+          const widget = document.querySelector(".widget");
+          widget.style.border = "0";
+          widget.style.borderRadius = "0";
+          widget.style.background = "transparent";
+          widget.querySelector(".widget-head").style.display = "none";
+          widget.querySelector("div[style*='padding:18px']").style.padding = "0";
+          widget.querySelector("label").style.display = "none";
+          widget.querySelector("input").style.display = "none";
+          widget.querySelector("#loadChat").style.display = "none";
+          widget.querySelector("p").style.display = "none";
+          widget.querySelector("#copyOverlay").style.display = "none";
+          widget.querySelector("#status").style.display = "none";
+          widget.querySelector(".note").style.display = "none";
+          document.getElementById("chatFrameWrap").style.border = "0";
+          document.getElementById("chatFrameWrap").style.borderRadius = "0";
+          document.getElementById("chatFrameWrap").style.height = "100vh";
+          document.getElementById("chatFrameWrap").style.minHeight = "0";
+        }
+      })();
+    </script>
   </main>
 </body>
 </html>
