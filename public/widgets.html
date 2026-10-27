@@ -2016,18 +2016,15 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
      const response=await fetch("/api/chat-badges?channel=mob_nadziratel");
      if(!response.ok)throw new Error("Badges unavailable");
      const data=await response.json();
-     const mainModSvg='<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><rect x="1" y="1" width="34" height="34" rx="6" fill="#c83d4d"/><path d="M18 4.5 29 9v8.1c0 7-4.7 11.6-11 14.4C11.7 28.7 7 24.1 7 17.1V9Z" fill="#fff"/><path d="m18 10 2.1 4.3 4.8.7-3.5 3.4.8 4.8-4.2-2.3-4.2 2.3.8-4.8-3.5-3.4 4.8-.7Z" fill="#c83d4d"/></svg>';
-     const artistSvg='<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><rect x="1" y="1" width="34" height="34" rx="6" fill="#9147ff"/><path d="M18 6.5a11.5 11.5 0 1 0 0 23h2.2a3.3 3.3 0 0 0 2.2-5.7c-.9-.8-.3-2.2 1-2.2h2.1A5.5 5.5 0 0 0 31 16.1C30 10.5 24.4 6.5 18 6.5Z" fill="#fff"/><circle cx="11.5" cy="16" r="1.8" fill="#9147ff"/><circle cx="16" cy="11.5" r="1.8" fill="#9147ff"/><circle cx="22" cy="12" r="1.8" fill="#9147ff"/><circle cx="25" cy="17" r="1.8" fill="#9147ff"/></svg>';
      const sets={
        "chat-twitch":["broadcaster","1"],
        "chat-mod":["moderator","1"],
        "chat-vip":["vip","1"],
        "chat-sub":["subscriber","0"],
-       "chat-mainmod":["moderator","1"]
+       "chat-mainmod":["lead_moderator","1"],
+       "chat-artist":["artist","1"]
      };
      preview.querySelectorAll(".chat-badge").forEach(el=>{
-       if(el.classList.contains("chat-mainmod")){const img=document.createElement("img");img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(mainModSvg);img.alt="Главный модератор";img.title="Главный модератор · оформление в стиле Twitch";img.width=18;img.height=18;img.style.cssText="width:18px;height:18px;object-fit:contain;vertical-align:middle";el.replaceChildren(img);el.style.cssText="display:inline-flex;align-items:center;background:transparent;padding:0;margin:1px 2px 0 0";el.dataset.officialBadge="true";return;}
-       if(el.classList.contains("chat-artist")){const img=document.createElement("img");img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(artistSvg);img.alt="Художник";img.title="Художник · значок в стиле Twitch";img.width=18;img.height=18;img.style.cssText="width:18px;height:18px;object-fit:contain;vertical-align:middle";el.replaceChildren(img);el.style.cssText="display:inline-flex;align-items:center;background:transparent;padding:0;margin:1px 2px 0 0";el.dataset.officialBadge="true";return;}
        const match=Object.entries(sets).find(([cls])=>el.classList.contains(cls));
        if(!match)return;
        const [cls,[setId,preferredId]]=match;
