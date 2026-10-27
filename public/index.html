@@ -962,11 +962,11 @@ html[data-theme="light"] .tabs .tab-button + .tab-button::before {
 
 /* Fourth tab: layered realistic urban brick wall, weathering, spray paint and pasted posters. */
 #wallPanel { margin: 6px 0 30px; }
-.vysluga-graffiti-photo{position:absolute;top:1120px;left:clamp(18px,7%,90px);width:min(78%,760px);margin:0;transform:rotate(-1.2deg);z-index:2;border:7px solid rgba(20,17,26,.9);border-radius:3px;background:#17151f;box-shadow:0 18px 38px rgba(0,0,0,.55),0 0 0 2px rgba(145,71,255,.55);overflow:hidden}
-.vysluga-graffiti-art{display:block;width:100%;height:auto;aspect-ratio:16/9}
-@media(max-width:600px){.vysluga-graffiti-photo{top:1120px;left:5%;width:88%;border-width:4px}}
+.vysluga-graffiti-photo{position:absolute;top:2420px;left:clamp(18px,7%,90px);width:min(78%,760px);margin:0;transform:rotate(-1.2deg);z-index:2;border:0;border-radius:0;background:transparent;box-shadow:none;overflow:visible;pointer-events:none}
+.vysluga-graffiti-art{display:block;width:100%;height:auto;aspect-ratio:16/9;overflow:visible}
+@media(max-width:600px){.vysluga-graffiti-photo{top:2440px;left:5%;width:88%}}
 .wall-mural {
-  position:relative; isolation:isolate; min-height:2200px;
+  position:relative; isolation:isolate; min-height:3000px;
   padding:clamp(28px,5vw,58px) clamp(14px,3.5vw,42px) 48px; overflow:hidden;
   border:1px solid rgba(255,255,255,.18); border-radius:12px;
   background-color:#70483e;
@@ -1938,8 +1938,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
             <filter id="graffiti-rough"><feTurbulence type="fractalNoise" baseFrequency=".7" numOctaves="2" seed="9" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="2.8"/></filter>
             <pattern id="graffiti-bricks" width="180" height="72" patternUnits="userSpaceOnUse"><path d="M0 0H180M0 36H180M0 72H180M90 0V36M30 36V72" fill="none" stroke="#07070b" stroke-width="7" opacity=".7"/><path d="M0 2H180M0 38H180" stroke="#b8a4c9" stroke-width="1" opacity=".12"/></pattern>
           </defs>
-          <rect width="960" height="540" fill="url(#graffiti-brick)"/>
-          <rect width="960" height="540" fill="url(#graffiti-bricks)"/>
+          
           <g opacity=".5" fill="none" stroke="#9147ff" stroke-width="15" stroke-linecap="round"><path d="M28 154l86-48 36 38-57 36 63 27M832 105l-54 54 71 30-55 47M55 409l69-40 40 25M836 405l-53-39 68-36"/></g>
           <g filter="url(#graffiti-rough)" stroke-linejoin="round" paint-order="stroke fill">
             <text x="480" y="305" text-anchor="middle" font-family="Impact, 'Arial Black', sans-serif" font-size="142" font-weight="900" letter-spacing="-5" fill="#f1e8ff" stroke="#07070b" stroke-width="29">!выслуга</text>
