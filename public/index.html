@@ -359,7 +359,7 @@ html[data-theme="light"] .random-streamer-button{background:linear-gradient(135d
 }
 .card-social-icon.brand-icon-rutube img,
 .profile-social-icon.brand-icon-rutube img {
-  mix-blend-mode: multiply;
+  mix-blend-mode: normal;
 }
 html[data-theme="light"] .card-social-icon.brand-icon-telegram,
 html[data-theme="light"] .profile-social-icon.brand-icon-telegram { background: rgba(38,165,228,.065) !important; }
@@ -2437,6 +2437,7 @@ function loadSiteIcon(img, wrapper, url, label) {
   let svg = '';
   if (/(^|\.)rutube\.ru$/.test(hostname)) {
     brand = 'rutube';
+    svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><rect width="24" height="24" rx="6" fill="#7B2BCE"/><path d="M9 5.8c0-.7.8-1.1 1.4-.7l8.1 5.4c.6.4.6 1.3 0 1.7l-8.1 5.4c-.6.4-1.4 0-1.4-.7z" fill="#fff"/></svg>';
   } else if (/(^|\.)paypal\.(com|me)$/.test(hostname)) {
     brand = 'paypal';
     svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="#003087" d="M15.607 4.653H8.941L6.645 19.251H1.82L4.862 0h7.995c3.754 0 6.375 2.294 6.473 5.513c-.648-.478-2.105-.86-3.722-.86m6.57 5.546c0 3.41-3.01 6.853-6.958 6.853h-2.493L11.595 24H6.74l1.845-11.538h3.592c4.208 0 7.346-3.634 7.153-6.949a5.24 5.24 0 0 1 2.848 4.686M9.653 5.546h6.408c.907 0 1.942.222 2.363.541c-.195 2.741-2.655 5.483-6.441 5.483H8.714Z"/></svg>';
@@ -2460,8 +2461,8 @@ function loadSiteIcon(img, wrapper, url, label) {
       wrapper.classList.add('is-fallback');
       wrapper.style.background = brand === 'donationalerts' ? 'rgba(245,117,7,.08)' : 'rgba(145,71,255,.075)';
       wrapper.style.border = brand === 'donationalerts' ? '1px solid rgba(245,117,7,.42)' : '1px solid rgba(169,112,255,.34)';
-      wrapper.style.color = brand === 'donationalerts' ? '#F57D07' : (brand === 'paypal' ? '#003087' : '#26A5E4');
-      wrapper.textContent = brand === 'paypal' ? 'P' : (brand === 'telegram' ? '➤' : 'DA');
+      wrapper.style.color = brand === 'donationalerts' ? '#F57D07' : (brand === 'paypal' ? '#003087' : (brand === 'rutube' ? '#fff' : '#26A5E4'));
+      wrapper.textContent = brand === 'paypal' ? 'P' : (brand === 'telegram' ? '➤' : (brand === 'rutube' ? '▶' : 'DA'));
     };
     img.onerror = showFallback;
     if (brand === 'donationalerts') {
