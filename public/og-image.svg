@@ -9,11 +9,8 @@
 <circle cx="990" cy="330" r="300" fill="url(#glow)"/>
 <circle cx="1000" cy="330" r="190" fill="#6f2aff" opacity=".10" filter="url(#blur)"/>
 <path d="M0 540 Q300 470 600 560 T1200 500 V630 H0Z" fill="#110b20" opacity=".9"/>
-<text x="70" y="270" font-family="Arial, sans-serif" font-weight="900" font-size="112" fill="#fff">1°</text>
-<text x="177" y="270" font-family="Arial, sans-serif" font-weight="900" font-size="112" fill="url(#purple)">6</text>
-<path d="M315 155 V305" stroke="#8b55f6" stroke-width="2" opacity=".8"/>
-<text x="355" y="215" font-family="Arial, sans-serif" font-weight="800" font-size="47" fill="#fff">Small Streamers</text>
-<text x="355" y="275" font-family="Arial, sans-serif" font-weight="800" font-size="57" fill="url(#purple)">Community</text>
+<text x="72" y="215" font-family="Arial, sans-serif" font-weight="800" font-size="47" fill="#fff">Small Streamers</text>
+<text x="72" y="280" font-family="Arial, sans-serif" font-weight="800" font-size="57" fill="url(#purple)">Community</text>
 <text x="72" y="365" font-family="Arial, sans-serif" font-size="26" fill="#e6e0f1">Сообщество Twitch-стримеров</text>
 <text x="72" y="405" font-family="Arial, sans-serif" font-size="26" fill="#e6e0f1">Каналы • Клипы • Стена • Предложения</text>
 <g transform="translate(790 335)">
