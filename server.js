@@ -425,6 +425,37 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (url.pathname === "/api/chat-badges") {
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    res.setHeader("Cache-Control", "public, max-age=1800");
+    try {
+      const globalPayload = await helix("chat/badges/global", new URLSearchParams());
+      const sets = [...(globalPayload.data || [])];
+      const channelLogin = String(url.searchParams.get("channel") || "").trim().toLowerCase();
+      if (channelLogin && /^[a-z0-9_]{1,25}$/.test(channelLogin)) {
+        const userParams = new URLSearchParams(); userParams.append("login", channelLogin);
+        const userPayload = await helix("users", userParams);
+        const broadcaster = (userPayload.data || [])[0];
+        if (broadcaster) {
+          const badgeParams = new URLSearchParams({ broadcaster_id: String(broadcaster.id) });
+          const channelPayload = await helix("chat/badges", badgeParams);
+          sets.push(...(channelPayload.data || []));
+        }
+      }
+      const badges = {};
+      for (const set of sets) {
+        const versions = set.versions || [];
+        const version = versions.find(v => v.id === "1") || versions[0];
+        if (version && version.image_url_2x) badges[set.set_id] = { title: version.title || set.set_id, url: version.image_url_2x };
+      }
+      res.writeHead(200); res.end(JSON.stringify({ badges }));
+    } catch (error) {
+      console.error("Could not load official Twitch chat badges: " + error.message);
+      res.writeHead(503); res.end(JSON.stringify({ error: "Twitch badges temporarily unavailable", badges: {} }));
+    }
+    return;
+  }
+
   if (url.pathname === "/api/avatar") {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.setHeader("Cache-Control", "public, max-age=300");
