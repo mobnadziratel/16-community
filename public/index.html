@@ -2916,6 +2916,9 @@ function normalizeDirectorySearch(value="") {
     [/charakoi|чарик|чарон/g, "charakoi"],
     [/zane|зейн/g, "zane"],
     [/agyha1|агуха\s*1/g, "agyha1"],
+    [/the|зе|зэ/g, "the"],
+    [/0/g, "o"],
+    [/x/g, "ks"],
     [/foxes?/g, "fox"]
   ];
   for (const [pattern, replacement] of aliases) normalized = normalized.replace(pattern, replacement);
