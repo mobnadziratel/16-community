@@ -399,6 +399,32 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (url.pathname === "/api/chat-colors") {
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    res.setHeader("Cache-Control", "public, max-age=300");
+    const logins = [...new Set(String(url.searchParams.get("logins") || "")
+      .split(",").map(value => value.trim().toLowerCase()).filter(value => /^[a-z0-9_]{1,25}$/.test(value)))].slice(0, 100);
+    if (!logins.length) { res.writeHead(200); res.end(JSON.stringify({ colors: {} })); return; }
+    try {
+      const usersParams = new URLSearchParams();
+      for (const login of logins) usersParams.append("login", login);
+      const usersPayload = await helix("users", usersParams);
+      const users = usersPayload.data || [];
+      const colorParams = new URLSearchParams();
+      for (const user of users) colorParams.append("user_id", String(user.id));
+      const colorsPayload = users.length ? await helix("chat/color", colorParams) : { data: [] };
+      const colors = {};
+      for (const item of colorsPayload.data || []) {
+        if (item.color) colors[String(item.user_login || "").toLowerCase()] = item.color;
+      }
+      res.writeHead(200); res.end(JSON.stringify({ colors }));
+    } catch (error) {
+      console.error("Could not load Twitch chat colors: " + error.message);
+      res.writeHead(503); res.end(JSON.stringify({ error: "Twitch chat colors temporarily unavailable", colors: {} }));
+    }
+    return;
+  }
+
   if (url.pathname === "/api/avatar") {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
     res.setHeader("Cache-Control", "public, max-age=300");
