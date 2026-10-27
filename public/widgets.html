@@ -1999,14 +1999,15 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
      const response=await fetch("/api/chat-badges");
      if(!response.ok)throw new Error("Badges unavailable");
      const data=await response.json();
-     const map=[["chat-twitch","partner"],["chat-mod","moderator"],["chat-sub","subscriber"]];
+     const map=[["chat-twitch","broadcaster"],["chat-mod","moderator"],["chat-sub","vip"]];
      for(const [cls,key] of map){
-       const badge=data.badges?.[key];
-       if(!badge)continue;
+       const versions=data.badges?.[key]?.versions;
+       if(!versions?.length)continue;
+       const badge=versions.find(v=>v.id==="1")||versions[0];
        preview.querySelectorAll(".chat-badge."+cls).forEach(el=>{
-         if(el.dataset.officialBadge==="true")return;
          const img=document.createElement("img");img.src=badge.url;img.alt=badge.title;img.title=badge.title;
          img.width=18;img.height=18;img.style.cssText="width:18px;height:18px;object-fit:contain;vertical-align:middle";
+         img.onerror=()=>{el.replaceChildren();el.classList.add("chat-hidden")};
          el.replaceChildren(img);el.style.cssText="display:inline-flex;align-items:center;background:transparent;padding:0;margin:1px 2px 0 0";
          el.dataset.officialBadge="true";
        });
