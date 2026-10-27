@@ -1893,7 +1893,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
   <button class="theme-toggle" id="themeToggle" type="button" aria-label="Переключить тему"><span class="theme-icon" id="themeIcon">☀️</span><span id="themeLabel">Светлая тема</span></button>
 </div></header>
 <main class="wrap chat-builder">
-  <section class="chat-intro"><h1>Виджет чата для OBS</h1><p>Настрой оформление, цвета ников и Twitch-значки. Справа — живой пример того, как будет выглядеть чат.</p></section>
+  <section class="chat-intro" id="chatIntro"><h1>Виджет чата для OBS</h1><p>Настрой оформление, цвета ников и Twitch-значки. Справа — живой пример того, как будет выглядеть чат.</p></section>
   <nav class="widget-tabs tabs" role="tablist" aria-label="Разделы"><button class="tab-button active" id="chatWidgetTab" type="button" role="tab" aria-selected="true" aria-controls="chatWidgetPanel">Чат</button><button class="tab-button" id="cityWidgetTab" type="button" role="tab" aria-selected="false" aria-controls="cityWidgetPanel">Город</button></nav>
   <div class="chat-layout" id="chatWidgetPanel" role="tabpanel" aria-labelledby="chatWidgetTab">
     <section class="chat-panel">
@@ -2076,6 +2076,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
  const cityTab=document.getElementById("cityWidgetTab");
  const chatPanel=document.getElementById("chatWidgetPanel");
  const cityPanel=document.getElementById("cityWidgetPanel");
+ const chatIntro=document.getElementById("chatIntro");
  if(!chatTab||!cityTab||!chatPanel||!cityPanel)return;
  function activate(tab){
   const city=tab===cityTab;
@@ -2085,6 +2086,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
   cityTab.setAttribute("aria-selected",String(city));
   chatPanel.hidden=city;
   cityPanel.hidden=!city;
+  if(chatIntro)chatIntro.hidden=city;
  }
  chatTab.addEventListener("click",()=>activate(chatTab));
  cityTab.addEventListener("click",()=>activate(cityTab));
