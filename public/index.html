@@ -2276,6 +2276,7 @@ const streamers = [
     {label:"Fetta", url:"https://fetta.app/u/medverina"}
    ]}
 ];
+const communityModerators = [];
 const moderators = [
   {name:"wildefild", url:"https://www.twitch.tv/wildefild", group:"moderators", channels:["cherrys_fox","mrbatosh"], tagLabel:"Модератор у:"},
   {name:"dmitriy_okak", url:"https://www.twitch.tv/dmitriy_okak", group:"moderators", channels:["d1unizi","mob_nadziratel"], tagLabel:"Модератор у:"},
@@ -2709,12 +2710,12 @@ function render(filter="") {
   if (activeTab === "streamers" || activeTab === "moderators") {
     Object.values(grids).forEach(grid => grid.innerHTML = "");
   }
-  const directory = activeTab === "moderators" ? [...moderators, ...editors] : (activeTab === "streamers" ? streamers : []);
+  const directory = activeTab === "moderators" ? [...moderators, ...editors, ...communityModerators] : (activeTab === "streamers" ? streamers : []);
   // Build cards once per tab change. Search keystrokes only hide/show existing cards.
   directory.forEach(({name,url,group,displayName}, cardEnterIndex) => {
     const cardLabel = displayName || name;
     const streamIndex = streamers.findIndex(item => item.name === name);
-    const moderatorIndex = [...moderators, ...editors].findIndex(item => item.name === name);
+    const moderatorIndex = [...moderators, ...editors, ...communityModerators].findIndex(item => item.name === name);
     const i = streamIndex >= 0 ? streamIndex : streamers.length + Math.max(0, moderatorIndex);
     const card = document.createElement("div");
     card.className = "streamer card-appear";
@@ -2724,22 +2725,17 @@ function render(filter="") {
     card.addEventListener("animationend", event => {
       if (event.animationName === "streamer-card-appear") card.classList.remove("card-appear");
     });
-    card.setAttribute("role", "link");
-    card.tabIndex = 0;
-    card.setAttribute("aria-label", `Открыть анкету стримера ${cardLabel}`);
-    card.addEventListener("click", event => {
-      if (event.target.closest("a")) return;
-      openStreamerProfile(name, true);
-    });
-    card.addEventListener("keydown", event => {
-      if (event.target !== card) return;
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        openStreamerProfile(name, true);
-      }
-    });
     const moderator = activeTab === "moderators";
-    const modData = moderator ? [...moderators, ...editors].find(item => item.name === name && item.group === group) : null;
+    const modData = moderator ? [...moderators, ...editors, ...communityModerators].find(item => item.name === name && item.group === group) : null;
+    if (modData && !modData.communitySubmitted) {
+      card.setAttribute("role", "link");
+      card.tabIndex = 0;
+      card.setAttribute("aria-label", `Открыть анкету модератора ${cardLabel}`);
+      card.addEventListener("click", event => { if (!event.target.closest("a,button")) openStreamerProfile(name, true); });
+      card.addEventListener("keydown", event => { if (event.target !== card) return; if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openStreamerProfile(name, true); } });
+    } else if (modData && modData.communitySubmitted) {
+      card.dataset.communityModerator = "true";
+    }
     const moderationTags = modData ? `<div class="moderates"><span class="moderates-label">${modData.tagLabel}</span> ${modData.channels.map(channel => `<button type="button" class="moderates-tag" data-streamer-target="${String(channel).replace(/&/g, "&amp;").replace(/\"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}" aria-label="Найти стримера ${channel}">@${channel}</button>`).join(" ")}</div>` : "";
     card.innerHTML = `<div class="avatar"><img src="${avatarSvg(name,i)}" alt="Аватар ${name}" loading="eager" referrerpolicy="no-referrer"></div>
       <div class="info"><div class="name">${cardLabel}</div>${moderator ? "" : ``}${moderator ? moderationTags : `<div class="status-line"><div class="live-status is-loading" data-status="${name}">Проверяем эфир…</div></div><div class="stream-meta" data-meta="${name}"></div>`}</div>
@@ -3605,18 +3601,13 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
       if(wallFeed)wallFeed.replaceChildren();
       const allApproved=data.submissions||[];
       const suggested=allApproved.filter(item=>item.kind==="streamer");
-      const moderatorGrid=byId("moderatorsGrid");
-      if(moderatorGrid){
-        moderatorGrid.querySelectorAll("[data-community-moderator]").forEach(card=>card.remove());
-        allApproved.filter(item=>item.kind==="moderator").forEach(item=>{
-          const card=makeText("article","","streamer");card.dataset.communityModerator="true";
-          card.append(makeText("h3",String(item.moderatorName||item.nickname||"Модератор")));
-          card.append(makeText("p","Модератор сообщества","streamer-description"));
-          const channels=Array.isArray(item.moderatorOf)?item.moderatorOf:[];
-          if(channels.length){card.append(makeText("p","Модерирует каналы:","streamer-description"));channels.forEach(login=>{const a=document.createElement("a");a.href="https://www.twitch.tv/"+encodeURIComponent(login);a.target="_blank";a.rel="noopener noreferrer";a.textContent="@"+login;a.style.marginRight="8px";card.append(a);});}
-          moderatorGrid.append(card);
-        });
-      }
+      communityModerators.splice(0, communityModerators.length, ...allApproved.filter(item=>item.kind==="moderator").map((item,index)=>({
+        name:String(item.moderatorName||item.nickname||"Модератор"),
+        url:"", group:"moderators", channels:Array.isArray(item.moderatorOf)?item.moderatorOf:[],
+        tagLabel:"Модерирует каналы:", communitySubmitted:true,
+        submissionId:item.id, cardIndex:index
+      })).filter(item=>item.channels.length));
+      if(activeTab==="moderators") render(document.getElementById("moderatorSearch").value||"");
       let addedToDirectory=false;
       suggested.forEach(item=>{
         const login=String(item.twitchLogin||"").toLowerCase();
