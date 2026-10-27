@@ -962,7 +962,7 @@ html[data-theme="light"] .tabs .tab-button + .tab-button::before {
 
 /* Fourth tab: layered realistic urban brick wall, weathering, spray paint and pasted posters. */
 #wallPanel { margin: 6px 0 30px; }
-.vysluga-graffiti-photo{position:absolute;top:2420px;left:clamp(18px,7%,90px);width:min(78%,760px);margin:0;transform:rotate(-1.2deg);z-index:2;border:0;border-radius:0;background:transparent;box-shadow:none;overflow:visible;pointer-events:none}
+.vysluga-graffiti-photo{position:absolute;top:2420px;left:clamp(18px,7%,90px);width:min(78%,760px);margin:0;transform:none;z-index:2;border:0;border-radius:0;background:transparent!important;box-shadow:none!important;overflow:visible;pointer-events:none}
 .vysluga-graffiti-art{display:block;width:100%;height:auto;aspect-ratio:16/9;overflow:visible}
 @media(max-width:600px){.vysluga-graffiti-photo{top:2440px;left:5%;width:88%}}
 .wall-mural {
@@ -1933,21 +1933,13 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
       <article class="vysluga-graffiti-photo" aria-label="Граффити с надписью !выслуга">
         <svg class="vysluga-graffiti-art" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-label="Фотография граффити: !выслуга">
           <defs>
-            <linearGradient id="graffiti-brick" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#17151f"/><stop offset=".52" stop-color="#292333"/><stop offset="1" stop-color="#100f16"/></linearGradient>
-            <linearGradient id="graffiti-purple" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#c7a2ff"/><stop offset=".45" stop-color="#9147ff"/><stop offset="1" stop-color="#5a25a9"/></linearGradient>
-            <filter id="graffiti-rough"><feTurbulence type="fractalNoise" baseFrequency=".7" numOctaves="2" seed="9" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="2.8"/></filter>
-            <pattern id="graffiti-bricks" width="180" height="72" patternUnits="userSpaceOnUse"><path d="M0 0H180M0 36H180M0 72H180M90 0V36M30 36V72" fill="none" stroke="#07070b" stroke-width="7" opacity=".7"/><path d="M0 2H180M0 38H180" stroke="#b8a4c9" stroke-width="1" opacity=".12"/></pattern>
+            <linearGradient id="graffiti-purple" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#e6d7ff"/><stop offset=".48" stop-color="#a970ff"/><stop offset="1" stop-color="#7b2bce"/></linearGradient>
+            <filter id="graffiti-shadow" x="-15%" y="-20%" width="130%" height="145%"><feGaussianBlur in="SourceAlpha" stdDeviation="3"/><feOffset dy="7"/><feComponentTransfer><feFuncA type="linear" slope=".65"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
           </defs>
-          
-          <g opacity=".5" fill="none" stroke="#9147ff" stroke-width="15" stroke-linecap="round"><path d="M28 154l86-48 36 38-57 36 63 27M832 105l-54 54 71 30-55 47M55 409l69-40 40 25M836 405l-53-39 68-36"/></g>
-          <g filter="url(#graffiti-rough)" stroke-linejoin="round" paint-order="stroke fill">
-            <text x="480" y="305" text-anchor="middle" font-family="Impact, 'Arial Black', sans-serif" font-size="142" font-weight="900" letter-spacing="-5" fill="#f1e8ff" stroke="#07070b" stroke-width="29">!выслуга</text>
-            <text x="480" y="305" text-anchor="middle" font-family="Impact, 'Arial Black', sans-serif" font-size="142" font-weight="900" letter-spacing="-5" fill="#f4efff" stroke="url(#graffiti-purple)" stroke-width="13">!выслуга</text>
-            <text x="480" y="305" text-anchor="middle" font-family="Impact, 'Arial Black', sans-serif" font-size="142" font-weight="900" letter-spacing="-5" fill="#f4efff" stroke="#fff" stroke-width="1">!выслуга</text>
+          <g filter="url(#graffiti-shadow)" paint-order="stroke fill">
+            <text x="480" y="310" text-anchor="middle" font-family="Arial Black, Impact, sans-serif" font-size="148" font-weight="900" letter-spacing="-4" fill="#ffffff" stroke="#211331" stroke-width="26" stroke-linejoin="round">!выслуга</text>
+            <text x="480" y="310" text-anchor="middle" font-family="Arial Black, Impact, sans-serif" font-size="148" font-weight="900" letter-spacing="-4" fill="#ffffff" stroke="url(#graffiti-purple)" stroke-width="10" stroke-linejoin="round">!выслуга</text>
           </g>
-          <g fill="#9147ff" opacity=".9"><path d="M190 324h8l-3 68h-4zM228 327h7l-3 42h-4zM666 323h7l-4 76h-4zM718 322h6l-2 48h-4zM483 330h7l-4 91h-4z"/></g>
-          <g fill="#c8a5ff" opacity=".7"><circle cx="138" cy="266" r="5"/><circle cx="176" cy="340" r="3"/><circle cx="752" cy="266" r="4"/><circle cx="804" cy="314" r="6"/><circle cx="314" cy="372" r="3"/><circle cx="619" cy="375" r="4"/></g>
-          <rect width="960" height="540" fill="none" stroke="#050409" stroke-width="28" opacity=".35"/>
         </svg>
       </article>
       <div class="wanted-poster" aria-label="Шуточный плакат розыска cherrys_fox">
