@@ -2914,12 +2914,15 @@ function normalizeDirectorySearch(value="") {
     [/cherrys?|cherries/g, "cherry"],
     // Treat these spellings as the same streamer/search alias.
     [/charakoi|чарик|чарон/g, "charakoi"],
+    [/zane|зейн/g, "zane"],
+    [/agyha1|агуха\s*1/g, "agyha1"],
     [/foxes?/g, "fox"]
   ];
   for (const [pattern, replacement] of aliases) normalized = normalized.replace(pattern, replacement);
   return normalized
     .replace(/[а-яё]/g, char => transliteration[char] ?? char)
     .replace(/1/g, "i")
+    .replace(/y/g, "u")
     .replace(/[\s._*\\-]+/g, "")
     .trim();
 }
