@@ -1949,6 +1949,26 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
  $("resetChat").addEventListener("click",()=>{ $("chatBg").value=defaults.bg;$("chatText").value=defaults.text;$("chatName").value=defaults.name;$("chatAccent").value=defaults.accent;$("chatSize").value=defaults.size;$("chatStyle").value=defaults.style;$("showBadges").checked=defaults.badges;$("showTime").checked=defaults.time;$("boldNames").checked=defaults.bold;$("transparentBg").checked=defaults.transparent;$("twitchNameColors").checked=defaults.twitchNameColors;apply()});
  $("downloadConfig").addEventListener("click",()=>{const blob=new Blob([JSON.stringify(settings(),null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="obs-chat-settings.json";a.click();URL.revokeObjectURL(url)});
  apply();
+ async function loadOfficialBadges(){
+   if(!$("showBadges").checked)return;
+   try{
+     const response=await fetch("/api/chat-badges");
+     if(!response.ok)throw new Error("Badges unavailable");
+     const data=await response.json();
+     const map=[["chat-twitch","partner"],["chat-mod","moderator"],["chat-sub","subscriber"]];
+     for(const [cls,key] of map){
+       const badge=data.badges?.[key];
+       if(!badge)continue;
+       preview.querySelectorAll(".chat-badge."+cls).forEach(el=>{
+         if(el.dataset.officialBadge==="true")return;
+         const img=document.createElement("img");img.src=badge.url;img.alt=badge.title;img.title=badge.title;
+         img.width=18;img.height=18;img.style.cssText="width:18px;height:18px;object-fit:contain;vertical-align:middle";
+         el.replaceChildren(img);el.style.cssText="display:inline-flex;align-items:center;background:transparent;padding:0;margin:1px 2px 0 0";
+         el.dataset.officialBadge="true";
+       });
+     }
+   }catch(_){}
+ }
  async function loadTwitchColors(){
    if(!$("twitchNameColors").checked){preview.querySelectorAll(".chat-name").forEach(el=>{el.style.color=settings().name});return}
    const logins=[...preview.querySelectorAll(".chat-name")].map(el=>el.textContent.trim().toLowerCase()).filter(Boolean);
