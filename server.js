@@ -680,8 +680,9 @@ const server = http.createServer(async (req, res) => {
         if (!["approve", "reject", "delete"].includes(action)) return sendJson(400, { error: "Неизвестное действие." });
         const db = await loadDb(), item = db.submissions.find(entry => entry.id === actionMatch[1]);
         if (!item) return sendJson(404, { error: "Заявка не найдена." });
-        if (item.kind === "wall" && item.status === "approved" && action !== "approve") {
-          return sendJson(409, { error: "Одобренные публикации на стене нельзя отклонить или удалить. Они остаются опубликованными." });
+        if (item.status === "approved" && ["wall", "streamer"].includes(item.kind) && action !== "approve") {
+          const typeLabel = item.kind === "streamer" ? "Одобренных стримеров" : "Одобренных публикаций на стене";
+          return sendJson(409, { error: typeLabel + " нельзя отклонить или удалить. Они остаются опубликованными после перезагрузки страницы." });
         }
         if (action === "delete") db.submissions = db.submissions.filter(entry => entry.id !== item.id);
         else { item.status = action === "approve" ? "approved" : "rejected"; item.reviewedAt = new Date().toISOString(); item.reviewedBy = session.username; }
