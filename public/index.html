@@ -2926,6 +2926,7 @@ function normalizeDirectorySearch(value="") {
     .replace(/[а-яё]/g, char => transliteration[char] ?? char)
     .replace(/1/g, "i")
     .replace(/y/g, "u")
+    .replace(/[aэае]/g, "a")
     .replace(/[\s._*\\-]+/g, "")
     .trim();
 }
