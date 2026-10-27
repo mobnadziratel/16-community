@@ -1868,7 +1868,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
 .widget-tab:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .widget-tab.active{background:var(--accent);color:#111;border-color:var(--accent)}
 @media(max-width:650px){.widget-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.widget-tab{width:100%;padding:12px 8px;text-align:center;min-height:44px}}
-.chat-intro{margin-bottom:20px}.chat-intro h1{font-size:clamp(25px,4vw,38px);margin:0 0 8px}.chat-intro p{color:var(--muted);margin:0}
+.chat-intro{margin:10px 0 20px}.chat-intro h1{font-size:clamp(25px,4vw,38px);margin:0 0 8px}.chat-intro p{color:var(--muted);margin:0}
 .city-widget-panel{padding:28px;border:1px solid var(--line);border-radius:18px;background:var(--panel);min-height:180px}.city-widget-panel h2{margin:0 0 12px;font-size:clamp(26px,4vw,38px);letter-spacing:-.04em}.city-widget-panel p{margin:0;color:var(--muted)}
 .chat-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.95fr);gap:18px;align-items:start}
 .chat-panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;min-width:0}
@@ -1926,7 +1926,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
       </div>
     </section>
   </div>
-<section class="chat-panel" style="margin-top:22px">
+<section id="obsLinkPanel" class="chat-panel" style="margin-top:22px">
   <h2>Ссылка для OBS</h2>
   <p class="chat-note">Введи логин Twitch-канала — получишь ссылку на отдельный живой виджет чата для OBS, без интерфейса Twitch.</p>
   <div class="chat-field" style="max-width:520px"><label for="obsChannel">Канал Twitch</label><input id="obsChannel" type="text" placeholder="например, rueumur" autocomplete="off" spellcheck="false" maxlength="25"></div>
@@ -2090,6 +2090,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
   chatPanel.hidden=city;
   cityPanel.hidden=!city;
   if(chatIntro)chatIntro.hidden=city;
+  if(obsLinkPanel)obsLinkPanel.hidden=city;
  }
  chatTab.addEventListener("click",()=>activate(chatTab));
  cityTab.addEventListener("click",()=>activate(cityTab));
