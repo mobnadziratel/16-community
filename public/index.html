@@ -3321,6 +3321,7 @@ document.addEventListener("keydown", event => { if (event.key === "Escape" && do
 document.getElementById("clipPeriod").addEventListener("change", () => { saveClipSettings(); loadClips(true); });
 document.getElementById("clipSort").addEventListener("change", () => { saveClipSettings(); renderClips(); });
 document.getElementById("refreshClips").addEventListener("click", () => loadClips(true));
+if (new URLSearchParams(window.location.search).has("clip")) loadClips(true);
 const backToTopButton = document.getElementById("backToTopButton");
 backToTopButton.addEventListener("click", () => {
   const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
