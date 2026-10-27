@@ -1900,11 +1900,11 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
         <div class="chat-field"><label for="chatBubble">Цвет пузырьков</label><input id="chatBubble" type="color" value="#292936"></div>
         <div class="chat-field"><label for="chatOutline">Цвет обводки сообщений</label><input id="chatOutline" type="color" value="#9147ff"></div>
         <div class="chat-field"><label for="chatSize">Размер текста</label><select id="chatSize"><option value="14">Маленький</option><option value="16" selected>Обычный</option><option value="19">Крупный</option><option value="22">Очень крупный</option></select></div>
-        <div class="chat-field"><label for="chatStyle">Оформление сообщений</label><select id="chatStyle"><option value="clean">Без рамок</option><option value="bubble">Отдельные пузырьки</option><option value="outline">Отдельная обводка каждого сообщения</option><option value="soft-outline">Мягкая обводка каждого сообщения</option><option value="bubble-outline">Пузырьки с обводкой</option></select></div>
+        <div class="chat-field"><label for="chatStyle">Оформление сообщений</label><select id="chatStyle"><option value="clean">Без рамок</option><option value="bubble">Пузырьки</option><option value="soft-outline">Обводка</option><option value="bubble-outline">Пузырьки с обводкой</option></select></div>
         <label class="chat-check"><input id="showBadges" type="checkbox" checked> Twitch-значки</label>
         <label class="chat-check"><input id="showTime" type="checkbox"> Время сообщений</label>
         <label class="chat-check"><input id="boldNames" type="checkbox" checked> Жирные ники</label>
-        <label class="chat-check"><input id="twitchNameColors" type="checkbox"> Цвет ников как на Twitch</label>
+        <label class="chat-check"><input id="twitchNameColors" type="checkbox" checked> Цвет ников как на Twitch</label>
         <label class="chat-check"><input id="transparentBg" type="checkbox"> Прозрачный фон</label>
       </div>
       <div class="chat-actions"><button class="chat-action" id="downloadConfig" type="button">Скачать настройки</button><button class="chat-action chat-secondary" id="resetChat" type="button">Сбросить</button></div>
@@ -1967,25 +1967,25 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
  const shuffle=a=>a.slice().sort(()=>Math.random()-.5);
  const people=shuffle(streamers);
  const mod=moderators.length?random(moderators):random(streamers);
- const pool=[people[0],mod,people[1]||people[0],people[2]||people[0]];
+ const pool=people.slice(0,Math.min(12,people.length));
  const messages=[
   {text:"Всем привет! Как вам сегодняшний стрим?",badge:"chat-twitch"},
   {text:"Хороший момент, уже сохранил клип 🔥",badge:"chat-mod"},
   {text:"Привет всем в чате 💜",badge:"chat-sub"},
   {text:"!discord",badge:""}
  ];
- const samples=["Всем привет! Как вам сегодняшний стрим?","ХАХАХА, отличный момент 😂","Привет чату 💜","!discord","Классная катка 🔥","Как настроение?","Вот это поворот 👀","Зашёл на стрим, всем привет!","Кто тоже это заметил?","Имба момент","Удачи на стриме!","АХАХАХА"];
+ const samples=["Всем привет! Как вам сегодняшний стрим?","ХАХАХА, отличный момент 😂","Привет чату 💜","!discord","Классная катка 🔥","Как настроение?","Вот это поворот 👀","Зашёл на стрим, всем привет!","Кто тоже это заметил?","Имба момент","Удачи на стриме!","АХАХАХА","Чат сегодня активный 😎","Давай ещё одну катку!","Кто откуда смотрит?","Музыка топовая 🎵","Это надо было видеть","Клип уже готов 😂","ПОВТОРИ ЭТО","легендарно","стрим как всегда уютный","!соцсети","гоооо 🔥","ну это база","минус мораль у соперника","лучший момент за сегодня","всем хорошего вечера","+вайб","неожиданно получилось","чат, вы это видели?!","я так и знал","подписка оформлена 💜","с возвращением!","не отвлекайся, мы верим","АХАХА, не могу","чисто случайно получилось","пора в хайлайты","сильная игра","ещё раз GG","красиво сыграно 👏"];
  preview.innerHTML="";
  pool.forEach((person,i)=>{if(!person)return;const line=document.createElement("div");line.className="chat-line";
-  if(messages[i].badge){const badge=document.createElement("span");badge.className="chat-badge "+messages[i].badge;badge.setAttribute("aria-label",i===1?"Модератор Twitch":i===2?"Подписчик Twitch":"Значок Twitch");line.appendChild(badge)}
-  const name=document.createElement("span");name.className="chat-name";name.textContent=person.name;name.dataset.twitchLogin=person.login;name.style.color=["#ff7a59","#55c7ff","#d78bff","#b9ff36"][i];line.appendChild(name);
+  const messagePreset=messages[i%messages.length];if(messagePreset.badge){const badge=document.createElement("span");badge.className="chat-badge "+messagePreset.badge;badge.setAttribute("aria-label",i===1?"Модератор Twitch":i===2?"Подписчик Twitch":"Значок Twitch");line.appendChild(badge)}
+  const name=document.createElement("span");name.className="chat-name";name.textContent=person.name;name.dataset.twitchLogin=person.login;name.style.color=["#ff7a59","#55c7ff","#d78bff","#b9ff36","#f2a1d1","#72dfbd"][i%6];line.appendChild(name);
   const message=document.createElement("span");message.className="chat-message";message.textContent=random(samples);line.appendChild(message);preview.appendChild(line);
  });
 })();
 (function chatWidgetBuilder(){
  const $=id=>document.getElementById(id),preview=$("chatPreview");
  if(!preview)return;
- const defaults={bg:"#111116",text:"#f5f5f7",name:"#b9ff36",accent:"#9147ff",outline:"#9147ff",bubble:"#292936",size:"16",style:"clean",badges:true,time:false,bold:true,transparent:false,twitchNameColors:false};
+ const defaults={bg:"#111116",text:"#f5f5f7",name:"#b9ff36",accent:"#9147ff",outline:"#9147ff",bubble:"#292936",size:"16",style:"clean",badges:true,time:false,bold:true,transparent:false,twitchNameColors:true};
  function settings(){return {bg:$("chatBg").value,text:$("chatText").value,name:$("chatName").value,accent:$("chatAccent").value,outline:$("chatOutline").value,bubble:$("chatBubble").value,size:$("chatSize").value,style:$("chatStyle").value,badges:$("showBadges").checked,time:$("showTime").checked,bold:$("boldNames").checked,transparent:$("transparentBg").checked,twitchNameColors:$("twitchNameColors").checked}}
  function apply(){const v=settings();preview.style.setProperty("--chat-bg",v.transparent?"transparent":v.bg);const messageColor=document.documentElement.dataset.theme==="light"?"#20212a":v.text;preview.style.setProperty("--chat-text",messageColor);preview.querySelectorAll(".chat-message").forEach(el=>el.style.color=messageColor);preview.style.setProperty("--chat-size",v.size+"px");preview.style.background=v.transparent?"transparent":v.bg;preview.querySelectorAll(".chat-name").forEach(el=>{el.style.color=v.twitchNameColors?(el.dataset.twitchColor||v.name):v.name;el.style.fontWeight=v.bold?"800":"500"});preview.querySelectorAll(".chat-badge").forEach(el=>el.classList.toggle("chat-hidden",!v.badges));preview.querySelectorAll(".chat-line").forEach(el=>{const boxed=v.style!=="clean";el.style.boxSizing="border-box";el.style.width="100%";el.style.background=(v.style==="bubble"||v.style==="bubble-outline")?v.bubble:"transparent";el.style.border=(v.style==="outline"||v.style==="soft-outline"||v.style==="bubble-outline")?"1px solid "+v.outline:"none";el.style.boxShadow=v.style==="soft-outline"?"0 0 0 1px "+v.outline+"22":"none";el.style.borderRadius=boxed?"9px":"0";el.style.padding=boxed?"6px 8px":"0";el.style.marginBottom=boxed?"8px":"13px"});preview.querySelectorAll(".chat-twitch").forEach(el=>el.style.background=v.accent);preview.querySelectorAll(".chat-line").forEach(el=>{let t=el.querySelector(".chat-time");if(v.time&&!t){t=document.createElement("span");t.className="chat-time";t.textContent="00:42";t.style.cssText="font-size:.75em;opacity:.55;order:-1";el.prepend(t)}else if(!v.time&&t)t.remove()})}
  ["chatBg","chatText","chatName","chatAccent","chatOutline","chatBubble","chatSize","chatStyle","showBadges","showTime","boldNames","transparentBg","twitchNameColors"].forEach(id=>$(id).addEventListener("input",apply));
