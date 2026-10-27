@@ -1922,7 +1922,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
   <p class="chat-note">Введи логин Twitch-канала — получишь ссылку на отдельный живой виджет чата для OBS, без интерфейса Twitch.</p>
   <div class="chat-field" style="max-width:520px"><label for="obsChannel">Канал Twitch</label><input id="obsChannel" type="text" placeholder="например, rueumur" autocomplete="off" spellcheck="false" maxlength="25"></div>
   <div class="chat-field" style="max-width:520px;margin-top:12px"><label for="obsLink">Ссылка для OBS</label><input id="obsLink" type="url" readonly placeholder="Ссылка появится после ввода канала"></div>
-  <div class="chat-actions"><button class="chat-action" id="copyObsLink" type="button">Копировать ссылку</button><a class="chat-action chat-secondary" id="openObsLink" href="#" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;text-decoration:none">Открыть предпросмотр</a></div>
+  <div class="chat-actions"><button class="chat-action" id="copyObsLink" type="button">Копировать ссылку</button></div>
   <p class="chat-note">В OBS: «Источники» → «+» → «Браузер» → вставь ссылку. Рекомендуемый размер: 450 × 800. Это отдельный виджет: сообщения появляются в реальном времени, а оформление берётся из выбранных настроек.</p>
   <p id="obsLinkStatus" class="chat-note" aria-live="polite"></p>
 </section>
@@ -1947,14 +1947,14 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
 })();
 
 (function obsLinkGenerator(){
- const channel=document.getElementById("obsChannel"),link=document.getElementById("obsLink"),open=document.getElementById("openObsLink"),copy=document.getElementById("copyObsLink"),status=document.getElementById("obsLinkStatus");
- if(!channel||!link||!open||!copy)return;
+ const channel=document.getElementById("obsChannel"),link=document.getElementById("obsLink"),copy=document.getElementById("copyObsLink"),status=document.getElementById("obsLinkStatus");
+ if(!channel||!link||!copy||!status)return;
  function update(){
   const login=channel.value.trim().replace(/^@/,"").toLowerCase();
-  if(!login){link.value="";open.href="#";open.style.pointerEvents="none";status.textContent="";return}
-  if(!/^[a-z0-9_]{1,25}$/.test(login)){link.value="";open.href="#";open.style.pointerEvents="none";status.textContent="Введи корректный логин Twitch: латинские буквы, цифры и подчёркивание.";return}
-  const url=new URL("/chat-overlay.html",location.origin);url.searchParams.set("channel",login);url.searchParams.set("style",settings().style);url.searchParams.set("bg",settings().bg);url.searchParams.set("text",settings().text);url.searchParams.set("name",settings().name);url.searchParams.set("accent",settings().accent);url.searchParams.set("outline",settings().outline);url.searchParams.set("bubble",settings().bubble);url.searchParams.set("size",settings().size);url.searchParams.set("twitchColors",settings().twitchNameColors?"1":"0");
-  link.value=url.href;open.href=url.href;open.style.pointerEvents="auto";status.textContent="Ссылка готова для OBS.";
+  if(!login){link.value="";status.textContent="";return}
+  if(!/^[a-z0-9_]{1,25}$/.test(login)){link.value="";status.textContent="Введи корректный логин Twitch: латинские буквы, цифры и подчёркивание.";return}
+  const url=new URL("/chat-overlay.html",location.origin);url.searchParams.set("channel",login);url.searchParams.set("style",document.getElementById("chatStyle")?.value||"bubble-outline");url.searchParams.set("bg",document.getElementById("chatBg")?.value||"#111116");url.searchParams.set("text",document.getElementById("chatText")?.value||"#f5f5f7");url.searchParams.set("name",document.getElementById("chatName")?.value||"#b9ff36");url.searchParams.set("accent",document.getElementById("chatAccent")?.value||"#9147ff");url.searchParams.set("outline",document.getElementById("chatOutline")?.value||"#9147ff");url.searchParams.set("bubble",document.getElementById("chatBubble")?.value||"#292936");url.searchParams.set("size",document.getElementById("chatSize")?.value||"16");url.searchParams.set("twitchColors",document.getElementById("twitchNameColors")?.checked?"1":"0");
+  link.value=url.href;status.textContent="Ссылка готова для OBS.";
  }
  channel.addEventListener("input",update);
  copy.addEventListener("click",async()=>{if(!link.value){status.textContent="Сначала введи логин Twitch-канала.";return}try{await navigator.clipboard.writeText(link.value);status.textContent="Ссылка скопирована."}catch(_){link.select();status.textContent="Выделил ссылку — нажми Ctrl+C."}});
