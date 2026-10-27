@@ -608,8 +608,8 @@ const server = http.createServer(async (req, res) => {
         if (kind === "moderator") {
           moderatorName = cleanText(body.moderatorName || nickname, 32);
           const rawModerates = cleanText(body.moderatorOf, 300);
-          moderatorOf = [...new Set(rawModerates.split(/[\\s,;]+/).map(value => value.replace(/^@/, "").toLowerCase()).filter(Boolean))];
-          if (!/^[\\p{L}\\p{N}_ .-]{2,32}$/u.test(moderatorName)) return sendJson(400, { error: "Укажите корректный ник модератора." });
+          moderatorOf = [...new Set(rawModerates.split(/[\s,;]+/).map(value => value.replace(/^@/, "").toLowerCase()).filter(Boolean))];
+          if (!/^[\p{L}\p{N}_ .-]{2,32}$/u.test(moderatorName)) return sendJson(400, { error: "Укажите корректный ник модератора." });
           if (!rawModerates || !moderatorOf.length || moderatorOf.some(login => !/^[a-zA-Z0-9_]{1,25}$/.test(login))) return sendJson(400, { error: "Обязательно укажите корректные Twitch-ники стримеров, где человек будет модератором." });
         }
         let imageData = "";
