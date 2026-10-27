@@ -23,12 +23,27 @@ footer{border-top:1px solid var(--line);padding:22px;text-align:center;color:#71
 dialog{border:1px solid var(--line);padding:0;border-radius:20px;background:#17171b;color:var(--text);width:min(900px,calc(100% - 24px));max-height:90vh;overflow:auto;box-shadow:0 30px 100px #000b}dialog::backdrop{background:#000a;backdrop-filter:blur(5px)}.modalhead{display:flex;justify-content:space-between;align-items:center;padding:20px 22px;border-bottom:1px solid var(--line)}.modalhead h2{margin:0}.close{border:0;background:transparent;color:var(--muted);font-size:25px;cursor:pointer}.editor{display:grid;grid-template-columns:1.2fr .8fr;gap:22px;padding:22px}.bigpreview{min-height:290px;border:1px solid var(--line);border-radius:14px;padding:28px;display:flex;align-items:center;background:#101014;background-image:radial-gradient(#ffffff12 1px,transparent 1px);background-size:16px 16px}.controls{display:grid;align-content:start;gap:15px}.controls label{display:grid;gap:6px;font-size:12px;font-weight:800;color:var(--muted)}.controls input[type=color]{width:100%;height:38px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:3px}.controls input[type=text],.controls select{width:100%;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px;font:inherit}.hint{font-size:11px;color:var(--muted);margin:0}
 @keyframes rise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:600px){.grid{grid-template-columns:1fr}.header-note{display:none}.editor{grid-template-columns:1fr}.preview{height:165px}.hero{padding-top:38px}}
+
+.obs-builder{border:1px solid var(--line);border-radius:18px;background:var(--panel);padding:22px;margin:26px 0}
+.obs-builder h2{margin:0 0 5px;font-size:21px}.obs-builder>p{margin:0 0 18px;color:var(--muted);font-size:13px}
+.builder-grid{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:12px}.field{display:grid;gap:6px;color:var(--muted);font-size:12px;font-weight:800}.field input,.field select{min-width:0;width:100%;height:42px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--text);padding:0 11px;font:inherit}
+.obs-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.obs-link{display:none;margin-top:14px;padding:12px;border:1px solid var(--line);border-radius:10px;color:var(--accent);overflow-wrap:anywhere;font-size:12px}.obs-help{color:var(--muted);font-size:12px;margin:12px 0 0}
+@media(max-width:700px){.builder-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<header><a class="brand" href="./widgets.html"><span class="mark">1°6</span><span>Стримерские виджеты</span></a><span class="header-note">Инструменты для твоего стрима</span></header>
+<header><a class="brand" href="./widgets.html"><span class="mark">SC</span><span>Streamers Community · Виджеты</span></a><span class="header-note">Инструменты для твоего стрима</span></header>
 <main class="wrap">
-<section class="hero"><div class="eyebrow">1°6 COMMUNITY · WIDGET LAB</div><h1>Оформи свой чат.</h1><p>Выбирай стиль чата для трансляции, смотри пример сообщений и настраивай цвета. Это наша собственная галерея стилей — отдельная от основного сайта.</p></section>
+<section class="hero"><div class="eyebrow">STREAMERS COMMUNITY · WIDGET LAB</div><h1>Оформи свой чат.</h1><p>Выбирай стиль чата для трансляции, смотри пример сообщений и настраивай цвета. Выбери оформление, подключи публичный Twitch-чат и создай ссылку для Browser Source в OBS.</p></section>
+<section class="obs-builder">
+<h2>Подключить Twitch-чат для OBS</h2><p>Создай персональную ссылку для Browser Source. Виджет получает сообщения публичного чата через Twitch IRC и отображает их в выбранном стиле.</p>
+<div class="builder-grid">
+<label class="field">Twitch-канал<input id="obsChannel" placeholder="например, rueumur" maxlength="25" autocomplete="off"></label>
+<label class="field">Оформление<select id="obsTheme"><option value="terminal">Терминал</option><option value="neon">Неоновый импульс</option><option value="soft">Уютный чат</option><option value="pixel">Пиксельный мир</option><option value="glass">Матовый акрил</option><option value="minimal">Чистый минимализм</option></select></label>
+<label class="field">Фон<select id="obsBackground"><option value="transparent">Прозрачный (для OBS)</option><option value="dark">Тёмный</option></select></label>
+</div><div class="obs-actions"><button class="btn primary" id="generateObs">Создать ссылку для OBS</button><button class="btn" id="previewObs">Открыть виджет</button></div>
+<div class="obs-link" id="obsLink" aria-live="polite"></div><p class="obs-help">В OBS: Источники → + → Браузер → вставь ссылку. Рекомендуемый размер: 420 × 760. Публичный чат не требует токена; для отправки сообщений из виджета авторизация не включена.</p>
+</section>
 <div class="toolbar"><label class="search"><input id="search" type="search" placeholder="Поиск шаблона…" aria-label="Поиск шаблона"></label><div class="filters"><button class="filter active" data-filter="all">Все стили</button><button class="filter" data-filter="neon">Неон</button><button class="filter" data-filter="pixel">Пиксель</button><button class="filter" data-filter="soft">Мягкий</button><button class="filter" data-filter="minimal">Минимализм</button></div></div>
 <div class="count" id="count">6 стилей</div>
 <div class="grid" id="grid">
@@ -54,5 +69,10 @@ document.getElementById("close").addEventListener("click",()=>dialog.close());
 dialog.addEventListener("click",e=>{if(e.target===dialog)dialog.close()});
 function applyPreview(){const accent=document.getElementById("accentColor").value,bubble=document.getElementById("bubbleColor").value,size=document.getElementById("fontSize").value,name=document.getElementById("previewName").value.trim()||"Зритель";big.style.setProperty("--accent",accent);big.querySelectorAll(".name").forEach((el,i)=>{el.textContent=i===0?name:["", "LunaStream","DragonSlayer"][i]||name;el.style.color=accent});big.querySelectorAll(".bubble").forEach(el=>{el.style.fontSize=size+"px";if(!["terminal","pixel","minimal"].includes(current))el.style.background=bubble})}
 document.getElementById("apply").addEventListener("click",applyPreview);
+
+const channelInput=document.getElementById("obsChannel"),themeInput=document.getElementById("obsTheme"),backgroundInput=document.getElementById("obsBackground"),obsLink=document.getElementById("obsLink");
+function makeObsUrl(){const channel=channelInput.value.trim().replace(/^@/,"").toLowerCase();if(!/^[a-z0-9_]{1,25}$/.test(channel)){channelInput.focus();channelInput.setCustomValidity("Введи корректный Twitch-ник");channelInput.reportValidity();channelInput.setCustomValidity("");return ""}const u=new URL("./chat-overlay.html",location.href);u.searchParams.set("channel",channel);u.searchParams.set("theme",themeInput.value);u.searchParams.set("background",backgroundInput.value);return u.href}
+document.getElementById("generateObs").addEventListener("click",async()=>{const url=makeObsUrl();if(!url)return;obsLink.textContent=url;obsLink.style.display="block";try{await navigator.clipboard.writeText(url);document.getElementById("generateObs").textContent="Ссылка скопирована"}catch{document.getElementById("generateObs").textContent="Ссылка создана"}});
+document.getElementById("previewObs").addEventListener("click",()=>{const url=makeObsUrl();if(url)window.open(url,"_blank","noopener")});
 </script>
 </body></html>
