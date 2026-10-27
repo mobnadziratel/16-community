@@ -2914,7 +2914,7 @@ function normalizeDirectorySearch(value="") {
     [/cherrys?|cherries/g, "cherry"],
     // Treat these spellings as the same streamer/search alias.
     [/charakoi|чарик|чарон/g, "charakoi"],
-    [/zane5k5|zane5l5|zane|зэйн5к5|зэйн|зейн5л5|зейн5к5|зейн|зане5к5|зане/g, "zane"],
+    [/(?:zane|зэйн|зейн|зане)(?:5[klлк]5)?/g, "zane"],
     [/agyha1|агуха\s*1/g, "agyha1"],
     [/the|зе|зэ/g, "the"],
     [/0/g, "o"],
