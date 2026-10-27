@@ -1866,6 +1866,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
 .widget-tab.active{background:var(--accent);color:#111;border-color:var(--accent)}
 @media(max-width:560px){.widget-tabs{gap:8px}.widget-tab{padding:11px 15px;min-height:44px}}
 .chat-intro{margin-bottom:20px}.chat-intro h1{font-size:clamp(25px,4vw,38px);margin:0 0 8px}.chat-intro p{color:var(--muted);margin:0}
+.city-widget-panel{padding:28px;border:1px solid var(--line);border-radius:18px;background:var(--panel);min-height:180px}.city-widget-panel h2{margin:0 0 12px;font-size:clamp(26px,4vw,38px);letter-spacing:-.04em}.city-widget-panel p{margin:0;color:var(--muted)}
 .chat-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.95fr);gap:18px;align-items:start}
 .chat-panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;min-width:0}
 .chat-panel h2{font-size:17px;margin:0 0 16px}.chat-controls{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -1891,7 +1892,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
   <button class="theme-toggle" id="themeToggle" type="button" aria-label="Переключить тему"><span class="theme-icon" id="themeIcon">☀️</span><span id="themeLabel">Светлая тема</span></button>
 </div></header>
 <main class="wrap chat-builder">
-  <nav class="widget-tabs" role="tablist" aria-label="Виджеты"><button class="widget-tab active" id="chatWidgetTab" type="button" role="tab" aria-selected="true" aria-controls="chatWidgetPanel">Чат</button></nav>
+  <nav class="widget-tabs" role="tablist" aria-label="Разделы"><button class="widget-tab active" id="chatWidgetTab" type="button" role="tab" aria-selected="true" aria-controls="chatWidgetPanel">Чат</button><button class="widget-tab" id="cityWidgetTab" type="button" role="tab" aria-selected="false" aria-controls="cityWidgetPanel">Город</button></nav>
   <section class="chat-intro"><h1>Виджет чата для OBS</h1><p>Настрой оформление, цвета ников и Twitch-значки. Справа — живой пример того, как будет выглядеть чат.</p></section>
   <div class="chat-layout" id="chatWidgetPanel" role="tabpanel" aria-labelledby="chatWidgetTab">
     <section class="chat-panel">
@@ -1930,6 +1931,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
   <p class="chat-note">В OBS: «Источники» → «+» → «Браузер» → вставь ссылку. Рекомендуемый размер: 450 × 800. Это отдельный виджет: сообщения появляются в реальном времени, а оформление берётся из выбранных настроек.</p>
   <p id="obsLinkStatus" class="chat-note" aria-live="polite"></p>
 </section>
+<section id="cityWidgetPanel" class="city-widget-panel" role="tabpanel" aria-labelledby="cityWidgetTab" hidden><h2>ГОРОД</h2><p>В РАЗРАБОТКЕ</p></section>
 </main>
 <footer class="wrap"><span>Открывай каналы и поддерживай стримеров на Twitch <span style="color:var(--accent)">✦</span></span></footer>
 <script>
@@ -2067,6 +2069,24 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
  $("twitchNameColors").addEventListener("change",loadTwitchColors);
  if($("twitchNameColors").checked)loadTwitchColors();
  loadOfficialBadges();
+})();
+(function initWidgetTabs(){
+ const chatTab=document.getElementById("chatWidgetTab");
+ const cityTab=document.getElementById("cityWidgetTab");
+ const chatPanel=document.getElementById("chatWidgetPanel");
+ const cityPanel=document.getElementById("cityWidgetPanel");
+ if(!chatTab||!cityTab||!chatPanel||!cityPanel)return;
+ function activate(tab){
+  const city=tab===cityTab;
+  chatTab.classList.toggle("active",!city);
+  cityTab.classList.toggle("active",city);
+  chatTab.setAttribute("aria-selected",String(!city));
+  cityTab.setAttribute("aria-selected",String(city));
+  chatPanel.hidden=city;
+  cityPanel.hidden=!city;
+ }
+ chatTab.addEventListener("click",()=>activate(chatTab));
+ cityTab.addEventListener("click",()=>activate(cityTab));
 })();
 </script>
 </body>
