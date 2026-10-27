@@ -1858,9 +1858,13 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
 .brand-wordmark .brand-main #brandMainLead{color:var(--accent)}\n.brand-wordmark[data-brand-state="moderators"] .brand-top{transform:translateY(1px)}\n.brand-wordmark[data-brand-state="moderators"] .brand-bottom{opacity:.9}\n.brand-wordmark[data-brand-state="community"] .brand-top{transform:translateY(1px)}\n.brand-wordmark[data-brand-state="community"] .brand-main #brandMainLead{color:var(--accent)}\n@media(max-width:500px){.brand-wordmark .brand-top,.brand-wordmark .brand-bottom{font-size:.52em}.brand-wordmark .brand-main{font-size:.9em}}\n@media(prefers-reduced-motion:reduce){.brand-wordmark,.brand-wordmark *{transition:none!important}}\n
 /* Chat widget builder */
 .chat-builder{padding:30px 0 42px;min-height:55vh}
-.widget-tabs{display:flex;gap:8px;border-bottom:1px solid var(--line);margin:0 0 22px;padding-bottom:10px}
-.widget-tab{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;padding:10px 18px;font:inherit;font-weight:750;cursor:pointer}
+.widget-tabs{display:flex;gap:10px;margin:0 0 22px;flex-wrap:wrap}
+.widget-tab{border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:12px 18px;border-radius:12px;font:inherit;font-weight:850;cursor:pointer;transition:background .2s ease,color .2s ease,border-color .2s ease,transform .2s ease}
+.widget-tab:hover{border-color:var(--accent);color:var(--text)}
+.widget-tab:active{transform:translateY(1px)}
+.widget-tab:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .widget-tab.active{background:var(--accent);color:#111;border-color:var(--accent)}
+@media(max-width:560px){.widget-tabs{gap:8px}.widget-tab{padding:11px 15px;min-height:44px}}
 .chat-intro{margin-bottom:20px}.chat-intro h1{font-size:clamp(25px,4vw,38px);margin:0 0 8px}.chat-intro p{color:var(--muted);margin:0}
 .chat-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.95fr);gap:18px;align-items:start}
 .chat-panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;min-width:0}
@@ -1887,9 +1891,9 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
   <button class="theme-toggle" id="themeToggle" type="button" aria-label="Переключить тему"><span class="theme-icon" id="themeIcon">☀️</span><span id="themeLabel">Светлая тема</span></button>
 </div></header>
 <main class="wrap chat-builder">
-  <nav class="widget-tabs" aria-label="Виджеты"><button class="widget-tab active" type="button" aria-current="page">Чат</button></nav>
+  <nav class="widget-tabs" role="tablist" aria-label="Виджеты"><button class="widget-tab active" id="chatWidgetTab" type="button" role="tab" aria-selected="true" aria-controls="chatWidgetPanel">Чат</button></nav>
   <section class="chat-intro"><h1>Виджет чата для OBS</h1><p>Настрой оформление, цвета ников и Twitch-значки. Справа — живой пример того, как будет выглядеть чат.</p></section>
-  <div class="chat-layout">
+  <div class="chat-layout" id="chatWidgetPanel" role="tabpanel" aria-labelledby="chatWidgetTab">
     <section class="chat-panel">
       <h2>Оформление</h2>
       <div class="chat-controls">
