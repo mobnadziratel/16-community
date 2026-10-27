@@ -917,6 +917,7 @@ html[data-theme="light"] .hero h1 span {
   padding: 13px 3px 0;
   border-top: 1px solid var(--line);
 }
+.clip-modal-caption{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.clip-share-button{flex:0 0 auto}.clip-share-button:disabled{opacity:.65;cursor:wait}
 .clip-modal-caption .clip-modal-title {
   font-size: 18px;
   line-height: 1.4;
@@ -2077,7 +2078,7 @@ LEGENDS</div>
     <button class="clip-modal-close" id="clipModalClose" type="button" aria-label="Закрыть плеер">×</button>
     <div class="clip-modal-top"><div><a class="clip-modal-author" id="clipModalAuthor" href="https://www.twitch.tv/" target="_blank" rel="noopener noreferrer"><img class="clip-modal-author-avatar" id="clipModalAuthorAvatar" alt="Аватар стримера"><span class="clip-modal-author-name" id="clipModalAuthorName">Twitch</span><span class="clip-destination-icon" aria-label="Ссылка на Twitch"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3 2.5 7v12h5v3h3l3-3h4l4-4V3H4zm15 11-2.5 2.5h-4L10 19v-2.5H5V5h14v9zM10 8h2v5h-2V8zm5 0h2v5h-2V8z"/></svg></span></a></div></div>
     <iframe class="clip-player-frame" id="clipPlayerFrame" title="Встроенный плеер Twitch-клипов" allowfullscreen="true" scrolling="no" allow="autoplay; fullscreen"></iframe>
-    <div class="clip-modal-caption"><div class="clip-modal-title" id="clipModalTitle">Клип Twitch</div></div>
+    <div class="clip-modal-caption"><div class="clip-modal-title" id="clipModalTitle">Клип Twitch</div><button class="refresh-clips clip-share-button" id="clipShareButton" type="button">Поделиться клипом</button></div>
     <p class="clip-modal-help">Нажми кнопку воспроизведения в плеере, чтобы посмотреть клип. Если видео не загрузилось, проверь доступность Twitch и домен сайта.</p>
   </div>
 </div>
@@ -2580,7 +2581,16 @@ function getTwitchClipSlug(clip) {
   } catch (_) {}
   return String(clip.id || "").trim();
 }
-function openClipPlayer(clip) {
+function makeClipShareUrl(clip) {
+  const slug = getTwitchClipSlug(clip);
+  if (!slug) return "";
+  const url = new URL(window.location.href);
+  url.search = "";
+  url.hash = "";
+  url.searchParams.set("clip", slug);
+  return url.toString();
+}
+function openClipPlayer(clip, updateAddress = true) {
   const slug = getTwitchClipSlug(clip);
   const modal = document.getElementById("clipModal");
   const frame = document.getElementById("clipPlayerFrame");
@@ -2599,28 +2609,69 @@ function openClipPlayer(clip) {
     document.getElementById("clipModalTitle").textContent = "Не удалось определить клип";
     return;
   }
-  // Twitch requires the exact parent domain in the embed URL. Include the deployed
-  // Render domain and the current hostname so the player also works on custom domains.
-  const params = new URLSearchParams({clip: slug, autoplay: "false", muted: "true"});
-  const parentDomains = new Set(["small-streamers.onrender.com", window.location.hostname]);
-  parentDomains.forEach(domain => {
-    if (domain && domain !== "localhost" && domain !== "127.0.0.1" && !domain.includes(":")) params.append("parent", domain);
-  });
-  if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
-    params.append("parent", window.location.hostname);
-  }
+  // Twitch embeds require parent= for the exact hosting domain. Never omit it.
+  const params = new URLSearchParams();
+  params.set("clip", slug);
+  params.set("parent", window.location.hostname || "small-streamers.onrender.com");
+  params.set("autoplay", "false");
+  params.set("muted", "true");
   frame.src = `https://clips.twitch.tv/embed?${params.toString()}`;
+  const shareButton = document.getElementById("clipShareButton");
+  if (shareButton) {
+    shareButton.disabled = false;
+    shareButton.textContent = "Поделиться клипом";
+    shareButton.onclick = async () => {
+      const shareUrl = makeClipShareUrl(clip);
+      if (!shareUrl) return;
+      try {
+        if (navigator.share) {
+          await navigator.share({title: clip.title || "Клип", url: shareUrl});
+        } else if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(shareUrl);
+          shareButton.textContent = "Ссылка скопирована!";
+        } else {
+          const input = document.createElement("textarea");
+          input.value = shareUrl; input.readOnly = true;
+          input.style.cssText = "position:fixed;left:-9999px;top:0";
+          document.body.appendChild(input); input.select();
+          const copied = document.execCommand("copy"); input.remove();
+          shareButton.textContent = copied ? "Ссылка скопирована!" : shareUrl;
+        }
+      } catch (error) {
+        if (error && error.name !== "AbortError") shareButton.textContent = "Не удалось поделиться";
+      }
+      window.setTimeout(() => { if (shareButton.isConnected) shareButton.textContent = "Поделиться клипом"; }, 2200);
+    };
+  }
+  if (updateAddress) {
+    const shareUrl = makeClipShareUrl(clip);
+    if (shareUrl && window.location.href !== shareUrl) history.pushState({sharedClip: slug}, "", shareUrl);
+  }
   modal.classList.add("is-open");
   modal.setAttribute("aria-hidden", "false");
   document.body.style.overflow = "hidden";
   document.getElementById("clipModalClose").focus();
 }
-function closeClipPlayer() {
+function openSharedClipFromUrl() {
+  const slug = new URLSearchParams(window.location.search).get("clip");
+  if (!slug || !Array.isArray(clipsData) || !clipsData.length) return false;
+  const clip = clipsData.find(item => getTwitchClipSlug(item).toLowerCase() === slug.toLowerCase());
+  if (!clip) return false;
+  activateTab("clips");
+  openClipPlayer(clip, false);
+  return true;
+}
+function closeClipPlayer(updateAddress = true) {
   const modal = document.getElementById("clipModal");
   modal.classList.remove("is-open");
   modal.setAttribute("aria-hidden", "true");
   document.getElementById("clipPlayerFrame").src = "about:blank";
   document.body.style.overflow = "";
+  if (updateAddress && new URLSearchParams(window.location.search).has("clip")) {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("clip");
+    history.replaceState({}, "", url.toString());
+  }
 }
 
 function formatClipDate(value) {
@@ -2720,6 +2771,7 @@ async function loadClips(force=false) {
     note.textContent = `Клипы каналов из вкладки «СТРИМЕРЫ». Найдено: ${clipsData.length}. Сортировка выполняется на этой странице.`;
     clipsRenderLimit = CLIPS_PAGE_SIZE;
     renderClips();
+    openSharedClipFromUrl();
   } catch (error) {
     note.textContent = `Не удалось загрузить клипы: ${error && error.message ? error.message : "неизвестная ошибка"}. Попробуйте обновить страницу.`;
     document.getElementById("clipsGrid").innerHTML = "";
@@ -3257,7 +3309,13 @@ document.addEventListener("click", event => {
 }, true);
 // Apply the tab remembered for this browser tab before the first paint.
 if (activeTab !== "streamers") activateTab(activeTab);
-document.getElementById("clipModalClose").addEventListener("click", closeClipPlayer);
+document.getElementById("clipModalClose").addEventListener("click", () => closeClipPlayer());
+window.addEventListener("popstate", () => {
+  const slug = new URLSearchParams(window.location.search).get("clip");
+  if (!slug) { closeClipPlayer(false); return; }
+  const clip = clipsData.find(item => getTwitchClipSlug(item).toLowerCase() === slug.toLowerCase());
+  if (clip) openClipPlayer(clip, false);
+});
 document.getElementById("clipModal").addEventListener("click", event => { if (event.target.id === "clipModal") closeClipPlayer(); });
 document.addEventListener("keydown", event => { if (event.key === "Escape" && document.getElementById("clipModal").classList.contains("is-open")) closeClipPlayer(); });
 document.getElementById("clipPeriod").addEventListener("change", () => { saveClipSettings(); loadClips(true); });
