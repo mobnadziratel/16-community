@@ -3697,15 +3697,21 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
         submissionId:item.id, cardIndex:index
       })).filter(item=>item.channels.length));
       if(activeTab==="moderators") render(document.getElementById("moderatorSearch").value||"");
-      let addedToDirectory=false;
+      let directoryChanged=false;
       suggested.forEach(item=>{
         const login=String(item.twitchLogin||"").toLowerCase();
-        if(login&&/^[a-z0-9_]{1,25}$/.test(login)&&!streamers.some(person=>String(person.name||"").toLowerCase()===login)){
-          streamers.push({name:login,url:"https://www.twitch.tv/"+encodeURIComponent(login),group:"others",displayName:login});
-          addedToDirectory=true;
+        if(!login||!/^[a-z0-9_]{1,25}$/.test(login)) return;
+        const existing=streamers.find(person=>String(person.name||"").toLowerCase()===login);
+        if(!existing){
+          streamers.push({name:login,url:"https://www.twitch.tv/"+encodeURIComponent(login),group:"others",displayName:login,communitySuggested:true});
+          directoryChanged=true;
         }
       });
-      if(addedToDirectory){render();initClipStreamerPicker();refreshLiveStatuses();}
+      // Refresh the directory and status after every approved-submissions load,
+      // not only when a new card was inserted. This prevents stale status labels.
+      if(directoryChanged || activeTab==="streamers"){render();initClipStreamerPicker();}
+      if(latestStreamData) applyLiveStatuses(latestStreamData);
+      refreshLiveStatuses();
       // Wall suggestions are not published automatically; they can be downloaded from moderation instead.
       if(wallFeed)wallFeed.replaceChildren();
     }catch(error){
