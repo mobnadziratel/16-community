@@ -720,7 +720,7 @@ footer b { color: var(--text); }
 .clip-thumb { background: #191b30; }
 .clip-body { padding: 15px; }
 .clip-title { color: #f2f1ff; }
-.clip-author { color: #b8aaff; }
+.clip-creator{font-size:12px;line-height:1.4;color:var(--muted);margin:-2px 0 8px;overflow-wrap:anywhere}.clip-author { color: #b8aaff; }
 .clip-meta { color: #969cbb; }
 .profile-back, .clip-modal-close {
   border-radius: 14px; background: #191b30; color: #d6d4f1; border-color: var(--line);
@@ -2725,11 +2725,13 @@ function renderClips() {
     thumb.alt = `Клип ${clip.title || "Twitch"}`; thumb.src = clip.thumbnailUrl || "";
     const body = document.createElement("div"); body.className = "clip-body";
     const author = document.createElement("div"); author.className = "clip-author"; author.textContent = clip.broadcasterName || clip.broadcasterLogin || "Twitch";
+    const creator = document.createElement("div"); creator.className = "clip-creator";
+    creator.textContent = clip.creatorName || clip.creatorLogin ? "Создал: " + (clip.creatorName || clip.creatorLogin) : "Создатель не указан";
     const title = document.createElement("div"); title.className = "clip-title"; title.textContent = clip.title || "Клип Twitch";
     const meta = document.createElement("div"); meta.className = "clip-meta";
     const views = document.createElement("span"); views.textContent = `${(Number(clip.viewCount)||0).toLocaleString("ru-RU")} просмотров`;
     const date = document.createElement("span"); date.textContent = formatClipDate(clip.createdAt);
-    meta.append(views,date); body.append(author,title,meta); card.append(thumb,body); fragment.appendChild(card);
+    meta.append(views,date); body.append(author,creator,title,meta); card.append(thumb,body); fragment.appendChild(card);
   });
   grid.appendChild(fragment);
   if (visibleItems.length < items.length) {
