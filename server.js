@@ -585,7 +585,7 @@ const server = http.createServer(async (req, res) => {
         if (recent.length >= 5) return sendJson(429, { error: "Слишком много отправок. Попробуйте позже." });
         const body = await readBody();
         const nickname = cleanText(body.nickname, 32);
-        const kind = body.kind === "streamer" ? "streamer" : body.kind === "wall" ? "wall" : body.kind === "site" ? "site" : "";
+        const kind = ["streamer", "wall", "site", "moderator"].includes(body.kind) ? body.kind : "";
         const text = cleanText(body.text, 1200);
         if (!/^[\p{L}\p{N}_ .-]{2,32}$/u.test(nickname)) return sendJson(400, { error: "Укажите никнейм длиной от 2 до 32 символов." });
         if (!kind) return sendJson(400, { error: "Выберите тип предложения." });
@@ -602,6 +602,15 @@ const server = http.createServer(async (req, res) => {
               twitchLogin = login.toLowerCase();
             }
           } catch (_) { return sendJson(400, { error: "Введите корректную ссылку на Twitch или ник канала." }); }
+        }
+        let moderatorName = "";
+        let moderatorOf = [];
+        if (kind === "moderator") {
+          moderatorName = cleanText(body.moderatorName || nickname, 32);
+          const rawModerates = cleanText(body.moderatorOf, 300);
+          moderatorOf = [...new Set(rawModerates.split(/[\\s,;]+/).map(value => value.replace(/^@/, "").toLowerCase()).filter(Boolean))];
+          if (!/^[\\p{L}\\p{N}_ .-]{2,32}$/u.test(moderatorName)) return sendJson(400, { error: "Укажите корректный ник модератора." });
+          if (!rawModerates || !moderatorOf.length || moderatorOf.some(login => !/^[a-zA-Z0-9_]{1,25}$/.test(login))) return sendJson(400, { error: "Обязательно укажите корректные Twitch-ники стримеров, где человек будет модератором." });
         }
         let imageData = "";
         if (body.image) {
@@ -621,11 +630,12 @@ const server = http.createServer(async (req, res) => {
         }
         if (kind === "wall" && !text && !imageData) return sendJson(400, { error: "Добавьте текст и/или изображение для стены." });
         if (kind === "site" && !text) return sendJson(400, { error: "Опишите предложение по улучшению сайта." });
+        if (kind === "moderator" && (!moderatorName || !moderatorOf.length)) return sendJson(400, { error: "Укажите имя модератора и каналы, где он будет модератором." });
         if (kind === "streamer" && !twitchLogin) return sendJson(400, { error: "Нужен Twitch-канал." });
         const db = await loadDb();
         if (kind === "streamer" && db.submissions.some(item => item.kind === "streamer" && item.twitchLogin === twitchLogin && item.status !== "rejected")) return sendJson(409, { error: "Этот канал уже предложен или опубликован." });
         db.submissions.push({
-          id: require("node:crypto").randomUUID(), kind, nickname, text, twitchLogin, imageData,
+          id: require("node:crypto").randomUUID(), kind, nickname, text, twitchLogin, imageData, moderatorName, moderatorOf,
           status: "pending", createdAt: new Date().toISOString(), reviewedAt: null, reviewedBy: null
         });
         await saveDb(db);
@@ -635,7 +645,7 @@ const server = http.createServer(async (req, res) => {
       if (url.pathname === "/api/community/posts" && method === "GET") {
         const db = await loadDb();
         return sendJson(200, { submissions: db.submissions.filter(item => item.status === "approved").map(item => ({
-          id: item.id, kind: item.kind, nickname: item.nickname, text: item.text, twitchLogin: item.twitchLogin, imageData: item.imageData, createdAt: item.createdAt
+          id: item.id, kind: item.kind, nickname: item.nickname, text: item.text, twitchLogin: item.twitchLogin, imageData: item.imageData, moderatorName: item.moderatorName, moderatorOf: item.moderatorOf, createdAt: item.createdAt
         })) });
       }
       if (url.pathname === "/api/community/login" && method === "POST") {
@@ -657,7 +667,7 @@ const server = http.createServer(async (req, res) => {
         const session = getSession(); if (!session) return sendJson(401, { error: "Нужен вход модератора." });
         const db = await loadDb();
         return sendJson(200, { submissions: db.submissions.filter(item => item.status === "pending").map(item => ({
-          id: item.id, kind: item.kind, nickname: item.nickname, text: item.text, twitchLogin: item.twitchLogin, imageData: item.imageData, createdAt: item.createdAt
+          id: item.id, kind: item.kind, nickname: item.nickname, text: item.text, twitchLogin: item.twitchLogin, imageData: item.imageData, moderatorName: item.moderatorName, moderatorOf: item.moderatorOf, createdAt: item.createdAt
         })), moderator: session.username, role: session.role });
       }
       const actionMatch = url.pathname.match(/^\/api\/community\/moderation\/([a-f0-9-]+)$/i);
