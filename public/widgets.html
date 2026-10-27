@@ -1,48 +1,58 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0e0e10">
-  <title>Стримерские виджеты — 1°6 Community</title>
-  <style>
-    :root{color-scheme:dark;--bg:#0e0e10;--panel:#18181b;--line:#303036;--text:#f4f4f5;--muted:#a1a1aa;--accent:#b9ff36}
-    *{box-sizing:border-box}
-    body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 75% 0%,rgba(185,255,54,.08),transparent 38%),var(--bg);color:var(--text);font:16px/1.5 Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    header{padding:22px clamp(18px,4vw,56px);border-bottom:1px solid var(--line);background:rgba(14,14,16,.84)}
-    .brand{display:inline-flex;align-items:center;gap:11px;color:var(--text);text-decoration:none;font-size:18px;font-weight:900;letter-spacing:-.02em}
-    .mark{display:grid;place-items:center;width:36px;height:36px;border-radius:11px;background:var(--accent);color:#111;font-weight:1000}
-    main{width:min(1060px,calc(100% - 36px));margin:0 auto;padding:clamp(48px,9vw,100px) 0}
-    .eyebrow{color:var(--accent);font-size:12px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}
-    h1{margin:12px 0 14px;font-size:clamp(34px,6vw,62px);line-height:1.03;letter-spacing:-.045em}
-    .intro{max-width:650px;color:var(--muted);font-size:17px}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:16px;margin-top:38px}
-    .tile{min-height:168px;padding:22px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.012))}
-    .tile .symbol{font-size:24px}
-    .tile h2{margin:12px 0 6px;font-size:18px}
-    .tile p{margin:0;color:var(--muted);font-size:14px}
-    .status{display:inline-flex;align-items:center;gap:8px;margin-top:32px;padding:9px 12px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:12px}
-    .dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
-    footer{padding:20px;text-align:center;color:#71717a;font-size:12px}
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0e0e10">
+<title>Стримерские виджеты — 1°6 Community</title>
+<style>
+:root{color-scheme:dark;--bg:#0e0e10;--panel:#18181b;--panel2:#202024;--line:#34343b;--text:#f4f4f5;--muted:#a1a1aa;--accent:#b9ff36}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+header{height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(18px,4vw,54px);border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(14,14,16,.92);backdrop-filter:blur(16px);z-index:5}
+.brand{display:flex;align-items:center;gap:11px;color:var(--text);text-decoration:none;font-weight:900;font-size:17px}.mark{display:grid;place-items:center;width:36px;height:36px;border-radius:11px;background:var(--accent);color:#111;font-weight:1000}
+.header-note{color:var(--muted);font-size:12px}.wrap{width:min(1240px,calc(100% - 36px));margin:auto}
+.hero{padding:54px 0 30px}.eyebrow{color:var(--accent);font-weight:900;font-size:11px;letter-spacing:.17em;text-transform:uppercase}
+h1{font-size:clamp(34px,5vw,54px);line-height:1.04;letter-spacing:-.045em;margin:10px 0 12px}.hero p{color:var(--muted);max-width:690px;margin:0;font-size:16px}
+.toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:28px 0 20px}.search{flex:1 1 250px;position:relative}.search input{width:100%;height:44px;background:var(--panel);border:1px solid var(--line);border-radius:12px;color:var(--text);padding:0 14px;font:inherit;outline:none}.search input:focus{border-color:var(--accent)}
+.filters{display:flex;gap:7px;flex-wrap:wrap}.filter{border:1px solid var(--line);background:var(--panel);color:var(--muted);padding:10px 14px;border-radius:999px;cursor:pointer;font:700 12px inherit}.filter.active{background:var(--accent);border-color:var(--accent);color:#111}
+.count{color:var(--muted);font-size:12px;margin:18px 0}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;padding-bottom:60px}.card{border:1px solid var(--line);background:var(--panel);border-radius:17px;overflow:hidden;transition:transform .18s,border-color .18s}.card:hover{transform:translateY(-3px);border-color:#62626c}
+.preview{height:180px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:20px;background-color:#101014;background-image:radial-gradient(#ffffff12 1px,transparent 1px);background-size:16px 16px}
+.chat{width:100%;display:flex;flex-direction:column;gap:9px}.msg{font-size:12px;line-height:1.4;max-width:100%;animation:rise .5s both}.msg:nth-child(2){animation-delay:.1s}.msg:nth-child(3){animation-delay:.2s}.name{font-weight:900;margin-right:6px}.bubble{display:inline-block;padding:8px 10px;border-radius:10px;background:#292930;color:#f4f4f5;box-shadow:0 3px 0 #0005}.template-terminal .bubble{font-family:ui-monospace,monospace;background:#071a12;border:1px solid #32e89a;color:#9affc8;border-radius:3px}.template-neon .bubble{background:#171024;border:1px solid #c65bff;box-shadow:0 0 12px #c65bff44;color:#fff}.template-soft .bubble{background:#f4e7d9;color:#503d35;border-radius:18px}.template-pixel .bubble{background:#254b29;border:2px solid #8ce36c;border-radius:3px;box-shadow:4px 4px 0 #0a190d}.template-glass .bubble{background:#ffffff18;border:1px solid #ffffff3b;backdrop-filter:blur(8px);border-radius:14px}.template-minimal .bubble{background:transparent;border-left:3px solid var(--accent);border-radius:0;padding:5px 9px}
+.template-terminal .name{color:#58f0a5}.template-neon .name{color:#e7a4ff}.template-soft .name{color:#a45f46}.template-pixel .name{color:#a9f37c}.template-glass .name{color:#b9ff36}.template-minimal .name{color:var(--accent)}
+.cardbody{padding:17px}.cardtop{display:flex;align-items:center;justify-content:space-between;gap:8px}.card h2{font-size:17px;margin:0;letter-spacing:-.02em}.tag{font-size:10px;font-weight:900;color:#b9ff36;background:#b9ff3614;border:1px solid #b9ff3633;border-radius:6px;padding:4px 7px;white-space:nowrap}.card p{font-size:12px;color:var(--muted);min-height:38px;margin:9px 0 16px}.actions{display:flex;gap:8px}.btn{cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:10px;padding:10px 12px;font:800 12px inherit}.btn.primary{background:var(--accent);border-color:var(--accent);color:#111;flex:1}.btn:hover{filter:brightness(1.08)}
+footer{border-top:1px solid var(--line);padding:22px;text-align:center;color:#71717a;font-size:12px}
+dialog{border:1px solid var(--line);padding:0;border-radius:20px;background:#17171b;color:var(--text);width:min(900px,calc(100% - 24px));max-height:90vh;overflow:auto;box-shadow:0 30px 100px #000b}dialog::backdrop{background:#000a;backdrop-filter:blur(5px)}.modalhead{display:flex;justify-content:space-between;align-items:center;padding:20px 22px;border-bottom:1px solid var(--line)}.modalhead h2{margin:0}.close{border:0;background:transparent;color:var(--muted);font-size:25px;cursor:pointer}.editor{display:grid;grid-template-columns:1.2fr .8fr;gap:22px;padding:22px}.bigpreview{min-height:290px;border:1px solid var(--line);border-radius:14px;padding:28px;display:flex;align-items:center;background:#101014;background-image:radial-gradient(#ffffff12 1px,transparent 1px);background-size:16px 16px}.controls{display:grid;align-content:start;gap:15px}.controls label{display:grid;gap:6px;font-size:12px;font-weight:800;color:var(--muted)}.controls input[type=color]{width:100%;height:38px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:3px}.controls input[type=text],.controls select{width:100%;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:10px;font:inherit}.hint{font-size:11px;color:var(--muted);margin:0}
+@keyframes rise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:600px){.grid{grid-template-columns:1fr}.header-note{display:none}.editor{grid-template-columns:1fr}.preview{height:165px}.hero{padding-top:38px}}
+</style>
 </head>
 <body>
-  <header>
-    <a class="brand" href="./widgets.html" aria-label="Стримерские виджеты">
-      <span class="mark">1°6</span><span>Стримерские виджеты</span>
-    </a>
-  </header>
-  <main>
-    <div class="eyebrow">1°6 Community · отдельный раздел</div>
-    <h1>Стримерские виджеты</h1>
-    <p class="intro">Отдельное пространство для инструментов и виджетов стримеров. Раздел создан отдельно от основной страницы и пока не добавлен в её навигацию.</p>
-    <div class="grid">
-      <section class="tile"><div class="symbol">🎥</div><h2>Виджеты для стрима</h2><p>Место для оверлеев и элементов, которые можно будет добавить в трансляцию.</p></section>
-      <section class="tile"><div class="symbol">💬</div><h2>Чат и активность</h2><p>Здесь можно разместить виджеты чата, сообщений и активности зрителей.</p></section>
-      <section class="tile"><div class="symbol">🧩</div><h2>Другие инструменты</h2><p>Основа для будущих инструментов сообщества и настроек отображения.</p></section>
-    </div>
-    <div class="status"><span class="dot"></span> Раздел создан · виджеты можно добавить следующим этапом</div>
-  </main>
-  <footer>1°6 Community</footer>
-</body>
-</html>
+<header><a class="brand" href="./widgets.html"><span class="mark">1°6</span><span>Стримерские виджеты</span></a><span class="header-note">Инструменты для твоего стрима</span></header>
+<main class="wrap">
+<section class="hero"><div class="eyebrow">1°6 COMMUNITY · WIDGET LAB</div><h1>Оформи свой чат.</h1><p>Выбирай стиль чата для трансляции, смотри пример сообщений и настраивай цвета. Это наша собственная галерея стилей — отдельная от основного сайта.</p></section>
+<div class="toolbar"><label class="search"><input id="search" type="search" placeholder="Поиск шаблона…" aria-label="Поиск шаблона"></label><div class="filters"><button class="filter active" data-filter="all">Все стили</button><button class="filter" data-filter="neon">Неон</button><button class="filter" data-filter="pixel">Пиксель</button><button class="filter" data-filter="soft">Мягкий</button><button class="filter" data-filter="minimal">Минимализм</button></div></div>
+<div class="count" id="count">6 стилей</div>
+<div class="grid" id="grid">
+<article class="card" data-name="терминал terminal ретро" data-kind="terminal"><div class="preview template-terminal"><div class="chat"><div class="msg"><span class="name">PixelNinja</span><span class="bubble">> Всем привет!_</span></div><div class="msg"><span class="name">LunaStream</span><span class="bubble">Классный стрим :)</span></div><div class="msg"><span class="name">DragonSlayer</span><span class="bubble">GG, погнали дальше!</span></div></div></div><div class="cardbody"><div class="cardtop"><h2>Терминал</h2><span class="tag">БЕСПЛАТНО</span></div><p>Ретро-консоль, зелёное свечение и текст в духе хакерского терминала.</p><div class="actions"><button class="btn primary customize" data-template="terminal">Настроить</button><button class="btn demo" data-template="terminal">Предпросмотр</button></div></div></article>
+<article class="card" data-name="неоновый импульс neon glow" data-kind="neon"><div class="preview template-neon"><div class="chat"><div class="msg"><span class="name">PixelNinja</span><span class="bubble">Этот чат светится ✦</span></div><div class="msg"><span class="name">LunaStream</span><span class="bubble">Врываемся!</span></div><div class="msg"><span class="name">DragonSlayer</span><span class="bubble">GG WP 💜</span></div></div></div><div class="cardbody"><div class="cardtop"><h2>Неоновый импульс</h2><span class="tag">БЕСПЛАТНО</span></div><p>Яркие неоновые акценты для ночных и игровых трансляций.</p><div class="actions"><button class="btn primary customize" data-template="neon">Настроить</button><button class="btn demo" data-template="neon">Предпросмотр</button></div></div></article>
+<article class="card" data-name="уютный чат cozy soft" data-kind="soft"><div class="preview template-soft"><div class="chat"><div class="msg"><span class="name">PixelNinja</span><span class="bubble">Рады видеть тебя ☀</span></div><div class="msg"><span class="name">LunaStream</span><span class="bubble">Устраивайся поудобнее</span></div><div class="msg"><span class="name">DragonSlayer</span><span class="bubble">Чай уже готов 🍵</span></div></div></div><div class="cardbody"><div class="cardtop"><h2>Уютный чат</h2><span class="tag">БЕСПЛАТНО</span></div><p>Тёплая палитра и мягкие пузыри для спокойных стримов.</p><div class="actions"><button class="btn primary customize" data-template="soft">Настроить</button><button class="btn demo" data-template="soft">Предпросмотр</button></div></div></article>
+<article class="card" data-name="пиксельный мир pixel minecraft" data-kind="pixel"><div class="preview template-pixel"><div class="chat"><div class="msg"><span class="name">PixelNinja</span><span class="bubble">+1 предмет найден!</span></div><div class="msg"><span class="name">LunaStream</span><span class="bubble">Ломаем блоки ⛏</span></div><div class="msg"><span class="name">DragonSlayer</span><span class="bubble">GG!</span></div></div></div><div class="cardbody"><div class="cardtop"><h2>Пиксельный мир</h2><span class="tag">БЕСПЛАТНО</span></div><p>Квадратные края, зелёные контуры и игровой пиксельный характер.</p><div class="actions"><button class="btn primary customize" data-template="pixel">Настроить</button><button class="btn demo" data-template="pixel">Предпросмотр</button></div></div></article>
+<article class="card" data-name="стекло glass translucent" data-kind="glass"><div class="preview template-glass"><div class="chat"><div class="msg"><span class="name">PixelNinja</span><span class="bubble">Стеклянный эффект</span></div><div class="msg"><span class="name">LunaStream</span><span class="bubble">Легко и прозрачно</span></div><div class="msg"><span class="name">DragonSlayer</span><span class="bubble">✨✨✨</span></div></div></div><div class="cardbody"><div class="cardtop"><h2>Матовый акрил</h2><span class="tag">БЕСПЛАТНО</span></div><p>Полупрозрачные карточки и тонкие светлые границы.</p><div class="actions"><button class="btn primary customize" data-template="glass">Настроить</button><button class="btn demo" data-template="glass">Предпросмотр</button></div></div></article>
+<article class="card" data-name="чистый минимализм minimal clean" data-kind="minimal"><div class="preview template-minimal"><div class="chat"><div class="msg"><span class="name">PixelNinja</span><span class="bubble">Ничего лишнего.</span></div><div class="msg"><span class="name">LunaStream</span><span class="bubble">Только сообщения и смысл.</span></div><div class="msg"><span class="name">DragonSlayer</span><span class="bubble">Добро пожаловать!</span></div></div></div><div class="cardbody"><div class="cardtop"><h2>Чистый минимализм</h2><span class="tag">БЕСПЛАТНО</span></div><p>Лаконичный чат, который не отвлекает от игрового процесса.</p><div class="actions"><button class="btn primary customize" data-template="minimal">Настроить</button><button class="btn demo" data-template="minimal">Предпросмотр</button></div></div></article>
+</div>
+</main><footer>1°6 Community · Стримерские виджеты</footer>
+<dialog id="editor"><div class="modalhead"><h2 id="editorTitle">Настройка стиля</h2><button class="close" id="close" aria-label="Закрыть">×</button></div><div class="editor"><div class="bigpreview" id="bigpreview"><div class="chat"><div class="msg"><span class="name">PixelNinja</span><span class="bubble">Всем привет! Добро пожаловать на стрим 👋</span></div><div class="msg"><span class="name">LunaStream</span><span class="bubble">Как дела у чата?</span></div><div class="msg"><span class="name">DragonSlayer</span><span class="bubble">Погнали! GG WP</span></div></div></div><div class="controls"><label>Название в чате<input id="previewName" type="text" value="PixelNinja" maxlength="24"></label><label>Цвет акцента<input id="accentColor" type="color" value="#b9ff36"></label><label>Цвет фона сообщения<input id="bubbleColor" type="color" value="#292930"></label><label>Размер текста<select id="fontSize"><option value="11">Маленький</option><option value="13" selected>Средний</option><option value="16">Большой</option></select></label><button class="btn primary" id="apply">Применить к предпросмотру</button><p class="hint">Сейчас это интерактивный макет стиля с тестовыми сообщениями. Подключение настоящего Twitch-чата и ссылка для OBS — следующий этап.</p></div></div></dialog>
+<script>
+const names={terminal:"Терминал",neon:"Неоновый импульс",soft:"Уютный чат",pixel:"Пиксельный мир",glass:"Матовый акрил",minimal:"Чистый минимализм"};
+let activeFilter="all",current="terminal";
+const cards=[...document.querySelectorAll(".card")],search=document.getElementById("search");
+function filterCards(){const q=search.value.trim().toLowerCase();let n=0;cards.forEach(c=>{const ok=(activeFilter==="all"||c.dataset.kind===activeFilter)&&c.dataset.name.includes(q);c.hidden=!ok;if(ok)n++});document.getElementById("count").textContent=n+" "+(n===1?"стиль":n<5?"стиля":"стилей")}
+document.querySelectorAll(".filter").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".filter").forEach(x=>x.classList.toggle("active",x===b));activeFilter=b.dataset.filter;filterCards()}));search.addEventListener("input",filterCards);
+const dialog=document.getElementById("editor"),big=document.getElementById("bigpreview");
+function openEditor(kind){current=kind;document.getElementById("editorTitle").textContent=names[kind];big.className="bigpreview template-"+kind;dialog.showModal();applyPreview()}
+document.querySelectorAll(".customize,.demo").forEach(b=>b.addEventListener("click",()=>openEditor(b.dataset.template)));
+document.getElementById("close").addEventListener("click",()=>dialog.close());
+dialog.addEventListener("click",e=>{if(e.target===dialog)dialog.close()});
+function applyPreview(){const accent=document.getElementById("accentColor").value,bubble=document.getElementById("bubbleColor").value,size=document.getElementById("fontSize").value,name=document.getElementById("previewName").value.trim()||"Зритель";big.style.setProperty("--accent",accent);big.querySelectorAll(".name").forEach((el,i)=>{el.textContent=i===0?name:["", "LunaStream","DragonSlayer"][i]||name;el.style.color=accent});big.querySelectorAll(".bubble").forEach(el=>{el.style.fontSize=size+"px";if(!["terminal","pixel","minimal"].includes(current))el.style.background=bubble})}
+document.getElementById("apply").addEventListener("click",applyPreview);
+</script>
+</body></html>
