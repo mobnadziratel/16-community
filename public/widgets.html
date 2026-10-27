@@ -2029,10 +2029,13 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
        if(!match)return;
        const [cls,[setId,preferredId]]=match;
        const versions=data.badges?.[setId]?.versions;
-       if(!versions?.length)return;
-       const version=versions.find(v=>v.id===preferredId)||versions[0];
+       // Official Twitch Artist badge CDN image; the API may not expose it under "artist".
+       const officialArtistUrl="https://static-cdn.jtvnw.net/badges/v1/4300a897-03dc-4e83-8c0e-c332fee7057f/1";
+       const version=versions?.find(v=>v.id===preferredId)||versions?.[0];
+       const imageUrl=cls==="chat-artist"?officialArtistUrl:version?.url;
+       if(!imageUrl)return;
        const img=document.createElement("img");
-       img.src=version.url;img.alt=el.title||version.title;img.title=el.title||version.title;
+       img.src=imageUrl;img.alt=el.title||version?.title||"Artist";img.title=el.title||version?.title||"Artist";
        img.width=18;img.height=18;img.style.cssText="width:18px;height:18px;object-fit:contain;vertical-align:middle";
        img.onerror=()=>{el.replaceChildren();el.classList.add("chat-hidden")};
        el.replaceChildren(img);el.style.cssText="display:inline-flex;align-items:center;background:transparent;padding:0;margin:1px 2px 0 0";
