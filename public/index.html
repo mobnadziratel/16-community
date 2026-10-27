@@ -3782,10 +3782,21 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
       String(value||"").split(/\\r?\\n/).forEach(paragraph=>{
         const words=paragraph.split(/\\s+/);let line="";
         words.forEach(word=>{
-          const test=line?line+" "+word:word;
-          if(line&&ctx.measureText(test).width>maxWidth){lines.push(line);line=word;}else line=test;
+          let remaining=word;
+          while(remaining && ctx.measureText(remaining).width>maxWidth){
+            let cut=1;
+            while(cut<remaining.length && ctx.measureText(remaining.slice(0,cut+1)).width<=maxWidth)cut++;
+            const piece=remaining.slice(0,cut);
+            const test=line?line+" "+piece:piece;
+            if(line && ctx.measureText(test).width>maxWidth){lines.push(line);line="";}
+            lines.push(piece);
+            remaining=remaining.slice(cut);
+          }
+          if(!remaining)return;
+          const test=line?line+" "+remaining:remaining;
+          if(line&&ctx.measureText(test).width>maxWidth){lines.push(line);line=remaining;}else line=test;
         });
-        lines.push(line);
+        if(line || !words.length)lines.push(line);
       });
       return lines;
     };
@@ -3797,9 +3808,11 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
     }
     const imageHeight=sourceImage?Math.round(contentWidth*Math.min(1,(sourceImage.naturalHeight||1)/(sourceImage.naturalWidth||1))):0;
     const lines=wrapText(item.text||"Без текста",contentWidth);
-    const lineHeight=44,gap=sourceImage?28:0,authorHeight=58;
+    const authorLines=wrapText("Автор: "+String(item.nickname||"Аноним").slice(0,200),contentWidth);
+    const lineHeight=44,authorLineHeight=32,gap=sourceImage?28:0,authorGap=20;
     const textHeight=lines.length*lineHeight;
-    const contentHeight=padding+imageHeight+(sourceImage?gap:0)+textHeight+padding+authorHeight+padding;
+    const authorHeight=authorLines.length*authorLineHeight;
+    const contentHeight=padding+imageHeight+(sourceImage?gap:0)+textHeight+authorGap+padding/2+2+authorHeight+padding;
     canvas.width=width;canvas.height=contentHeight;
     // Transparent canvas corners, with a translucent rounded panel behind the complete post.
     ctx.clearRect(0,0,width,canvas.height);
@@ -3810,9 +3823,10 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
     ctx.fillStyle="#f5f5f7";ctx.font=font;
     lines.forEach(line=>{ctx.fillText(line,padding,y+lineHeight-8);y+=lineHeight;});
     y+=padding/2;
+    y+=authorGap;
     ctx.fillStyle="rgba(255,255,255,0.22)";ctx.fillRect(padding,y,contentWidth,2);
     ctx.fillStyle="#c7c7d1";ctx.font="500 22px system-ui, sans-serif";
-    ctx.fillText("Автор: "+String(item.nickname||"Аноним").slice(0,60),padding,y+38);
+    authorLines.forEach(line=>{y+=authorLineHeight;ctx.fillText(line,padding,y-5,contentWidth);});
     ctx.restore();
     const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));
     if(!blob)throw new Error("Не удалось создать картинку для скачивания.");
