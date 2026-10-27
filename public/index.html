@@ -2898,18 +2898,27 @@ function render(filter="") {
   }
 }
 function normalizeDirectorySearch(value="") {
-  // Make streamer search forgiving: Cyrillic transliteration and common 1/i substitutions.
+  // Forgiving search: transliteration, common character substitutions, separators and aliases.
   const transliteration = {
     а:"a", б:"b", в:"v", г:"g", д:"d", е:"e", ё:"yo", ж:"zh", з:"z",
     и:"i", й:"y", к:"k", л:"l", м:"m", н:"n", о:"o", п:"p", р:"r",
     с:"s", т:"t", у:"u", ф:"f", х:"h", ц:"ts", ч:"ch", ш:"sh",
     щ:"shch", ы:"y", э:"e", ю:"yu", я:"ya", ь:"", ъ:""
   };
-  return String(value)
-    .toLocaleLowerCase("ru")
+  let normalized = String(value).toLocaleLowerCase("ru");
+  // Treat common Russian/English name parts as aliases, e.g. "вишнёвая лиса" ↔ "cherrys fox".
+  const aliases = [
+    [/вишн(?:я|и|ю|ей|е|ёвый|евый|ёвая|евая|ёвые|евые|ёвого|евого)/g, "cherry"],
+    [/вишн(?:ёвая|евая)/g, "cherry"],
+    [/лиса|лису|лисы|лисе|лисой|лисами|лисах/g, "fox"],
+    [/cherrys?|cherries/g, "cherry"],
+    [/foxes?/g, "fox"]
+  ];
+  for (const [pattern, replacement] of aliases) normalized = normalized.replace(pattern, replacement);
+  return normalized
     .replace(/[а-яё]/g, char => transliteration[char] ?? char)
     .replace(/1/g, "i")
-    .replace(/[\s._-]+/g, "")
+    .replace(/[\s._*\\-]+/g, "")
     .trim();
 }
 function applyDirectoryFilter(filter="") {
