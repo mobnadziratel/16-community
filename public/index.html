@@ -1875,13 +1875,11 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
   </section>
   <div class="tabs" role="tablist" aria-label="Разделы сообщества">
     <button class="tab-button active" id="streamersTab" role="tab" aria-selected="true" type="button">СТРИМЕРЫ</button>
-    <button class="tab-button" id="cityTab" role="tab" aria-selected="false" aria-controls="cityPanel" type="button">ГОРОД</button>
     <button class="tab-button" id="moderatorsTab" role="tab" aria-selected="false" type="button">МОДЕРАТОРЫ</button>
     <button class="tab-button" id="clipsTab" role="tab" aria-selected="false" type="button">КЛИПЫ</button>
     <button class="tab-button" id="wallTab" role="tab" aria-selected="false" aria-controls="wallPanel" type="button">СТЕНА</button>
     <button class="tab-button" id="suggestionsTab" role="tab" aria-selected="false" aria-controls="suggestionsPanel" type="button">ПРЕДЛОЖКА</button>
   </div>
-  <section id="cityPanel" aria-label="Город" hidden><div class="city-placeholder">В РАЗРАБОТКЕ</div></section>
   <section id="streamersPanel" aria-label="Список стримеров">
     <div class="toolbar">
       <div class="count"><strong id="visibleCount">24</strong> <span id="streamerCountLabel">стримера</span></div>
@@ -3235,7 +3233,6 @@ document.getElementById("moderatorSearch").addEventListener("input", e => {
 }
 const tabButtons = {
   streamers: "streamersTab",
-  city: "cityTab",
   moderators: "moderatorsTab",
   clips: "clipsTab",
   wall: "wallTab",
@@ -3246,15 +3243,12 @@ function activateTab(nextTab) {
   try { sessionStorage.setItem("small-streamers-active-tab", nextTab); } catch (_) {}
   const sectionCopy = {
     streamers: ["СТРИМЕРЫ", "Выбирай канал, чтобы открыть Twitch и посмотреть трансляцию."],
-    city: ["ГОРОД", "В РАЗРАБОТКЕ"],
     moderators: ["МОДЕРАТОРЫ", "Команда, которая помогает сообществу и поддерживает порядок на каналах."],
     clips: ["КЛИПЫ", "Лучшие моменты со стримов — выбирай период, сортировку и смотри подборку."],
     wall: ["СТЕНА СООБЩЕСТВА", "Общие мемы, картинки и подписи — всё, что делает наше комьюнити живым."],
     suggestions: ["ПРЕДЛОЖКА", "Предложи нового стримера или добавь фото и подпись на стену. Публикации появляются после модерации."]
   };
   const [heading, description] = sectionCopy[nextTab] || sectionCopy.streamers;
-  const cityPanel = document.getElementById("cityPanel");
-  if (cityPanel) cityPanel.hidden = nextTab !== "city";
   document.getElementById("streamersPanel").hidden = nextTab !== "streamers";
   document.getElementById("moderatorsPanel").hidden = nextTab !== "moderators";
   document.getElementById("clipsPanel").hidden = nextTab !== "clips";
