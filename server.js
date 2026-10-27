@@ -38,7 +38,8 @@ const LOGINS = [
   "ssh1nxx",
   "homka20_",
   "medverina",
-  "ne_twig"
+  "ne_twig",
+  "screada67"
 ];
 
 let token = null;
@@ -161,7 +162,8 @@ async function fetchStreams() {
     headers: {
       "Client-Id": CLIENT_ID,
       "Authorization": `Bearer ${accessToken}`
-    }
+    },
+    signal: AbortSignal.timeout(12000)
   });
   if (!response.ok) {
     if (response.status === 401) {
