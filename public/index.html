@@ -3679,7 +3679,7 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
           card.append(downloadButton);
         }
         const actions=makeText("div","","community-pending-actions");
-        [["approve","Одобрить"],["reject","Отклонить"],["delete","Удалить"]].forEach(([action,label])=>{
+        [["approve","Одобрить"],["reject","Отклонить"]].forEach(([action,label])=>{
           const button=makeText("button",label,"wall-action-button");button.type="button";
           button.addEventListener("click",async()=>{
             button.disabled=true;
