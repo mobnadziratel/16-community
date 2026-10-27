@@ -2027,6 +2027,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
  }
  $("showBadges").addEventListener("change",()=>{apply();if($("showBadges").checked)loadOfficialBadges()});
  $("twitchNameColors").addEventListener("change",loadTwitchColors);
+ if($("twitchNameColors").checked)loadTwitchColors();
  loadOfficialBadges();
 })();
 </script>
