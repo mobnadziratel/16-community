@@ -444,9 +444,12 @@ const server = http.createServer(async (req, res) => {
       }
       const badges = {};
       for (const set of sets) {
-        const versions = set.versions || [];
-        const version = versions.find(v => v.id === "1") || versions[0];
-        if (version && version.image_url_2x) badges[set.set_id] = { title: version.title || set.set_id, url: version.image_url_2x };
+        const versions = (set.versions || []).map(version => ({
+          id: String(version.id),
+          title: version.title || set.set_id,
+          url: version.image_url_2x || version.image_url_1x || ""
+        })).filter(version => version.url);
+        if (versions.length) badges[set.set_id] = { title: set.set_id, versions };
       }
       res.writeHead(200); res.end(JSON.stringify({ badges }));
     } catch (error) {
