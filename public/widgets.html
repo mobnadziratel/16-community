@@ -1919,11 +1919,11 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
   </div>
 <section class="chat-panel" style="margin-top:22px">
   <h2>Ссылка для OBS</h2>
-  <p class="chat-note">Введи логин Twitch-канала — получишь ссылку на живой чат с официальными значками Twitch. Ссылка работает как Browser Source в OBS.</p>
+  <p class="chat-note">Введи логин Twitch-канала — получишь ссылку на отдельный живой виджет чата для OBS, без интерфейса Twitch.</p>
   <div class="chat-field" style="max-width:520px"><label for="obsChannel">Канал Twitch</label><input id="obsChannel" type="text" placeholder="например, rueumur" autocomplete="off" spellcheck="false" maxlength="25"></div>
   <div class="chat-field" style="max-width:520px;margin-top:12px"><label for="obsLink">Ссылка для OBS</label><input id="obsLink" type="url" readonly placeholder="Ссылка появится после ввода канала"></div>
   <div class="chat-actions"><button class="chat-action" id="copyObsLink" type="button">Копировать ссылку</button><a class="chat-action chat-secondary" id="openObsLink" href="#" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;text-decoration:none">Открыть предпросмотр</a></div>
-  <p class="chat-note">В OBS: «Источники» → «+» → «Браузер» → вставь ссылку. Рекомендуемый размер: 450 × 800. Это официальный чат Twitch, поэтому значки и сообщения загружаются непосредственно с Twitch.</p>
+  <p class="chat-note">В OBS: «Источники» → «+» → «Браузер» → вставь ссылку. Рекомендуемый размер: 450 × 800. Это отдельный виджет: сообщения появляются в реальном времени, а оформление берётся из выбранных настроек.</p>
   <p id="obsLinkStatus" class="chat-note" aria-live="polite"></p>
 </section>
 </main>
@@ -1953,7 +1953,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
   const login=channel.value.trim().replace(/^@/,"").toLowerCase();
   if(!login){link.value="";open.href="#";open.style.pointerEvents="none";status.textContent="";return}
   if(!/^[a-z0-9_]{1,25}$/.test(login)){link.value="";open.href="#";open.style.pointerEvents="none";status.textContent="Введи корректный логин Twitch: латинские буквы, цифры и подчёркивание.";return}
-  const url=new URL("https://www.twitch.tv/embed/"+encodeURIComponent(login)+"/chat");url.searchParams.set("parent",location.hostname);url.searchParams.set("darkpopout","");
+  const url=new URL("/chat-overlay.html",location.origin);url.searchParams.set("channel",login);url.searchParams.set("style",settings().style);url.searchParams.set("bg",settings().bg);url.searchParams.set("text",settings().text);url.searchParams.set("name",settings().name);url.searchParams.set("accent",settings().accent);url.searchParams.set("outline",settings().outline);url.searchParams.set("bubble",settings().bubble);url.searchParams.set("size",settings().size);url.searchParams.set("twitchColors",settings().twitchNameColors?"1":"0");
   link.value=url.href;open.href=url.href;open.style.pointerEvents="auto";status.textContent="Ссылка готова для OBS.";
  }
  channel.addEventListener("input",update);
