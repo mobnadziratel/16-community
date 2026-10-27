@@ -362,7 +362,9 @@ async function fetchClips(period) {
     createdAt: clip.created_at,
     thumbnailUrl: clip.thumbnail_url,
     broadcasterName: clip.broadcaster_name,
-    broadcasterLogin: clip.broadcaster_login || clip.broadcaster_name
+    broadcasterLogin: clip.broadcaster_login || clip.broadcaster_name,
+    creatorName: clip.creator_name || "",
+    creatorLogin: clip.creator_name || ""
   }));
   clipsCache.set(cacheKey, { time: now, clips });
   return clips;
