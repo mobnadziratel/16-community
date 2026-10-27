@@ -3126,8 +3126,7 @@ async function refreshLiveStatuses() {
   const label = button.querySelector(".random-button-label");
   button.addEventListener("click", async () => {
     if (button.disabled) return;
-    // Open a blank tab immediately during the click gesture so popup blockers allow it.
-    const streamTab = window.open("about:blank", "_blank");
+    // Do not open or navigate to any channel until the live-status check finishes.
     button.disabled = true;
     if (label) label.textContent = "Проверяем эфиры…";
     // Keep the previous message in place while checking so the button does not jump back.
@@ -3146,7 +3145,6 @@ async function refreshLiveStatuses() {
         return Boolean(state && state.isLive === true);
       });
       if (!live.length) {
-        if (streamTab) streamTab.close();
         message.classList.remove("is-error");
         message.textContent = "Сейчас никто не стримит";
         return;
@@ -3155,14 +3153,12 @@ async function refreshLiveStatuses() {
       message.textContent = "";
       const chosen = live[Math.floor(Math.random() * live.length)];
       const targetUrl = chosen.url || `https://www.twitch.tv/${encodeURIComponent(chosen.name)}`;
-      if (streamTab) {
-        streamTab.location.replace(targetUrl);
-      } else {
+      const streamTab = window.open(targetUrl, "_blank", "noopener");
+      if (!streamTab) {
         message.classList.add("is-error");
         message.textContent = "Браузер заблокировал новую вкладку. Разрешите всплывающие окна для сайта.";
       }
     } catch (error) {
-      if (streamTab) streamTab.close();
       message.classList.add("is-error");
       message.textContent = "Не удалось проверить эфир. Попробуйте обновить страницу.";
     } finally {
