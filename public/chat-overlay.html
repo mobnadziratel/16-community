@@ -110,10 +110,10 @@ if(params.get("preview")==="1"){
   status.style.display="none";
   const samples=[
     {user:"rueumur",text:"Всем привет! Добро пожаловать на стрим ✨",tags:"color=#9147ff;badges=broadcaster/1;user-type="},
-    {user:"homka20_",text:"Как дела, чат? 😎",tags:"color=#69d8ff;badges=moderator/1;mod=1;user-type=mod"},
+    {user:"homka20_",text:"Как дела, чат? Kappa",tags:"color=#69d8ff;badges=moderator/1;mod=1;user-type=mod;emotes=25:15-19"},
     {user:"d1unizi",text:"Хорошего стрима всем 💜",tags:"color=#9be58d;badges=vip/1;vip=1"},
-    {user:"medverina",text:"KEKW вот это момент 😂",tags:"color=#ff9bd5;badges=subscriber/12;subscriber=1"},
-    {user:"Зритель",text:"PogChamp Отличная игра!",tags:"color=#f2c14e;badges="}
+    {user:"medverina",text:"LUL вот это момент 😂",tags:"color=#ff9bd5;badges=subscriber/12;subscriber=1;emotes=425618:0-2"},
+    {user:"Зритель",text:"PogChamp Отличная игра!",tags:"color=#f2c14e;badges=;emotes=305954156:0-7"}
   ];
   samples.forEach((m,i)=>setTimeout(()=>addMessage(m.user,m.text,m.tags,"preview-"+i),(i+1)*1250));
 }else connect();
