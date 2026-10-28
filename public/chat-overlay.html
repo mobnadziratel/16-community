@@ -115,7 +115,7 @@ if(params.get("preview")==="1"){
     {user:"medverina",text:"KEKW вот это момент 😂",tags:"color=#ff9bd5;badges=subscriber/12;subscriber=1"},
     {user:"Зритель",text:"PogChamp Отличная игра!",tags:"color=#f2c14e;badges="}
   ];
-  samples.forEach((m,i)=>setTimeout(()=>addMessage(m.user,m.text,m.tags,"preview-"+i),i*180));
+  samples.forEach((m,i)=>setTimeout(()=>addMessage(m.user,m.text,m.tags,"preview-"+i),(i+1)*1250));
 }else connect();
 window.addEventListener("beforeunload",()=>{closed=true;try{socket?.close()}catch{}});
 </script></body></html>
