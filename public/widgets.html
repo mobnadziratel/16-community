@@ -1922,7 +1922,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
         <label class="chat-check"><input id="twitchNameColors" type="checkbox" checked> Цвет ников как на Twitch</label>
         <label class="chat-check"><input id="transparentBg" type="checkbox"> Прозрачный фон</label>
       </div>
-      <div class="chat-actions"><button class="chat-action" id="downloadConfig" type="button">Скачать настройки</button><button class="chat-action chat-secondary" id="resetChat" type="button">Сбросить</button></div>
+      <div class="chat-actions"><button class="chat-action chat-secondary" id="resetChat" type="button">Сбросить</button></div>
       <p class="chat-note">Это первая версия редактора: сейчас показан демонстрационный чат и параметры внешнего вида. Подключение реальных сообщений Twitch и готового OBS Browser Source — следующий этап.</p>
     </section>
     <section class="chat-panel" id="chatPreviewPanel">
@@ -2069,7 +2069,6 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
  ["chatBg","chatText","chatName","chatAccent","chatOutline","chatBubble","chatSize","chatStyle","showBadges","showTime","boldNames","transparentBg","twitchNameColors","messageDisappear","chatDirection","chatLayout","chatBgOpacity","chatBubbleOpacity"].forEach(id=>$(id).addEventListener("input",()=>{apply();saveSettings();document.getElementById("obsChannel")?.dispatchEvent(new Event("input"))}));
  const themeButton=$("themeToggle");if(themeButton)themeButton.addEventListener("click",()=>requestAnimationFrame(apply));
  $("resetChat").addEventListener("click",()=>{ $("chatBg").value=defaults.bg;$("chatText").value=defaults.text;$("chatName").value=defaults.name;$("chatAccent").value=defaults.accent;$("chatOutline").value=defaults.outline;$("chatBubble").value=defaults.bubble;$("chatSize").value=defaults.size;$("chatStyle").value=defaults.style;$("showBadges").checked=defaults.badges;$("showTime").checked=defaults.time;$("boldNames").checked=defaults.bold;$("transparentBg").checked=defaults.transparent;$("twitchNameColors").checked=defaults.twitchNameColors;$("messageDisappear").value=defaults.disappear;$("chatDirection").value=defaults.direction;$("chatLayout").value=defaults.layout;$("chatBgOpacity").value=defaults.bgOpacity;$("chatBubbleOpacity").value=defaults.bubbleOpacity;apply();saveSettings();document.getElementById("obsChannel")?.dispatchEvent(new Event("input"))});
- $("downloadConfig").addEventListener("click",()=>{const blob=new Blob([JSON.stringify(settings(),null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="obs-chat-settings.json";a.click();URL.revokeObjectURL(url)});
  restoreSettings();
  apply();
  saveSettings();
