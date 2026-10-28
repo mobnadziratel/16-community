@@ -2707,10 +2707,22 @@ function renderClips() {
   const sort = document.getElementById("clipSort").value;
   const now = Date.now();
   const ranges = {"24h": 24*60*60*1000, "7d": 7*24*60*60*1000, "30d":30*24*60*60*1000, "365d":365*24*60*60*1000};
+  const loginByName = new Map();
+  streamers.forEach(streamer => {
+    const login = String(streamer.name || "").trim().toLowerCase();
+    if (!login) return;
+    [streamer.name, streamer.displayName].forEach(name => {
+      const key = String(name || "").trim().toLowerCase();
+      if (key) loginByName.set(key, login);
+    });
+  });
   let items = clipsData.filter(clip => {
-    const login = String(clip.broadcasterLogin || clip.broadcasterName || "").toLowerCase();
+    const rawLogin = String(clip.broadcasterLogin || "").trim().toLowerCase();
+    const rawName = String(clip.broadcasterName || "").trim().toLowerCase();
+    const login = loginByName.get(rawLogin) || loginByName.get(rawName) || rawLogin || rawName;
     const streamerMatch = selectedClipStreamers.has(login);
-    const periodMatch = period === "all" || (Date.parse(clip.createdAt || "") >= now - (ranges[period] || 0));
+    const createdAt = Date.parse(clip.createdAt || "");
+    const periodMatch = period === "all" || (Number.isFinite(createdAt) && createdAt >= now - ranges[period]);
     return streamerMatch && periodMatch;
   });
   items.sort((a,b) => sort === "popular" ? (Number(b.viewCount)||0)-(Number(a.viewCount)||0) : sort === "newest" ? (Date.parse(b.createdAt)||0)-(Date.parse(a.createdAt)||0) : (Date.parse(a.createdAt)||0)-(Date.parse(b.createdAt)||0));
@@ -3359,8 +3371,8 @@ window.addEventListener("popstate", () => {
 });
 document.getElementById("clipModal").addEventListener("click", event => { if (event.target.id === "clipModal") closeClipPlayer(); });
 document.addEventListener("keydown", event => { if (event.key === "Escape" && document.getElementById("clipModal").classList.contains("is-open")) closeClipPlayer(); });
-document.getElementById("clipPeriod").addEventListener("change", () => { saveClipSettings(); loadClips(true); });
-document.getElementById("clipSort").addEventListener("change", () => { saveClipSettings(); renderClips(); });
+document.getElementById("clipPeriod").addEventListener("change", () => { clipsRenderLimit = CLIPS_PAGE_SIZE; saveClipSettings(); loadClips(true); });
+document.getElementById("clipSort").addEventListener("change", () => { clipsRenderLimit = CLIPS_PAGE_SIZE; saveClipSettings(); renderClips(); });
 document.getElementById("refreshClips").addEventListener("click", () => loadClips(true));
 if (new URLSearchParams(window.location.search).has("clip")) loadClips(true);
 const backToTopButton = document.getElementById("backToTopButton");
