@@ -2021,22 +2021,40 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
  const defaults={bg:"#111116",text:"#f5f5f7",name:"#b9ff36",accent:"#9147ff",outline:"#9147ff",bubble:"#292936",size:"16",style:"clean",badges:true,time:false,bold:true,transparent:false,twitchNameColors:true,disappear:"0",direction:"bottom",layout:"vertical",bgOpacity:"0",bubbleOpacity:"100"};
  function settings(){return {bg:$("chatBg").value,text:$("chatText").value,name:$("chatName").value,accent:$("chatAccent").value,outline:$("chatOutline").value,bubble:$("chatBubble").value,size:$("chatSize").value,style:$("chatStyle").value,badges:$("showBadges").checked,time:$("showTime").checked,bold:$("boldNames").checked,transparent:$("transparentBg").checked,twitchNameColors:$("twitchNameColors").checked,disappear:$("messageDisappear").value,direction:$("chatDirection").value,layout:$("chatLayout").value,bgOpacity:$("chatBgOpacity").value,bubbleOpacity:$("chatBubbleOpacity").value}}
  const SETTINGS_KEY="community-chat-widget-settings-v1";
- // Постоянные демонстрационные сообщения, чтобы предпросмотр не был пустым.
+ // Живой демонстрационный чат: сообщения появляются и плавно исчезают.
  const previewMessages=$("chatPreviewMessages");
- if(previewMessages&&!previewMessages.children.length){
+ if(previewMessages){
    const demo=[
      {name:"rueumur",color:"#b79cff",badges:[["chat-twitch","★"]],text:"Всем привет! Как вам стрим?"},
      {name:"medverina",color:"#ff8fcf",badges:[["chat-sub","♥"]],text:"Привет-привет 👋"},
      {name:"homka20_",color:"#69d8ff",badges:[["chat-mod","М"]],text:"Чат сегодня на месте!"},
-     {name:"d1unizi",color:"#9be58d",badges:[],text:"Хорошего всем вечера ✨"}
+     {name:"d1unizi",color:"#9be58d",badges:[],text:"Хорошего всем вечера ✨"},
+     {name:"rueumur",color:"#b79cff",badges:[["chat-twitch","★"]],text:"Кто смотрит до конца?"},
+     {name:"medverina",color:"#ff8fcf",badges:[["chat-sub","♥"]],text:"Ахах, хорош 😂"},
+     {name:"homka20_",color:"#69d8ff",badges:[["chat-mod","М"]],text:"Залетайте в чат!"},
+     {name:"d1unizi",color:"#9be58d",badges:[],text:"Всем приятного просмотра ✨"}
    ];
-   for(const item of demo){
-     const line=document.createElement("div");line.className="chat-line";
+   let demoIndex=0;
+   const addPreviewMessage=(item)=>{
+     const line=document.createElement("div");line.className="chat-line preview-live-message";
+     line.style.animation="previewChatIn .28s ease-out both";
      const name=document.createElement("span");name.className="chat-name";name.dataset.twitchColor=item.color;name.textContent=item.name;
      for(const [cls,label] of item.badges){const badge=document.createElement("span");badge.className="chat-badge "+cls;badge.textContent=label;badge.setAttribute("aria-label",label);name.prepend(badge)}
      const message=document.createElement("span");message.className="chat-message";message.textContent=item.text;
      line.append(name,message);previewMessages.append(line);
-   }
+     requestAnimationFrame(()=>{if(typeof apply==="function")apply()});
+   };
+   if(!previewMessages.children.length){for(let i=0;i<4;i++)addPreviewMessage(demo[demoIndex++%demo.length])}
+   const previewStyle=document.createElement("style");
+   previewStyle.textContent="@keyframes previewChatIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.preview-live-message{transition:opacity .35s ease,transform .35s ease,max-height .35s ease,margin .35s ease;padding-top:2px;padding-bottom:2px}.preview-live-message.is-leaving{opacity:0;transform:translateY(-7px);max-height:0!important;margin-top:0!important;margin-bottom:0!important;padding-top:0!important;padding-bottom:0!important;overflow:hidden}";
+   document.head.append(previewStyle);
+   setInterval(()=>{
+     if(!previewMessages.isConnected)return;
+     const first=previewMessages.firstElementChild;
+     if(first){first.classList.add("is-leaving");setTimeout(()=>first.remove(),380)}
+     addPreviewMessage(demo[demoIndex++%demo.length]);
+     while(previewMessages.children.length>5){const extra=previewMessages.firstElementChild;if(extra===first)break;extra.remove()}
+   },2600);
  }
  function saveSettings(){try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(settings()))}catch(e){console.warn("Could not save chat widget settings",e)}}
  function restoreSettings(){try{const saved=JSON.parse(localStorage.getItem(SETTINGS_KEY)||"null");if(!saved||typeof saved!=="object")return;const ids={bg:"chatBg",text:"chatText",name:"chatName",accent:"chatAccent",outline:"chatOutline",bubble:"chatBubble",size:"chatSize",style:"chatStyle",disappear:"messageDisappear",direction:"chatDirection",layout:"chatLayout",bgOpacity:"chatBgOpacity",bubbleOpacity:"chatBubbleOpacity"};for(const [key,id] of Object.entries(ids)){if(typeof saved[key]==="string"&&$(id))$(id).value=saved[key]}const checks={badges:"showBadges",time:"showTime",bold:"boldNames",transparent:"transparentBg",twitchNameColors:"twitchNameColors"};for(const [key,id] of Object.entries(checks))if(typeof saved[key]==="boolean"&&$(id))$(id).checked=saved[key]}catch(e){console.warn("Could not restore chat widget settings",e)}}
