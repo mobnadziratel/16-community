@@ -3159,8 +3159,7 @@ async function refreshLiveStatuses() {
       const targetUrl = chosen.url || `https://www.twitch.tv/${encodeURIComponent(chosen.name)}`;
       const streamTab = window.open(targetUrl, "_blank", "noopener");
       if (!streamTab) {
-        message.classList.add("is-error");
-        message.textContent = "Браузер заблокировал новую вкладку. Разрешите всплывающие окна для сайта.";
+        // Браузер заблокировал новую вкладку — не показываем служебное сообщение.
       }
     } catch (error) {
       message.classList.add("is-error");
