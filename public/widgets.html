@@ -2194,6 +2194,8 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
   u.searchParams.set("game",game.value);
   u.searchParams.set("nameColor",nameColor.value);
   u.searchParams.set("twitchColors",twitchColors.checked?"1":"0");
+  u.searchParams.set("showMessages",showMessages.checked?"1":"0");
+  u.searchParams.set("showEmotes",showEmotes.checked?"1":"0");
   if(preview)u.searchParams.set("preview","1");
   return u.toString();
  }
