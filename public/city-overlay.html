@@ -27,10 +27,17 @@ const twitchColorCache={};
 const badgeImages=new Map();
 const emoteImages=new Map();
 const emoteCache=new Map();
-function addEmote(name,url){
+function addEmote(name,url,fallbackUrl=""){
  if(!name||!url||emoteCache.has(name))return;
  emoteCache.set(name,url);
- const img=new Image();img.crossOrigin="anonymous";img.onload=()=>emoteImages.set(name,img);img.src=url;
+ const img=new Image();
+ img.crossOrigin="anonymous";
+ img.onload=()=>emoteImages.set(name,img);
+ img.onerror=()=>{
+  if(fallbackUrl&&img.src!==fallbackUrl){img.onerror=null;img.src=fallbackUrl;return;}
+  emoteImages.delete(name);
+ };
+ img.src=url;
 }
 async function loadChatEmotes(){
  const login=channel||"rueumur";
@@ -49,14 +56,14 @@ async function loadChatEmotes(){
   for(const e of [...(bttv?.channelEmotes||[]),...(bttv?.sharedEmotes||[])])addEmote(e.code,"https://cdn.betterttv.net/emote/"+e.id+"/2x");
   const seven=[...(seventv?.emote_set?.emotes||[]),...(seventv?.user?.emote_sets||[]).flatMap(s=>s.emotes||[])];
   for(const e of seven){
-    const id=e.id||e.data?.id,name=e.name||e.data?.name,host=e.data?.host||e.host;
-    const files=host?.files||[];
-    const file=files.find(f=>/^(2x|3x)\.webp$/i.test(f.name))||files.find(f=>/^1x\.webp$/i.test(f.name))||files.find(f=>/webp/i.test(f.name));
-    let url="";
-    if(host?.url&&file)url=(host.url.startsWith("//")?"https:":host.url.startsWith("http")?"":"https://")+host.url.replace(/^https?:\/\//,"").replace(/\/$/,"")+"/"+file.name;
-    else if(id)url="https://cdn.7tv.app/emote/"+id+"/2x.webp";
-    if(id&&name&&url)addEmote(name,url);
+   const data=e.data||{};
+   const id=e.id||data.id;
+   const name=e.name||data.name;
+   if(id&&name){
+    // Stable 7TV CDN URL; host metadata can be protocol-relative or incomplete.
+    addEmote(name,"https://cdn.7tv.app/emote/"+id+"/2x.webp","https://cdn.7tv.app/emote/"+id+"/1x.webp");
    }
+  }
   for(const set of Object.values(ffz?.sets||{}))for(const e of (set.emoticons||[]))addEmote(e.name,"https://cdn.frankerfacez.com/emote/"+e.id+"/2");
   for(const set of Object.values(ffzGlobal?.sets||{}))for(const e of (set.emoticons||[]))addEmote(e.name,"https://cdn.frankerfacez.com/emote/"+e.id+"/2");
  }catch(_){}
