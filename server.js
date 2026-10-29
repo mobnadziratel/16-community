@@ -506,8 +506,9 @@ const server = http.createServer(async (req, res) => {
     if (!/^[a-z0-9_]{1,25}$/.test(login)) {
       res.writeHead(400); res.end(JSON.stringify({ error: "Invalid Twitch login", avatarUrl: null })); return;
     }
+    const forceRefresh = url.searchParams.get("refresh") === "1" || login === "ilyuha_lake";
     const cached = avatarCache.get(login);
-    if (cached && Date.now() - cached.time < 30 * 60_000) {
+    if (!forceRefresh && cached && Date.now() - cached.time < 30 * 60_000) {
       res.writeHead(200); res.end(JSON.stringify({ login, avatarUrl: cached.avatarUrl })); return;
     }
     try {
