@@ -1954,6 +1954,8 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
   <div class="chat-field"><label for="cityChannel">Канал Twitch</label><input id="cityChannel" type="text" maxlength="25" placeholder="например, rueumur" autocomplete="off" spellcheck="false"></div>
   <div class="chat-field"><label for="cityIdle">Убирать после бездействия</label><select id="cityIdle"><option value="1">1 минута</option><option value="2">2 минуты</option><option value="5" selected>5 минут</option><option value="10">10 минут</option><option value="15">15 минут</option><option value="30">30 минут</option><option value="60">1 час</option></select></div>
   <div class="chat-field"><label for="cityGame">Стиль персонажей</label><select id="cityGame"><option value="mixed" selected>Все вместе</option><option value="minecraft">Пиксели</option><option value="terraria">Пиксели с предметами</option><option value="rpg">Маги</option><option value="scifi">Роботы</option></select></div>
+  <div class="chat-field"><label for="cityNameColor">Цвет ников</label><input id="cityNameColor" type="color" value="#b9ff36"></div>
+  <label class="chat-check"><input id="cityTwitchColors" type="checkbox" checked> Цвет ников как на Twitch</label>
  </div>
  <div class="city-preview-wrap"><div class="city-preview-label">ПРЕДПРОСМОТР · ФОН ПРОЗРАЧНЫЙ</div><iframe id="cityPreviewFrame" title="Предпросмотр ходящих персонажей из чата" loading="eager"></iframe></div>
  <div class="chat-field city-link-field"><label for="cityObsLink">Ссылка для OBS</label><input id="cityObsLink" type="url" readonly placeholder="Введи канал Twitch выше"><button id="cityCopyLink" class="refresh-clips" type="button">Скопировать ссылку</button></div>
@@ -2175,8 +2177,10 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
  loadOfficialBadges();
 })();
 (function initCityWidget(){
- const channel=document.getElementById("cityChannel"),idle=document.getElementById("cityIdle"),game=document.getElementById("cityGame"),frame=document.getElementById("cityPreviewFrame"),link=document.getElementById("cityObsLink"),copy=document.getElementById("cityCopyLink"),status=document.getElementById("cityWidgetStatus");
- if(!channel||!idle||!game||!frame||!link||!copy)return;
+ const channel=document.getElementById("cityChannel"),idle=document.getElementById("cityIdle"),game=document.getElementById("cityGame"),nameColor=document.getElementById("cityNameColor"),twitchColors=document.getElementById("cityTwitchColors"),frame=document.getElementById("cityPreviewFrame"),link=document.getElementById("cityObsLink"),copy=document.getElementById("cityCopyLink"),status=document.getElementById("cityWidgetStatus");
+ if(!channel||!idle||!game||!frame||!link||!copy||!nameColor||!twitchColors)return;
+ const settingsKey="community-city-widget-settings-v1";
+ try{const saved=JSON.parse(localStorage.getItem(settingsKey)||"null");if(saved&&typeof saved==="object"){if(/^#[0-9a-f]{6}$/i.test(saved.nameColor||""))nameColor.value=saved.nameColor;if(typeof saved.twitchColors==="boolean")twitchColors.checked=saved.twitchColors;if(typeof saved.game==="string"&&[...game.options].some(o=>o.value===saved.game))game.value=saved.game;if(typeof saved.idle==="string"&&[...idle.options].some(o=>o.value===saved.idle))idle.value=saved.idle;}}catch(_){}
  function buildUrl(preview){
   const u=new URL("/city-overlay.html",location.origin);
   const login=channel.value.trim().toLowerCase().replace(/^#/,"");
@@ -2184,6 +2188,8 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
   if(login)u.searchParams.set("channel",login);
   u.searchParams.set("idle",idle.value);
   u.searchParams.set("game",game.value);
+  u.searchParams.set("nameColor",nameColor.value);
+  u.searchParams.set("twitchColors",twitchColors.checked?"1":"0");
   if(preview)u.searchParams.set("preview","1");
   return u.toString();
  }
@@ -2192,9 +2198,10 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
   const valid=/^[a-z0-9_]{1,25}$/.test(login);
   link.value=valid?buildUrl(false):"";
   frame.src=buildUrl(true);
+  try{localStorage.setItem(settingsKey,JSON.stringify({nameColor:nameColor.value,twitchColors:twitchColors.checked,game:game.value,idle:idle.value}))}catch(_){}
   if(status)status.textContent=valid?"Настройки обновлены. Скопируй ссылку в OBS как источник «Браузер».":"Введи корректный логин канала Twitch. Настройки можно менять в любое время.";
  }
- [channel,idle,game].forEach(el=>el.addEventListener("input",update));
+ [channel,idle,game,nameColor,twitchColors].forEach(el=>{el.addEventListener("input",update);el.addEventListener("change",update)});
  copy.addEventListener("click",async()=>{
   if(!link.value){status.textContent="Сначала введи корректный логин Twitch.";return}
   try{await navigator.clipboard.writeText(link.value);status.textContent="Ссылка скопирована. Добавь её в OBS как источник «Браузер»."}
