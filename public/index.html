@@ -2101,6 +2101,130 @@ html[data-theme="light"] .streamer::after{color:rgba(183,76,18,.5)}
   body::before,body::after,main.wrap::before,main.wrap::after{animation:none!important}
 }
 
+
+/* === Halloween makeover for the community wall === */
+#wallPanel .wall-mural{
+  border:2px solid rgba(255,139,43,.78);
+  border-radius:18px;
+  box-shadow:
+    0 0 0 3px rgba(123,61,166,.32),
+    0 0 26px rgba(255,111,35,.22),
+    0 26px 70px rgba(0,0,0,.46),
+    inset 0 0 0 2px rgba(255,200,130,.12),
+    inset 0 2px 3px rgba(255,255,255,.13),
+    inset 0 -18px 24px rgba(0,0,0,.34);
+}
+#wallPanel .wall-mural::after{
+  opacity:.6;
+  background:
+    radial-gradient(ellipse at 5% 4%,rgba(255,120,37,.22),transparent 24%),
+    radial-gradient(ellipse at 96% 14%,rgba(156,77,214,.24),transparent 26%),
+    radial-gradient(ellipse at 50% 100%,rgba(255,120,37,.13),transparent 33%),
+    radial-gradient(circle at 14% 48%,#111 0 1px,transparent 2px),
+    radial-gradient(circle at 77% 34%,#17100e 0 1px,transparent 2px),
+    radial-gradient(circle at 61% 83%,#21130f 0 2px,transparent 3px);
+  background-size:auto,auto,auto,37px 41px,53px 47px,67px 59px;
+}
+#wallPanel .wall-halloween-garland{
+  position:absolute;z-index:2;top:94px;left:clamp(12px,2.4vw,30px);right:clamp(12px,2.4vw,30px);
+  display:flex;align-items:center;justify-content:center;gap:clamp(6px,1.5vw,18px);
+  min-height:42px;padding:8px 14px;box-sizing:border-box;
+  border:1px solid rgba(255,169,76,.48);border-radius:13px;
+  background:linear-gradient(100deg,rgba(28,12,39,.82),rgba(79,31,77,.82),rgba(30,13,36,.84));
+  color:#ffe8be;text-align:center;
+  box-shadow:0 6px 22px rgba(0,0,0,.25),0 0 18px rgba(255,129,38,.12),inset 0 1px 0 rgba(255,255,255,.12);
+  text-shadow:0 0 11px rgba(255,138,43,.6);
+  pointer-events:none;
+}
+#wallPanel .wall-halloween-garland strong{
+  font-size:clamp(11px,1.6vw,17px);line-height:1.15;letter-spacing:.12em;
+  font-weight:1000;color:#ffbd68;
+}
+#wallPanel .wall-halloween-icon{font-size:clamp(16px,2vw,24px);filter:drop-shadow(0 0 6px rgba(255,139,43,.4))}
+#wallPanel .wall-tag.tag-purple{color:#e1baff;text-shadow:2px 2px 0 #4a225f,-2px -1px 0 #4a225f,0 0 15px rgba(189,122,255,.45),4px 6px 0 rgba(20,10,25,.65)}
+#wallPanel .wall-tag.tag-cyan{color:#ffbd8a;text-shadow:2px 2px 0 #873f31,-2px -1px 0 #873f31,0 0 15px rgba(255,129,50,.36),4px 6px 0 rgba(20,10,25,.65)}
+#wallPanel .wall-tag.tag-orange{color:#ff8a42;text-shadow:2px 2px 0 #6c251a,-2px -1px 0 #6c251a,0 0 15px rgba(255,115,40,.4),4px 6px 0 rgba(20,10,25,.65)}
+#wallPanel .wall-tag.tag-lime{color:#c9a1ff;text-shadow:2px 2px 0 #4b286a,-2px -1px 0 #4b286a,0 0 15px rgba(184,113,255,.4),4px 6px 0 rgba(20,10,25,.65)}
+#wallPanel .wall-square-sign{
+  border-color:#ff8b2b;
+  box-shadow:0 14px 24px rgba(0,0,0,.62),0 0 22px rgba(255,120,35,.22),inset 0 0 0 3px rgba(255,255,255,.075),inset 0 -12px 18px rgba(255,255,255,.025);
+}
+#wallPanel .wanted-poster{
+  border-color:#d87930;
+  box-shadow:0 14px 22px rgba(0,0,0,.58),0 0 20px rgba(255,129,37,.12),inset 0 0 0 4px rgba(101,61,34,.2),inset 0 0 24px rgba(91,54,27,.16);
+}
+#wallPanel .wanted-title{color:#a33524;text-shadow:2px 2px 0 rgba(255,137,47,.28),0 0 12px rgba(255,137,47,.15)}
+#wallPanel .bakery-flyer{
+  border-color:#f3a34d;
+  box-shadow:0 16px 25px rgba(0,0,0,.5),0 0 20px rgba(255,132,40,.15),inset 0 0 0 5px rgba(255,255,255,.4),inset 0 0 22px rgba(132,75,32,.16);
+}
+#wallPanel .wall-splatter.splatter-a{--splatter:#ff9b42;opacity:.45}
+#wallPanel .wall-splatter.splatter-b{--splatter:#bb86ff;opacity:.42}
+#wallPanel .wall-splatter.splatter-c{--splatter:#ff6d45;opacity:.48}
+#wallPanel .wall-footing{
+  height:42px;
+  background:linear-gradient(180deg,#42213f,#211226);
+  border-top:2px solid rgba(255,143,49,.75);
+  box-shadow:0 -3px 18px rgba(255,107,34,.18);
+}
+#wallPanel .wall-footing::before{
+  content:"🎃  BOO!  🎃";
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  color:#ffc16c;font:900 12px/1.2 ui-sans-serif,system-ui,sans-serif;letter-spacing:.28em;
+  text-shadow:0 0 12px rgba(255,111,35,.7);
+}
+#wallPanel .wall-posts-on-mural .wall-post-card{
+  position:relative;overflow:hidden;
+  border:1px solid rgba(255,157,72,.58);
+  border-radius:13px;
+  background:linear-gradient(145deg,rgba(45,23,55,.97),rgba(24,13,30,.97));
+  box-shadow:0 10px 25px rgba(0,0,0,.42),0 0 15px rgba(255,114,36,.09);
+}
+#wallPanel .wall-posts-on-mural .wall-post-card::before{
+  content:"✦  SPOOKY POST  ✦";
+  display:block;padding:7px 12px;
+  border-bottom:1px solid rgba(255,156,76,.28);
+  background:linear-gradient(90deg,rgba(115,50,135,.75),rgba(77,35,69,.7),rgba(153,63,29,.4));
+  color:#ffca88;font-size:10px;font-weight:900;letter-spacing:.17em;
+}
+#wallPanel .wall-posts-on-mural .wall-post-card img{
+  background:#140d1a;
+  box-shadow:inset 0 0 0 1px rgba(255,157,72,.18);
+}
+#wallPanel .wall-posts-on-mural .wall-post-copy{color:#fff1e2}
+#wallPanel .wall-posts-on-mural .wall-post-date{color:#d9bfdc}
+#wallPanel .wall-posts-on-mural .wall-post-actions .wall-action-button,
+#wallPanel .wall-posts-on-mural .wall-post-actions button{
+  border-color:rgba(255,155,70,.55);
+  border-radius:9px;
+}
+html[data-theme="light"] #wallPanel .wall-halloween-garland{
+  background:linear-gradient(100deg,rgba(51,20,68,.95),rgba(92,40,83,.94),rgba(51,20,68,.95));
+  border-color:#d87930;
+}
+html[data-theme="light"] #wallPanel .wall-posts-on-mural .wall-post-card{
+  background:linear-gradient(145deg,#321a3e,#24132e);
+}
+@media(max-width:650px){
+  #wallPanel .wall-halloween-garland{
+    position:relative;inset:auto;order:0;flex:0 0 auto;width:100%;
+    margin:70px 0 -2px;padding:10px 7px;gap:6px;min-height:42px;
+  }
+  #wallPanel .wall-halloween-garland strong{font-size:clamp(10px,3.2vw,14px);letter-spacing:.06em}
+  #wallPanel .wall-halloween-icon{font-size:18px}
+  #wallPanel .wall-footing{height:34px}
+  #wallPanel .wall-footing::before{font-size:10px;letter-spacing:.18em}
+  #wallPanel .wall-posts-on-mural .wall-post-card::before{text-align:center;letter-spacing:.1em}
+}
+@media(prefers-reduced-motion:no-preference){
+  #wallPanel .wall-halloween-icon{animation:wall-halloween-float 4.8s ease-in-out infinite}
+  #wallPanel .wall-halloween-icon:nth-child(2n){animation-delay:-2.4s}
+  @keyframes wall-halloween-float{
+    0%,100%{transform:translateY(0) rotate(-4deg)}
+    50%{transform:translateY(-4px) rotate(4deg)}
+  }
+}
+
 </style>
 </head>
 <body>
@@ -2180,6 +2304,13 @@ html[data-theme="light"] .streamer::after{color:rgba(183,76,18,.5)}
   </section>
   <section id="wallPanel" aria-label="Стена сообщества" hidden>
     <div class="wall-mural" role="img" aria-label="Декоративная стена сообщества">
+      <div class="wall-halloween-garland" aria-hidden="true">
+        <span class="wall-halloween-icon">🕸️</span>
+        <span class="wall-halloween-icon">🦇</span>
+        <strong>ХЭЛЛОУИНСКАЯ СТЕНА</strong>
+        <span class="wall-halloween-icon">👻</span>
+        <span class="wall-halloween-icon">🎃</span>
+      </div>
       <div id="plovecmolodecCountdown" role="timer" aria-live="off" style="position:absolute;z-index:8;top:12px;left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100% - 24px);box-sizing:border-box;padding:12px 18px;border:1px solid rgba(255,255,255,.28);border-radius:16px;background:rgba(10,10,16,.78);backdrop-filter:blur(8px);color:#fff;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.35);font-family:inherit">
         <div style="font-weight:800;font-size:clamp(13px,2.4vw,18px);margin-bottom:7px">До дня возвращения plovecmolodec</div>
         <div id="plovecmolodecCountdownValue" style="font-variant-numeric:tabular-nums;font-size:clamp(18px,3vw,27px);font-weight:900;letter-spacing:.04em">Загрузка…</div>
