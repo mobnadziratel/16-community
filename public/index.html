@@ -2352,7 +2352,7 @@ const editors = [
 let activeTab = "streamers";
 try {
   const savedTab = sessionStorage.getItem("small-streamers-active-tab");
-  if (["streamers", "moderators", "clips", "wall"].includes(savedTab)) activeTab = savedTab;
+  if (["streamers", "moderators", "clips", "wall", "suggestions"].includes(savedTab)) activeTab = savedTab;
 } catch (_) {}
 (function startAtTopOnReload() {
   let isReload = false;
