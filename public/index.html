@@ -2336,7 +2336,7 @@ html[data-theme="light"] #wallPanel .wall-posts-on-mural .wall-post-card{
 }
 
 </style>
-</head>
+\n<style>\n/* Move the WANTED poster lower on the desktop mural without changing the compact mobile layout. */\n@media (min-width: 651px) { #wallPanel .wanted-poster { margin-top: 120px; } }\n</style>\n</head>
 <body>
 <header><div class="wrap nav">
   <span class="brand"><span class="logo" role="button" tabindex="0" aria-label="Нажмите 5 раз для анимации аватарок">
@@ -4479,7 +4479,8 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
     try{await apiJson("/api/community/logout",{method:"POST"});}catch(_){}
     setModeratorSignedIn(false);pending.replaceChildren();moderatorMessage.textContent="Вы вышли из панели модерации.";
   });
-  setModeratorSignedIn(false);loadApproved();
+  // Restore the existing server-side login session after reload; loadPending checks the session cookie.
+  loadPending();loadApproved();
 })();
 
 </script>
