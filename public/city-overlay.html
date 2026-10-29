@@ -142,8 +142,9 @@ function drawPerson(p,t){
   const padX=8,padY=6,lineHeight=15;
   const maxBubbleWidth=Math.min(260,width-12);
   const maxTextWidth=Math.max(12,maxBubbleWidth-padX*2);
-  const lines=[];let line="";
+  const lines=[];let line="",consumed=0;
   for(const ch of bubbleText){
+   consumed++;
    if(ch==="\n"){lines.push(line);line="";if(lines.length>=4)break;continue;}
    const candidate=line+ch;
    if(line&&ctx.measureText(candidate).width>maxTextWidth){
@@ -153,8 +154,7 @@ function drawPerson(p,t){
   }
   if(lines.length<4&&line)lines.push(line.trimEnd());
   if(!lines.length)lines.push(bubbleText.slice(0,10));
-  const shown=lines.join("").length;
-  const truncated=shown<bubbleText.replace(/\s/g,"").length;
+  const truncated=consumed<bubbleText.length;
   if(truncated){let last=lines[lines.length-1];while(last.length&&ctx.measureText(last+"…").width>maxTextWidth)last=last.slice(0,-1);lines[lines.length-1]=last+"…";}
   const contentWidth=Math.max(24,...lines.map(value=>ctx.measureText(value).width));
   const bw=Math.min(maxBubbleWidth,contentWidth+padX*2),bh=lines.length*lineHeight+padY*2;
