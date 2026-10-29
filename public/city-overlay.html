@@ -19,6 +19,8 @@ const style=params.get("game")||"mixed";
 const preview=params.get("preview")==="1";
 const nameColor=/^#[0-9a-f]{6}$/i.test(params.get("nameColor")||"")?params.get("nameColor"):"#b9ff36";
 const useTwitchColors=params.get("twitchColors")!=="0";
+const showMessages=params.get("showMessages")!=="0";
+const showEmotes=params.get("showEmotes")!=="0";
 const canvas=document.getElementById("city"),ctx=canvas.getContext("2d"),status=document.getElementById("status");
 const people=new Map();
 const twitchColorCache={};
@@ -178,7 +180,7 @@ function drawPerson(p,t){
  ctx.save();ctx.font="bold 13px Arial,sans-serif";ctx.textAlign="center";ctx.textBaseline="bottom";
  const label=p.display;const labelWidth=ctx.measureText(label).width;const icons=(p.badges||[]).map(b=>({badge:b,img:badgeImages.get(b.id+"/"+b.version)||badgeImages.get(b.id+"/1")})).filter(item=>item.img&&item.img.complete&&item.img.naturalWidth>0);const iconSize=13,gap=2,iconsWidth=icons.length?icons.length*iconSize+(icons.length-1)*gap+4:0;const tw=Math.min(labelWidth+iconsWidth,width*.4);const tx=Math.max(tw/2+3,Math.min(width-tw/2-3,x));const textX=tx+iconsWidth/2;let badgeX=textX-labelWidth/2-iconsWidth+2;for(const item of icons){ctx.drawImage(item.img,badgeX,base-34*s-12,iconSize,iconSize);badgeX+=iconSize+gap;}ctx.lineWidth=4;ctx.strokeStyle="#101014";ctx.lineJoin="round";ctx.strokeText(label,textX,base-34*s);ctx.fillStyle=p.nameColor||nameColor;ctx.fillText(label,textX,base-34*s);ctx.restore();
  // Wrap long messages reliably, including text without spaces.
- if(p.message&&Date.now()-p.messageAt<9000&&width>30&&height>30){
+ if(showMessages&&p.message&&Date.now()-p.messageAt<9000&&width>30&&height>30){
   const bubbleText=p.message.slice(0,220);
    const wordsForEmotes=bubbleText.split(/(\s+)/);
   ctx.save();ctx.font="bold 12px Arial,sans-serif";ctx.textAlign="left";ctx.textBaseline="top";
@@ -211,7 +213,7 @@ function drawPerson(p,t){
    let cursorX=bx+padX;
     for(const token of value.split(/(\s+)/)){
     if(!token)continue;
-    const img=emoteImages.get(token);
+    const img=showEmotes?emoteImages.get(token):null;
     if(img&&img.complete&&img.naturalWidth>0){
      const size=18;if(cursorX+size>bx+bw-padX+2)break;
      ctx.drawImage(img,cursorX,by+padY+i*lineHeight-2,size,size);cursorX+=size+2;
