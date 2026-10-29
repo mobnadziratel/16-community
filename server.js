@@ -841,7 +841,14 @@ const server = http.createServer(async (req, res) => {
     if (err) { res.writeHead(404); res.end("Not found"); return; }
     const ext = path.extname(filePath);
     const types = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".svg": "image/svg+xml" };
-    res.writeHead(200, { "Content-Type": types[ext] || "application/octet-stream" });
+    const headers = { "Content-Type": types[ext] || "application/octet-stream" };
+    // HTML must not be served from a stale browser/proxy cache after deployments (e.g. old music-login instructions).
+    if (ext === ".html") {
+      headers["Cache-Control"] = "no-store, no-cache, must-revalidate, proxy-revalidate";
+      headers["Pragma"] = "no-cache";
+      headers["Expires"] = "0";
+    }
+    res.writeHead(200, headers);
     res.end(data);
   });
 });
