@@ -23,6 +23,40 @@ const canvas=document.getElementById("city"),ctx=canvas.getContext("2d"),status=
 const people=new Map();
 const twitchColorCache={};
 const badgeImages=new Map();
+const emoteImages=new Map();
+const emoteCache=new Map();
+function addEmote(name,url){
+ if(!name||!url||emoteCache.has(name))return;
+ emoteCache.set(name,url);
+ const img=new Image();img.crossOrigin="anonymous";img.onload=()=>emoteImages.set(name,img);img.src=url;
+}
+async function loadChatEmotes(){
+ const login=channel||"rueumur";
+ try{
+  const userResponse=await fetch("https://api.ivr.fi/v2/twitch/user?login="+encodeURIComponent(login));
+  if(!userResponse.ok)return;
+  const users=await userResponse.json(),user=Array.isArray(users)?users[0]:users;
+  const id=user&&user.id;if(!id)return;
+  const jobs=[
+   fetch("https://api.betterttv.net/3/cached/users/twitch/"+encodeURIComponent(id)).then(r=>r.ok?r.json():null),
+   fetch("https://7tv.io/v3/users/twitch/"+encodeURIComponent(id)).then(r=>r.ok?r.json():null),
+   fetch("https://api.frankerfacez.com/v1/room/"+encodeURIComponent(login)).then(r=>r.ok?r.json():null),
+   fetch("https://api.frankerfacez.com/v1/set/global").then(r=>r.ok?r.json():null)
+  ];
+  const [bttv,seventv,ffz,ffzGlobal]=await Promise.all(jobs);
+  for(const e of [...(bttv?.channelEmotes||[]),...(bttv?.sharedEmotes||[])])addEmote(e.code,"https://cdn.betterttv.net/emote/"+e.id+"/2x");
+  const seven=[...(seventv?.emote_set?.emotes||[]),...(seventv?.user?.emote_sets||[]).flatMap(s=>s.emotes||[])];
+  for(const e of seven){const id=e.id||e.data?.id,name=e.name||e.data?.name;if(id&&name)addEmote(name,"https://cdn.7tv.app/emote/"+id+"/2x.webp");}
+  for(const set of Object.values(ffz?.sets||{}))for(const e of (set.emoticons||[]))addEmote(e.name,"https://cdn.frankerfacez.com/emote/"+e.id+"/2");
+  for(const set of Object.values(ffzGlobal?.sets||{}))for(const e of (set.emoticons||[]))addEmote(e.name,"https://cdn.frankerfacez.com/emote/"+e.id+"/2");
+ }catch(_){}
+}
+function nativeEmotesFromTag(tag,text){
+ const result={};if(!tag)return result;
+ for(const group of tag.split("/")){const parts=group.split(":");const id=parts[0];for(const range of (parts[1]||"").split(",")){const [a,b]=range.split("-").map(Number);if(Number.isInteger(a)&&Number.isInteger(b)&&a>=0&&b<text.length){const word=text.slice(a,b+1);if(word)addEmote(word,"https://static-cdn.jtvnw.net/emoticons/v2/"+id+"/default/dark/2.0");result[word]=true;}}}
+ return result;
+}
+
 const badgeLabels={broadcaster:"Владелец",moderator:"Модератор",vip:"VIP",subscriber:"Подписчик",founder:"Основатель",staff:"Twitch Staff",admin:"Администратор",global_mod:"Глобальный модератор",bits:"Bits"};
 async function loadTwitchBadges(){try{const response=await fetch("/api/chat-badges?channel="+encodeURIComponent(channel||"rueumur"),{cache:"no-store"});if(!response.ok)return;const data=await response.json();for(const [setId,set] of Object.entries(data.badges||{})){for(const version of (set.versions||[])){if(!version.url)continue;const img=new Image();img.src=version.url;badgeImages.set(setId+"/"+String(version.id),img);}}}catch(_){}}
 const pendingColorLogins=new Set();
@@ -138,6 +172,7 @@ function drawPerson(p,t){
  // Wrap long messages reliably, including text without spaces.
  if(p.message&&Date.now()-p.messageAt<9000&&width>30&&height>30){
   const bubbleText=p.message.slice(0,220);
+  const wordsForEmotes=bubbleText.split(/(\\s+)/);
   ctx.save();ctx.font="bold 12px Arial,sans-serif";ctx.textAlign="left";ctx.textBaseline="top";
   const padX=8,padY=6,lineHeight=15;
   const maxBubbleWidth=Math.min(260,width-12);
@@ -164,7 +199,17 @@ function drawPerson(p,t){
   ctx.beginPath();if(typeof ctx.roundRect==="function")ctx.roundRect(bx,by,bw,bh,7);else ctx.rect(bx,by,bw,bh);ctx.fill();ctx.stroke();
   ctx.fillStyle="#fff";
   ctx.save();ctx.beginPath();ctx.rect(bx+1,by+1,bw-2,bh-2);ctx.clip();
-  lines.forEach((value,i)=>ctx.fillText(value,bx+padX,by+padY+i*lineHeight));
+  lines.forEach((value,i)=>{
+   let cursorX=bx+padX;
+   for(const token of value.split(/(\\s+)/)){
+    if(!token)continue;
+    const img=emoteImages.get(token);
+    if(img&&img.complete&&img.naturalWidth>0){
+     const size=18;if(cursorX+size>bx+bw-padX+2)break;
+     ctx.drawImage(img,cursorX,by+padY+i*lineHeight-2,size,size);cursorX+=size+2;
+    }else{ctx.fillText(token,cursorX,by+padY+i*lineHeight);cursorX+=ctx.measureText(token).width;}
+   }
+  });
   ctx.restore();
   const pointerX=Math.max(bx+9,Math.min(bx+bw-9,x));
   ctx.fillStyle="rgba(18,18,25,.96)";ctx.beginPath();ctx.moveTo(pointerX-4,by+bh-1);ctx.lineTo(pointerX,Math.min(height-2,by+bh+5));ctx.lineTo(pointerX+1,by+bh-1);ctx.closePath();ctx.fill();
@@ -185,11 +230,11 @@ function connect(){
  if(!/^[a-z0-9_]{1,25}$/.test(channel)){showStatus("Укажи канал Twitch в настройках виджета");return}
  try{socket=new WebSocket("wss://irc-ws.chat.twitch.tv:443");}catch(_){showStatus("Не удалось подключиться к чату");return}
  socket.onopen=()=>{socket.send("CAP REQ :twitch.tv/tags twitch.tv/commands");socket.send("PASS SCHMOOPIIE");socket.send("NICK justinfan"+Math.floor(Math.random()*900000+100000));socket.send("JOIN #"+channel);showStatus("Подключаемся к чату "+channel)};
- socket.onmessage=e=>{for(const line of String(e.data||"").split("\r\n")){if(!line)continue;if(line.startsWith("PING")){socket.send("PONG :"+line.slice(5));continue}const tagPart=line.startsWith("@")?line.slice(1,line.indexOf(" ")).split(";"):[];const tags=Object.fromEntries(tagPart.map(x=>{const i=x.indexOf("=");return i<0?[x,""]:[x.slice(0,i),x.slice(i+1)]}));const match=line.match(/:([a-zA-Z0-9_]{1,25})![^ ]+ PRIVMSG #\S+ :(.*)$/);if(match){const text=match[2].replace(/\\s/g," ").replace(/\\:/g,";").replace(/\\r/g," ").replace(/\\n/g," ");addPerson(match[1],(tags.badges||"").split(",").filter(Boolean),tags["user-type"]||"",text);}}};
+ socket.onmessage=e=>{for(const line of String(e.data||"").split("\r\n")){if(!line)continue;if(line.startsWith("PING")){socket.send("PONG :"+line.slice(5));continue}const tagPart=line.startsWith("@")?line.slice(1,line.indexOf(" ")).split(";"):[];const tags=Object.fromEntries(tagPart.map(x=>{const i=x.indexOf("=");return i<0?[x,""]:[x.slice(0,i),x.slice(i+1)]}));const match=line.match(/:([a-zA-Z0-9_]{1,25})![^ ]+ PRIVMSG #\S+ :(.*)$/);if(match){const text=match[2].replace(/\\s/g," ").replace(/\\:/g,";").replace(/\\r/g," ").replace(/\\n/g," ");nativeEmotesFromTag(tags.emotes||"",text);addPerson(match[1],(tags.badges||"").split(",").filter(Boolean),tags["user-type"]||"",text);}}};
  socket.onerror=()=>showStatus("Чат Twitch временно недоступен");
  socket.onclose=()=>{if(!preview)retryTimer=setTimeout(connect,5000)};
 }
-window.addEventListener("resize",resize);resize();loadTwitchBadges();connect();requestAnimationFrame(frame);
+window.addEventListener("resize",resize);resize();loadTwitchBadges();loadChatEmotes();connect();requestAnimationFrame(frame);
 window.addEventListener("beforeunload",()=>{clearTimeout(retryTimer);if(socket)socket.close()});
 })();
 </script>
