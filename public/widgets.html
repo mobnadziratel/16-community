@@ -2047,7 +2047,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
      const line=document.createElement("div");line.className="chat-line preview-live-message";
      line.style.animation="previewChatIn .28s ease-out both";
      const bubble=document.createElement("div");bubble.className="chat-preview-bubble";
-     const name=document.createElement("span");name.className="chat-name";name.dataset.twitchColor=item.color;
+     const name=document.createElement("span");name.className="chat-name";
      const roles=document.createElement("span");roles.className="chat-role-badges";
      for(const [cls,label] of (item.badges||[])){
        const badge=document.createElement("span");badge.className="chat-badge "+cls;badge.textContent=label;
@@ -2057,7 +2057,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
      const nick=document.createElement("span");nick.className="chat-nick";nick.textContent=item.name;name.append(nick);
      const message=document.createElement("span");message.className="chat-message";message.textContent=item.text;
      bubble.append(name,message);line.append(bubble);previewMessages.append(line);
-     requestAnimationFrame(()=>{if(typeof apply==="function")apply();if(preview.classList.contains("is-horizontal"))preview.scrollLeft=preview.scrollWidth;else if(settings().direction==="top")preview.scrollTop=preview.scrollHeight;});
+     requestAnimationFrame(()=>{if(typeof apply==="function")apply();applyPreviewNameColors();if(preview.classList.contains("is-horizontal"))preview.scrollLeft=preview.scrollWidth;else if(settings().direction==="top")preview.scrollTop=preview.scrollHeight;});
    };
    if(!previewMessages.children.length){for(let i=0;i<4;i++)addPreviewMessage(demo[demoIndex++%demo.length])}
    const previewStyle=document.createElement("style");
@@ -2097,7 +2097,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
    previewFrame.dataset.src=u.href;
    previewFrame.src=u.href;
   }
- } function updateOpacityLabels(){const bg=$("chatBgOpacity"),bubble=$("chatBubbleOpacity");if(bg&&$("chatBgOpacityValue"))$("chatBgOpacityValue").textContent=(100-Number(bg.value))+"%";if(bubble&&$("chatBubbleOpacityValue"))$("chatBubbleOpacityValue").textContent=Number(bubble.value)+"%";}["chatBgOpacity","chatBubbleOpacity"].forEach(id=>$(id)?.addEventListener("input",updateOpacityLabels));updateOpacityLabels();["chatBg","chatText","chatName","chatAccent","chatOutline","chatBubble","chatSize","chatStyle","showBadges","showTime","boldNames","transparentBg","twitchNameColors","messageDisappear","chatDirection","chatLayout","chatBgOpacity","chatBubbleOpacity"].forEach(id=>$(id)?.addEventListener("input",()=>{updateOpacityLabels();apply();saveSettings();document.getElementById("obsChannel")?.dispatchEvent(new Event("input"))}));
+ } function updateOpacityLabels(){const bg=$("chatBgOpacity"),bubble=$("chatBubbleOpacity");if(bg&&$("chatBgOpacityValue"))$("chatBgOpacityValue").textContent=(100-Number(bg.value))+"%";if(bubble&&$("chatBubbleOpacityValue"))$("chatBubbleOpacityValue").textContent=Number(bubble.value)+"%";}["chatBgOpacity","chatBubbleOpacity"].forEach(id=>$(id)?.addEventListener("input",updateOpacityLabels));updateOpacityLabels();["chatBg","chatText","chatName","chatAccent","chatOutline","chatBubble","chatSize","chatStyle","showBadges","showTime","boldNames","transparentBg","twitchNameColors","messageDisappear","chatDirection","chatLayout","chatBgOpacity","chatBubbleOpacity"].forEach(id=>$(id)?.addEventListener("input",()=>{updateOpacityLabels();apply();applyPreviewNameColors();saveSettings();document.getElementById("obsChannel")?.dispatchEvent(new Event("input"))}));
  const themeButton=$("themeToggle");if(themeButton)themeButton.addEventListener("click",()=>requestAnimationFrame(apply));
  $("resetChat").addEventListener("click",()=>{const values={chatBg:defaults.bg,chatText:defaults.text,chatName:defaults.name,chatAccent:defaults.accent,chatOutline:defaults.outline,chatBubble:defaults.bubble,chatSize:defaults.size,chatStyle:defaults.style,messageDisappear:defaults.disappear,chatDirection:defaults.direction,chatLayout:defaults.layout,chatBgOpacity:defaults.bgOpacity,chatBubbleOpacity:defaults.bubbleOpacity};for(const [id,value] of Object.entries(values))if($(id))$(id).value=value;const checks={showBadges:defaults.badges,showTime:defaults.time,boldNames:defaults.bold,transparentBg:defaults.transparent,twitchNameColors:defaults.twitchNameColors};for(const [id,value] of Object.entries(checks))if($(id))$(id).checked=value;updateOpacityLabels();apply();saveSettings();document.getElementById("obsChannel")?.dispatchEvent(new Event("input"))});
  restoreSettings();
@@ -2136,16 +2136,27 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
      });
    }catch(_){}
  }
+ let twitchColorCache={};
+ function applyPreviewNameColors(){
+   const enabled=$("twitchNameColors").checked;
+   preview.querySelectorAll(".chat-name").forEach(el=>{
+     const nick=el.querySelector(".chat-nick");
+     if(!nick)return;
+     const color=enabled?(twitchColorCache[nick.textContent.trim().toLowerCase()]||""):settings().name;
+     if(color)nick.style.setProperty("color",color,"important");
+     else nick.style.setProperty("color",settings().name,"important");
+   });
+ }
  async function loadTwitchColors(){
-   if(!$("twitchNameColors").checked){preview.querySelectorAll(".chat-name").forEach(el=>{el.style.color=settings().name});return}
-   const logins=[...preview.querySelectorAll(".chat-name")].map(el=>el.textContent.trim().toLowerCase()).filter(Boolean);
+   if(!$("twitchNameColors").checked){applyPreviewNameColors();return}
+   const logins=[...new Set([...preview.querySelectorAll(".chat-nick")].map(el=>el.textContent.trim().toLowerCase()).filter(Boolean))];
    try{
      const response=await fetch("/api/chat-colors?logins="+encodeURIComponent(logins.join(",")));
      if(!response.ok)throw new Error("Twitch colors unavailable");
      const data=await response.json();
-     preview.querySelectorAll(".chat-name").forEach(el=>{const color=data.colors?.[el.textContent.trim().toLowerCase()];if(color)el.dataset.twitchColor=color;else delete el.dataset.twitchColor});
-   }catch(_){preview.querySelectorAll(".chat-name").forEach(el=>delete el.dataset.twitchColor)}
-   apply();
+     twitchColorCache=data.colors||{};
+   }catch(_){twitchColorCache={}}
+   applyPreviewNameColors();
  }
  $("showBadges").addEventListener("change",()=>{apply();if($("showBadges").checked)loadOfficialBadges()});
  $("twitchNameColors").addEventListener("change",loadTwitchColors);
