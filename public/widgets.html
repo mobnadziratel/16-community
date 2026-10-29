@@ -2208,9 +2208,11 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
  const chatPanel=document.getElementById("chatWidgetPanel");
  const cityPanel=document.getElementById("cityWidgetPanel");
  const chatIntro=document.getElementById("chatIntro");
+ const obsPanel=document.getElementById("obsLinkPanel");
+ const storageKey="small-streamers-widget-active-tab";
  if(!chatTab||!cityTab||!chatPanel||!cityPanel)return;
- function activate(tab){
-  const city=tab===cityTab;
+ function activate(tab,save=true){
+  const city=tab==="city"||tab===cityTab;
   chatTab.classList.toggle("active",!city);
   cityTab.classList.toggle("active",city);
   chatTab.setAttribute("aria-selected",String(!city));
@@ -2218,10 +2220,14 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
   chatPanel.hidden=city;
   cityPanel.hidden=!city;
   if(chatIntro)chatIntro.hidden=city;
-  if(obsLinkPanel)obsLinkPanel.hidden=city;
+  if(obsPanel)obsPanel.hidden=city;
+  if(save){try{localStorage.setItem(storageKey,city?"city":"chat")}catch(_){}}
  }
- chatTab.addEventListener("click",()=>activate(chatTab));
- cityTab.addEventListener("click",()=>activate(cityTab));
+ let savedTab="chat";
+ try{savedTab=localStorage.getItem(storageKey)||"chat"}catch(_){}
+ activate(savedTab==="city"?"city":"chat",false);
+ chatTab.addEventListener("click",()=>activate("chat"));
+ cityTab.addEventListener("click",()=>activate("city"));
 })();
 </script>
 </body>
