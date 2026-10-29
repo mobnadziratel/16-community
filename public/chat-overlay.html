@@ -37,6 +37,7 @@ const validColor=v=>/^#[0-9a-fA-F]{6}$/.test(v||"");
 if(!/^[a-z0-9_]{1,25}$/.test(channel)){document.getElementById("status").textContent="Укажи Twitch-канал в параметре channel";throw new Error("Invalid Twitch channel")}
 document.body.classList.add("template-"+(["terminal","neon","soft","pixel","glass","minimal","aurora","cyber","vhs","sakura","ocean","bloodmoon","gold","comic","matrix","bubblegum","mono","ember"].includes(theme)?theme:"terminal"));
 const root=document.documentElement;
+if(params.get("preview")==="1"){document.documentElement.style.backgroundColor="#777777";document.body.style.backgroundColor="#777777";}
 const direction=params.get("direction")||"bottom",layout=params.get("layout")||"vertical",bgOpacity=params.get("transparent")==="1"?0:Math.max(0,Math.min(100,Number(params.get("bgOpacity")??0)))/100,bubbleOpacity=Math.max(0,Math.min(100,Number(params.get("bubbleOpacity")??100)))/100;const bg=params.get("bg"),textColor=params.get("text"),nameColor=params.get("name"),accent=params.get("accent"),outline=params.get("outline"),bubble=params.get("bubble"),size=params.get("size");
 if(validColor(textColor))root.style.setProperty("--text",textColor);
 if(validColor(nameColor))root.style.setProperty("--name",nameColor);
