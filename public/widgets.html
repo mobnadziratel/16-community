@@ -2058,10 +2058,10 @@ body::after{
   background:none!important;
 }
 /* Fine spiderwebs in the header corners. */
-header{isolation:isolate;overflow:hidden}
+header{isolation:isolate;overflow:visible}
 header::before,header::after{
   content:"";position:absolute;top:0;width:130px;height:110px;
-  z-index:-1;pointer-events:none;opacity:.56;
+  z-index:0;pointer-events:none;opacity:.56;
   background:
     repeating-conic-gradient(from 0deg at var(--web-x,0%) var(--web-y,0%),
       transparent 0deg 14deg,rgba(255,157,82,.45) 14.4deg 15deg,transparent 15.4deg 30deg),
@@ -2070,6 +2070,7 @@ header::before,header::after{
   -webkit-mask-image:radial-gradient(ellipse at var(--web-x,0%) var(--web-y,0%),#000 0%,transparent 77%);
   mask-image:radial-gradient(ellipse at var(--web-x,0%) var(--web-y,0%),#000 0%,transparent 77%);
 }
+.nav{position:relative;z-index:1}
 header::before{left:0;--web-x:0%;--web-y:0%}
 header::after{right:0;--web-x:100%;--web-y:0%}
 html[data-theme="light"] header::before,html[data-theme="light"] header::after{opacity:.35}
