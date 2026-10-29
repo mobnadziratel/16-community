@@ -108,12 +108,26 @@ function parseLine(line){if(line.startsWith("PING")){socket?.send("PONG :tmi.twi
 if(params.get("preview")==="1"){
   status.style.display="none";
   const samples=[
-    {user:"rueumur",text:"Всем привет! Добро пожаловать на стрим ✨",tags:"color=#9147ff;badges=broadcaster/1;user-type="},
-    {user:"homka20_",text:"Как дела, чат? Kappa",tags:"color=#69d8ff;badges=moderator/1;mod=1;user-type=mod;emotes=25:15-19"},
-    {user:"d1unizi",text:"Хорошего стрима всем 💜",tags:"color=#9be58d;badges=vip/1;vip=1"},
-    {user:"medverina",text:"LUL вот это момент 😂",tags:"color=#ff9bd5;badges=subscriber/12;subscriber=1;emotes=425618:0-2"},
-    {user:"Зритель",text:"PogChamp Отличная игра!",tags:"color=#f2c14e;badges=;emotes=305954156:0-7"}
+    {user:"rueumur",text:"Всем привет! Добро пожаловать на стрим ✨",tags:"badges=broadcaster/1;user-type="},
+    {user:"homka20_",text:"Как дела, чат? Kappa",tags:"badges=moderator/1;mod=1;user-type=mod;emotes=25:15-19"},
+    {user:"d1unizi",text:"Хорошего стрима всем 💜",tags:"badges=vip/1;vip=1"},
+    {user:"medverina",text:"LUL вот это момент 😂",tags:"badges=subscriber/12;subscriber=1;emotes=425618:0-2"},
+    {user:"Зритель",text:"PogChamp Отличная игра!",tags:"badges=;emotes=305954156:0-7"}
   ];
+  // Предпросмотр не должен подставлять придуманные цвета. Используем цвета,
+  // которые Twitch API возвращает для конкретных аккаунтов.
+  const previewColorNames=samples.map(m=>m.user).filter(user=>/^[a-z0-9_]{1,25}$/i.test(user));
+  fetch("/api/chat-colors?logins="+encodeURIComponent([...new Set(previewColorNames)].join(",")),{cache:"no-store"})
+    .then(response=>response.ok?response.json():Promise.reject(new Error("Twitch colors unavailable")))
+    .then(payload=>{
+      for(const row of chat.querySelectorAll(".message")){
+        const nick=row.querySelector(".name");
+        const login=(nick?.textContent||"").trim().toLowerCase();
+        const color=payload.colors?.[login];
+        if(color&&validColor(color))nick.style.setProperty("color",color,"important");
+      }
+    })
+    .catch(()=>{});
   samples.forEach((m,i)=>setTimeout(()=>addMessage(m.user,m.text,m.tags,"preview-"+i),(i+1)*1250));
 }else connect();
 window.addEventListener("pageshow",()=>{if(!params.get("preview")&&(!socket||socket.readyState===WebSocket.CLOSED||socket.readyState===WebSocket.CLOSING))connect()});document.addEventListener("visibilitychange",()=>{if(!document.hidden&&!params.get("preview")&&(!socket||socket.readyState===WebSocket.CLOSED||socket.readyState===WebSocket.CLOSING))connect()});window.addEventListener("beforeunload",()=>{closed=true;clearTimeout(reconnectTimer);try{socket?.close()}catch{}});
