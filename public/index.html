@@ -2533,9 +2533,10 @@ let lastStatusAttemptAt = 0;
 
 async function loadTwitchAvatar(name, img) {
   // Load avatars through our own server so mobile browsers do not depend on a third-party lookup/CORS.
-  if (avatarCache.has(name)) { img.src = avatarCache.get(name); return; }
+  const forceRefresh = String(name || "").toLowerCase() === "ilyuha_lake";
+  if (!forceRefresh && avatarCache.has(name)) { img.src = avatarCache.get(name); return; }
   try {
-    const response = await fetch(`/api/avatar?login=${encodeURIComponent(name)}`, { cache: "no-store" });
+    const response = await fetch(`/api/avatar?login=${encodeURIComponent(name)}${forceRefresh ? "&refresh=1" : ""}`, { cache: "no-store" });
     if (!response.ok) throw new Error(`Avatar endpoint unavailable (${response.status})`);
     const payload = await response.json();
     const avatarUrl = String(payload.avatarUrl || "").trim();
