@@ -54,7 +54,7 @@ async function loadChatEmotes(){
   ];
   const [bttv,seventv,ffz,ffzGlobal]=await Promise.all(jobs);
   for(const e of [...(bttv?.channelEmotes||[]),...(bttv?.sharedEmotes||[])])addEmote(e.code,"https://cdn.betterttv.net/emote/"+e.id+"/2x");
-  const seven=[...(seventv?.emote_set?.emotes||[]),...(seventv?.user?.emote_sets||[]).flatMap(s=>s.emotes||[])];
+  const seven=[...(seventv?.emote_set?.emotes||[]),...(seventv?.user?.emote_set?.emotes||[]),...(seventv?.user?.emote_sets||[]).flatMap(s=>s.emotes||[]),...(seventv?.emote_sets||[]).flatMap(s=>s.emotes||[])];
   for(const e of seven){
    const data=e.data||{};
    const id=e.id||data.id;
@@ -220,10 +220,22 @@ function drawPerson(p,t){
    let cursorX=bx+padX;
     for(const token of value.split(/(\s+)/)){
     if(!token)continue;
-    const img=showEmotes?emoteImages.get(token):null;
+    if(/^\s+$/.test(token)){ctx.fillText(token,cursorX,by+padY+i*lineHeight);cursorX+=ctx.measureText(token).width;continue;}
+    let matchEmote=null,matchAt=-1;
+    if(showEmotes){
+     for(const name of emoteImages.keys()){
+      const at=token.indexOf(name);if(at<0)continue;
+      const before=at?token[at-1]:"",after=at+name.length<token.length?token[at+name.length]:"";
+      if((!before||!/[a-zA-Z0-9_]/.test(before))&&(!after||!/[a-zA-Z0-9_]/.test(after))&&(!matchEmote||name.length>matchEmote.length)){matchEmote=name;matchAt=at;}
+     }
+    }
+    const img=matchEmote?emoteImages.get(matchEmote):null;
     if(img&&img.complete&&img.naturalWidth>0){
+     const before=token.slice(0,matchAt),after=token.slice(matchAt+matchEmote.length);
+     if(before){ctx.fillText(before,cursorX,by+padY+i*lineHeight);cursorX+=ctx.measureText(before).width;}
      const size=18;if(cursorX+size>bx+bw-padX+2)break;
      ctx.drawImage(img,cursorX,by+padY+i*lineHeight-2,size,size);cursorX+=size+2;
+     if(after){ctx.fillText(after,cursorX,by+padY+i*lineHeight);cursorX+=ctx.measureText(after).width;}
     }else{ctx.fillText(token,cursorX,by+padY+i*lineHeight);cursorX+=ctx.measureText(token).width;}
    }
   });
@@ -247,7 +259,7 @@ function connect(){
  if(!/^[a-z0-9_]{1,25}$/.test(channel)){showStatus("Укажи канал Twitch в настройках виджета");return}
  try{socket=new WebSocket("wss://irc-ws.chat.twitch.tv:443");}catch(_){showStatus("Не удалось подключиться к чату");return}
  socket.onopen=()=>{socket.send("CAP REQ :twitch.tv/tags twitch.tv/commands");socket.send("PASS SCHMOOPIIE");socket.send("NICK justinfan"+Math.floor(Math.random()*900000+100000));socket.send("JOIN #"+channel);showStatus("Подключаемся к чату "+channel)};
- socket.onmessage=e=>{for(const line of String(e.data||"").split("\r\n")){if(!line)continue;if(line.startsWith("PING")){socket.send("PONG :"+line.slice(5));continue}const tagPart=line.startsWith("@")?line.slice(1,line.indexOf(" ")).split(";"):[];const tags=Object.fromEntries(tagPart.map(x=>{const i=x.indexOf("=");return i<0?[x,""]:[x.slice(0,i),x.slice(i+1)]}));const match=line.match(/:([a-zA-Z0-9_]{1,25})![^ ]+ PRIVMSG #\S+ :(.*)$/);if(match){const text=match[2].replace(/\s/g," ").replace(/\:/g,";").replace(/\r/g," ").replace(/\n/g," ");nativeEmotesFromTag(tags.emotes||"",text);addPerson(match[1],(tags.badges||"").split(",").filter(Boolean),tags["user-type"]||"",text);}}};
+ socket.onmessage=e=>{for(const line of String(e.data||"").split("\r\n")){if(!line)continue;if(line.startsWith("PING")){socket.send("PONG :"+line.slice(5));continue}const tagPart=line.startsWith("@")?line.slice(1,line.indexOf(" ")).split(";"):[];const tags=Object.fromEntries(tagPart.map(x=>{const i=x.indexOf("=");return i<0?[x,""]:[x.slice(0,i),x.slice(i+1)]}));const match=line.match(/:([a-zA-Z0-9_]{1,25})![^ ]+ PRIVMSG #\S+ :(.*)$/);if(match){const text=match[2].replace(/[\r\n\t]/g," ");nativeEmotesFromTag(tags.emotes||"",text);addPerson(match[1],(tags.badges||"").split(",").filter(Boolean),tags["user-type"]||"",text);}}};
  socket.onerror=()=>showStatus("Чат Twitch временно недоступен");
  socket.onclose=()=>{if(!preview)retryTimer=setTimeout(connect,5000)};
 }
