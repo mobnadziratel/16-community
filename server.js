@@ -833,7 +833,7 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
-  const requested = url.pathname === "/" ? "index.html" : (url.pathname === "/widgets" || url.pathname === "/widgets/") ? "widgets.html" : decodeURIComponent(url.pathname.slice(1));
+  const requested = url.pathname === "/music-dock" || url.pathname === "/music-dock/" ? "music-dock.html" : url.pathname === "/" ? "index.html" : (url.pathname === "/widgets" || url.pathname === "/widgets/") ? "widgets.html" : decodeURIComponent(url.pathname.slice(1));
   const filePath = path.resolve(PUBLIC_DIR, requested);
   if (!filePath.startsWith(PUBLIC_DIR + path.sep) && filePath !== path.join(PUBLIC_DIR, "index.html")) {
     res.writeHead(403); res.end("Forbidden"); return;
