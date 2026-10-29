@@ -180,7 +180,7 @@ function drawPerson(p,t){
  // Wrap long messages reliably, including text without spaces.
  if(p.message&&Date.now()-p.messageAt<9000&&width>30&&height>30){
   const bubbleText=p.message.slice(0,220);
-  const wordsForEmotes=bubbleText.split(/(\\s+)/);
+   const wordsForEmotes=bubbleText.split(/(\s+)/);
   ctx.save();ctx.font="bold 12px Arial,sans-serif";ctx.textAlign="left";ctx.textBaseline="top";
   const padX=8,padY=6,lineHeight=15;
   const maxBubbleWidth=Math.min(260,width-12);
@@ -209,7 +209,7 @@ function drawPerson(p,t){
   ctx.save();ctx.beginPath();ctx.rect(bx+1,by+1,bw-2,bh-2);ctx.clip();
   lines.forEach((value,i)=>{
    let cursorX=bx+padX;
-   for(const token of value.split(/(\\s+)/)){
+    for(const token of value.split(/(\s+)/)){
     if(!token)continue;
     const img=emoteImages.get(token);
     if(img&&img.complete&&img.naturalWidth>0){
