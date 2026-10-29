@@ -1878,7 +1878,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
 .widget-tab.active{background:var(--accent);color:#111;border-color:var(--accent)}
 @media(max-width:650px){.widget-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.widget-tab{width:100%;padding:12px 8px;text-align:center;min-height:44px}}
 .chat-intro{margin:10px 0 20px}.chat-intro h1{font-size:clamp(25px,4vw,38px);margin:0 0 8px}.chat-intro p{color:var(--muted);margin:0}
-.city-widget-panel{padding:28px;border:1px solid var(--line);border-radius:18px;background:var(--panel);min-height:180px}.city-widget-panel h2{margin:0 0 12px;font-size:clamp(26px,4vw,38px);letter-spacing:-.04em}.city-widget-panel p{margin:0;color:var(--muted)}
+.city-widget-panel{padding:28px;border:1px solid var(--line);border-radius:18px;background:var(--panel);min-height:180px}.city-widget-panel h2{margin:0 0 12px;font-size:clamp(26px,4vw,38px);letter-spacing:-.04em}.city-widget-panel p{margin:0;color:var(--muted)}.city-lead{line-height:1.6;max-width:760px}.city-settings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:24px 0}.city-settings input,.city-settings select,.city-link-field input{width:100%;min-width:0;background:var(--bg);border:1px solid var(--line);border-radius:11px;padding:12px;color:var(--text);font:inherit;font-size:14px}.city-preview-wrap{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin:20px 0;background-color:#17171f;background-image:linear-gradient(45deg,#ffffff08 25%,transparent 25%),linear-gradient(-45deg,#ffffff08 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#ffffff08 75%),linear-gradient(-45deg,transparent 75%,#ffffff08 75%);background-size:20px 20px;background-position:0 0,0 10px,10px -10px,-10px 0}.city-preview-label{padding:9px 12px;font-size:10px;letter-spacing:.12em;font-weight:900;color:var(--muted);background:#111b}.city-preview-wrap iframe{display:block;width:100%;height:240px;border:0;background:transparent}.city-link-field{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end;margin-top:20px}.city-link-field label{grid-column:1/-1}.city-link-field button{white-space:nowrap}.city-widget-panel .chat-note{margin-top:12px;line-height:1.5}@media(max-width:700px){.city-settings{grid-template-columns:1fr}.city-link-field{grid-template-columns:1fr}.city-link-field label{grid-column:auto}.city-link-field button{width:100%}.city-preview-wrap iframe{height:210px}}
 .chat-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.95fr);gap:18px;align-items:start}
 .chat-panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;min-width:0}
 .chat-panel h2{font-size:17px;margin:0 0 16px}.chat-controls{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -1947,7 +1947,18 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
   <p class="chat-note">В OBS: «Источники» → «+» → «Браузер» → вставь ссылку. Рекомендуемый размер: 450 × 800. Это отдельный виджет: сообщения появляются в реальном времени, а оформление берётся из выбранных настроек.</p>
   <p id="obsLinkStatus" class="chat-note" aria-live="polite"></p>
 </section>
-<section id="cityWidgetPanel" class="city-widget-panel" role="tabpanel" aria-labelledby="cityWidgetTab" hidden><h2>ГОРОД</h2><p>В РАЗРАБОТКЕ</p></section>
+<section id="cityWidgetPanel" class="city-widget-panel" role="tabpanel" aria-labelledby="cityWidgetTab" hidden>
+ <h2>ГОРОД <span style="color:var(--accent)">✦</span></h2>
+ <p class="city-lead">Прозрачный виджет для OBS: игровые человечки ходят по экрану, а над ними отображаются ники участников Twitch-чата.</p>
+ <div class="city-settings">
+  <div class="chat-field"><label for="cityChannel">Канал Twitch</label><input id="cityChannel" type="text" maxlength="25" placeholder="например, rueumur" autocomplete="off" spellcheck="false"></div>
+  <div class="chat-field"><label for="cityIdle">Убирать после бездействия</label><select id="cityIdle"><option value="1">1 минута</option><option value="2">2 минуты</option><option value="5" selected>5 минут</option><option value="10">10 минут</option><option value="15">15 минут</option><option value="30">30 минут</option><option value="60">1 час</option></select></div>
+  <div class="chat-field"><label for="cityGame">Стиль персонажей</label><select id="cityGame"><option value="mixed" selected>Смешанный игровой мир</option><option value="minecraft">Блочный мир</option><option value="terraria">Приключенческий пиксель-арт</option><option value="rpg">Фэнтези RPG</option><option value="scifi">Научная фантастика</option></select></div>
+ </div>
+ <div class="city-preview-wrap"><div class="city-preview-label">ПРЕДПРОСМОТР · ФОН ПРОЗРАЧНЫЙ</div><iframe id="cityPreviewFrame" title="Предпросмотр ходящих персонажей из чата" loading="eager"></iframe></div>
+ <div class="chat-field city-link-field"><label for="cityObsLink">Ссылка для OBS</label><input id="cityObsLink" type="url" readonly placeholder="Введи канал Twitch выше"><button id="cityCopyLink" class="refresh-clips" type="button">Скопировать ссылку</button></div>
+ <p id="cityWidgetStatus" class="chat-note" aria-live="polite">Персонаж появляется, когда пользователь пишет в чат. Если он не пишет выбранное время, он исчезает.</p>
+</section>
 </main>
 <footer class="wrap"><span>Открывай каналы и поддерживай стримеров на Twitch <span style="color:var(--accent)">✦</span></span></footer>
 <script>
@@ -2162,6 +2173,34 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
  $("twitchNameColors").addEventListener("change",loadTwitchColors);
  if($("twitchNameColors").checked)loadTwitchColors();
  loadOfficialBadges();
+})();
+(function initCityWidget(){
+ const channel=document.getElementById("cityChannel"),idle=document.getElementById("cityIdle"),game=document.getElementById("cityGame"),frame=document.getElementById("cityPreviewFrame"),link=document.getElementById("cityObsLink"),copy=document.getElementById("cityCopyLink"),status=document.getElementById("cityWidgetStatus");
+ if(!channel||!idle||!game||!frame||!link||!copy)return;
+ function buildUrl(preview){
+  const u=new URL("/city-overlay.html",location.origin);
+  const login=channel.value.trim().toLowerCase().replace(/^#/,"");
+  if(!preview&&!/^[a-z0-9_]{1,25}$/.test(login))return "";
+  if(login)u.searchParams.set("channel",login);
+  u.searchParams.set("idle",idle.value);
+  u.searchParams.set("game",game.value);
+  if(preview)u.searchParams.set("preview","1");
+  return u.toString();
+ }
+ function update(){
+  const login=channel.value.trim().toLowerCase().replace(/^#/,"");
+  const valid=/^[a-z0-9_]{1,25}$/.test(login);
+  link.value=valid?buildUrl(false):"";
+  frame.src=buildUrl(true);
+  if(status)status.textContent=valid?"Настройки обновлены. Скопируй ссылку в OBS как источник «Браузер».":"Введи корректный логин канала Twitch. Настройки можно менять в любое время.";
+ }
+ [channel,idle,game].forEach(el=>el.addEventListener("input",update));
+ copy.addEventListener("click",async()=>{
+  if(!link.value){status.textContent="Сначала введи корректный логин Twitch.";return}
+  try{await navigator.clipboard.writeText(link.value);status.textContent="Ссылка скопирована. Добавь её в OBS как источник «Браузер»."}
+  catch(_){link.focus();link.select();status.textContent="Ссылка выделена — нажми Ctrl+C, чтобы скопировать."}
+ });
+ update();
 })();
 (function initWidgetTabs(){
  const chatTab=document.getElementById("chatWidgetTab");
