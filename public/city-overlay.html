@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Город — Twitch chat walkers</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:transparent}body{font-family:Arial,Helvetica,sans-serif}canvas{display:block;width:100%;height:100%;background:transparent}#status{position:absolute;left:12px;top:10px;padding:5px 8px;border-radius:6px;background:#111b;color:#ddd;font:12px Arial,sans-serif}#status[hidden]{display:none}
+</style>
+</head>
+<body>
+<canvas id="city" aria-label="Ходящие персонажи участников Twitch-чата"></canvas><div id="status" hidden></div>
+<script>
+(function(){
+const params=new URLSearchParams(location.search);
+const channel=(params.get("channel")||"").trim().toLowerCase();
+const idleMinutes=Math.max(1,Math.min(180,Number(params.get("idle")||5)));
+const style=params.get("game")||"mixed";
+const preview=params.get("preview")==="1";
+const canvas=document.getElementById("city"),ctx=canvas.getContext("2d"),status=document.getElementById("status");
+const people=new Map();
+let width=0,height=0,lastFrame=0,lastPing=0,socket=null,retryTimer=null;
+const palettes=[
+{skin:"#f0c49a",hair:"#53352c",shirt:"#4b8bd8",pants:"#25395d",accent:"#f3d56a"},
+{skin:"#dba47b",hair:"#2d2928",shirt:"#5dbb77",pants:"#303a40",accent:"#f3f3f3"},
+{skin:"#f2d0ad",hair:"#d5a13b",shirt:"#b06be0",pants:"#47366b",accent:"#74e4dc"},
+{skin:"#a96f4f",hair:"#201c24",shirt:"#ed765f",pants:"#3a2a38",accent:"#f6cf58"},
+{skin:"#f2c6a0",hair:"#b7c9d7",shirt:"#e5e7eb",pants:"#3e536a",accent:"#6ce0f2"},
+{skin:"#d9aa8a",hair:"#5942a4",shirt:"#e5a34b",pants:"#463a35",accent:"#83ed91"}
+];
+function resize(){const dpr=Math.min(window.devicePixelRatio||1,2);width=Math.max(1,canvas.clientWidth);height=Math.max(1,canvas.clientHeight);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);for(const p of people.values())p.y=height-13;}
+function addPerson(login){
+ const key=String(login||"").toLowerCase().replace(/[^a-z0-9_]/g,"").slice(0,25);if(!key)return;
+ const now=Date.now();let p=people.get(key);
+ if(p){p.last=now;p.display=login;return}
+ const palette=palettes[Math.floor(Math.random()*palettes.length)];
+ const x=people.size%2===0?Math.random()*Math.max(1,width*.35):width*.65+Math.random()*Math.max(1,width*.3);
+ people.set(key,{key,display:login,last:now,x,y:height-13,vx:(Math.random()>.5?1:-1)*(.3+Math.random()*.45),phase:Math.random()*6.28,palette,kind:style==="mixed"?Math.floor(Math.random()*4):({minecraft:0,terraria:1,rpg:2,scifi:3}[style]??0),scale:1+Math.random()*.45});
+}
+function drawPerson(p,t){
+ const x=Math.round(p.x),base=Math.round(p.y),s=p.scale,pal=p.palette,step=Math.sin(t*.009+p.phase)>0?1:0;
+ ctx.save();ctx.translate(x,base);ctx.scale(s,s);
+ ctx.fillStyle="#0005";ctx.beginPath();ctx.ellipse(0,0,9,2.5,0,0,Math.PI*2);ctx.fill();
+ const px=(xx,yy,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(xx,yy,w,h)};
+ // Original game-inspired pixel sprites, not exact copies of game characters.
+ if(p.kind===0){px(-5,-25,10,9,pal.skin);px(-6,-27,12,4,pal.hair);px(-7,-17,14,10,pal.shirt);px(-6,-7,5,7,pal.pants);px(1,-7,5,7,pal.pants);px(-6,-1,5,2,"#222");px(2,-1,5,2,"#222");px(-9,-16,3,8,pal.skin);px(6,-16,3,8,pal.skin);}
+ else if(p.kind===1){px(-4,-24,8,8,pal.skin);px(-5,-26,10,4,pal.hair);px(-6,-16,12,9,pal.shirt);px(-5,-7,4,6,pal.pants);px(1,-7,4,6,pal.pants);px(-8,-15,2,7,pal.skin);px(6,-15,2,7,pal.skin);px(-3,-23,2,2,"#242424");px(2,-23,2,2,"#242424");}
+ else if(p.kind===2){px(-4,-25,8,9,pal.skin);px(-5,-27,10,5,pal.hair);px(-7,-17,14,10,pal.shirt);px(-5,-7,4,7,pal.pants);px(1,-7,4,7,pal.pants);px(-9,-17,3,9,pal.accent);px(6,-17,3,9,pal.accent);px(-2,-22,2,2,"#222");px(2,-22,2,2,"#222");}
+ else{px(-5,-25,10,10,pal.skin);px(-6,-27,12,4,pal.accent);px(-7,-17,14,10,pal.shirt);px(-5,-7,4,7,pal.pants);px(1,-7,4,7,pal.pants);px(-8,-16,3,8,pal.accent);px(6,-16,3,8,pal.accent);px(-3,-22,2,2,"#20252b");px(2,-22,2,2,"#20252b");}
+ if(step){px(-5,-2,4,3,pal.pants);px(2,-1,4,2,pal.pants)}else{px(-5,-1,4,2,pal.pants);px(2,-2,4,3,pal.pants)}
+ ctx.restore();
+ ctx.save();ctx.font="bold 13px Arial,sans-serif";ctx.textAlign="center";ctx.textBaseline="bottom";
+ const label=p.display;const tw=Math.min(ctx.measureText(label).width,width*.4);const tx=Math.max(tw/2+3,Math.min(width-tw/2-3,x));
+ ctx.lineWidth=4;ctx.strokeStyle="#101014";ctx.lineJoin="round";ctx.strokeText(label,tx,base-31*s);ctx.fillStyle="#fff";ctx.fillText(label,tx,base-31*s);ctx.restore();
+}
+function frame(t){
+ if(!lastFrame)lastFrame=t;const dt=Math.min(40,t-lastFrame);lastFrame=t;
+ ctx.clearRect(0,0,width,height);const now=Date.now();
+ for(const [key,p] of people){if(now-p.last>idleMinutes*60000){people.delete(key);continue}
+ p.x+=p.vx*dt*.06;if(p.x>width-18){p.x=width-18;p.vx=-Math.abs(p.vx)}if(p.x<18){p.x=18;p.vx=Math.abs(p.vx)}drawPerson(p,t);}
+ if(socket&&socket.readyState===WebSocket.OPEN&&now-lastPing>240000){socket.send("PING :city-widget");lastPing=now}
+ requestAnimationFrame(frame);
+}
+function showStatus(message){if(preview){status.textContent=message;status.hidden=false;setTimeout(()=>status.hidden=true,4500)}}
+function connect(){
+ if(preview){["rueumur","homka20_","d1unizi","medverina","Зритель_42"].forEach((name,i)=>setTimeout(()=>addPerson(name),i*350));return}
+ if(!/^[a-z0-9_]{1,25}$/.test(channel)){showStatus("Укажи канал Twitch в настройках виджета");return}
+ try{socket=new WebSocket("wss://irc-ws.chat.twitch.tv:443");}catch(_){showStatus("Не удалось подключиться к чату");return}
+ socket.onopen=()=>{socket.send("CAP REQ :twitch.tv/tags twitch.tv/commands");socket.send("PASS SCHMOOPIIE");socket.send("NICK justinfan"+Math.floor(Math.random()*900000+100000));socket.send("JOIN #"+channel);showStatus("Подключаемся к чату "+channel)};
+ socket.onmessage=e=>{for(const line of String(e.data||"").split("\r\n")){if(!line)continue;if(line.startsWith("PING")){socket.send("PONG :"+line.slice(5));continue}const match=line.match(/(?:^| ):([a-zA-Z0-9_]{1,25})![^ ]+ PRIVMSG #[^ ]+ :/);if(match)addPerson(match[1]);}};
+ socket.onerror=()=>showStatus("Чат Twitch временно недоступен");
+ socket.onclose=()=>{if(!preview)retryTimer=setTimeout(connect,5000)};
+}
+window.addEventListener("resize",resize);resize();connect();requestAnimationFrame(frame);
+window.addEventListener("beforeunload",()=>{clearTimeout(retryTimer);if(socket)socket.close()});
+})();
+</script>
+</body>
+</html>
