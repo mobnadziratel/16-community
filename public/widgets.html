@@ -1957,6 +1957,8 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
   <div class="city-name-options">
    <label class="city-color-inline" for="cityNameColor">Цвет ников <input id="cityNameColor" type="color" value="#b9ff36"></label>
    <label class="chat-check"><input id="cityTwitchColors" type="checkbox" checked> Цвет как на Twitch</label>
+   <label class="chat-check"><input id="cityShowMessages" type="checkbox" checked> Показывать сообщения</label>
+   <label class="chat-check"><input id="cityShowEmotes" type="checkbox" checked> Показывать смайлики</label>
   </div>
  </div>
  <div class="city-preview-wrap"><div class="city-preview-label">ПРЕДПРОСМОТР · ФОН ПРОЗРАЧНЫЙ</div><iframe id="cityPreviewFrame" title="Предпросмотр ходящих персонажей из чата" loading="eager"></iframe></div>
@@ -2179,10 +2181,10 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
  loadOfficialBadges();
 })();
 (function initCityWidget(){
- const channel=document.getElementById("cityChannel"),idle=document.getElementById("cityIdle"),game=document.getElementById("cityGame"),nameColor=document.getElementById("cityNameColor"),twitchColors=document.getElementById("cityTwitchColors"),frame=document.getElementById("cityPreviewFrame"),link=document.getElementById("cityObsLink"),copy=document.getElementById("cityCopyLink"),status=document.getElementById("cityWidgetStatus");
- if(!channel||!idle||!game||!frame||!link||!copy||!nameColor||!twitchColors)return;
+ const channel=document.getElementById("cityChannel"),idle=document.getElementById("cityIdle"),game=document.getElementById("cityGame"),nameColor=document.getElementById("cityNameColor"),twitchColors=document.getElementById("cityTwitchColors"),showMessages=document.getElementById("cityShowMessages"),showEmotes=document.getElementById("cityShowEmotes"),frame=document.getElementById("cityPreviewFrame"),link=document.getElementById("cityObsLink"),copy=document.getElementById("cityCopyLink"),status=document.getElementById("cityWidgetStatus");
+ if(!channel||!idle||!game||!frame||!link||!copy||!nameColor||!twitchColors||!showMessages||!showEmotes)return;
  const settingsKey="community-city-widget-settings-v1";
- try{const saved=JSON.parse(localStorage.getItem(settingsKey)||"null");if(saved&&typeof saved==="object"){if(/^#[0-9a-f]{6}$/i.test(saved.nameColor||""))nameColor.value=saved.nameColor;if(typeof saved.twitchColors==="boolean")twitchColors.checked=saved.twitchColors;if(typeof saved.game==="string"&&[...game.options].some(o=>o.value===saved.game))game.value=saved.game;if(typeof saved.idle==="string"&&[...idle.options].some(o=>o.value===saved.idle))idle.value=saved.idle;}}catch(_){}
+ try{const saved=JSON.parse(localStorage.getItem(settingsKey)||"null");if(saved&&typeof saved==="object"){if(/^#[0-9a-f]{6}$/i.test(saved.nameColor||""))nameColor.value=saved.nameColor;if(typeof saved.twitchColors==="boolean")twitchColors.checked=saved.twitchColors;if(typeof saved.showMessages==="boolean")showMessages.checked=saved.showMessages;if(typeof saved.showEmotes==="boolean")showEmotes.checked=saved.showEmotes;if(typeof saved.game==="string"&&[...game.options].some(o=>o.value===saved.game))game.value=saved.game;if(typeof saved.idle==="string"&&[...idle.options].some(o=>o.value===saved.idle))idle.value=saved.idle;}}catch(_){}
  function buildUrl(preview){
   const u=new URL("/city-overlay.html",location.origin);
   const login=channel.value.trim().toLowerCase().replace(/^#/,"");
@@ -2202,10 +2204,10 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
   link.value=valid?buildUrl(false):"";
   clearTimeout(previewTimer);
   previewTimer=setTimeout(()=>{const previewUrl=buildUrl(true);if(frame.src!==previewUrl)frame.src=previewUrl;},250);
-  try{localStorage.setItem(settingsKey,JSON.stringify({nameColor:nameColor.value,twitchColors:twitchColors.checked,game:game.value,idle:idle.value}))}catch(_){}
+  try{localStorage.setItem(settingsKey,JSON.stringify({nameColor:nameColor.value,twitchColors:twitchColors.checked,showMessages:showMessages.checked,showEmotes:showEmotes.checked,game:game.value,idle:idle.value}))}catch(_){}
   if(status)status.textContent=valid?"Настройки обновлены. Скопируй ссылку в OBS как источник «Браузер».":"Введи корректный логин канала Twitch. Настройки можно менять в любое время.";
  }
- [channel,idle,game,nameColor,twitchColors].forEach(el=>{el.addEventListener("input",update);el.addEventListener("change",update)});
+ [channel,idle,game,nameColor,twitchColors,showMessages,showEmotes].forEach(el=>{el.addEventListener("input",update);el.addEventListener("change",update)});
  copy.addEventListener("click",async()=>{
   if(!link.value){status.textContent="Сначала введи корректный логин Twitch.";return}
   try{await navigator.clipboard.writeText(link.value);status.textContent="Ссылка скопирована. Добавь её в OBS как источник «Браузер»."}
