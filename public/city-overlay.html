@@ -149,7 +149,7 @@ function drawPerson(p,t){
   const contentWidth=Math.max(...lines.map(value=>ctx.measureText(value).width),24),padX=8,padY=6,bw=Math.min(maxTextWidth+padX*2,contentWidth+padX*2),bh=lines.length*lineHeight+padY*2;
   const bx=Math.max(5,Math.min(width-bw-5,x-bw/2)),by=Math.max(5,base-44*s-bh);
   ctx.fillStyle="rgba(18,18,25,.94)";ctx.strokeStyle=(p.nameColor||nameColor)+"cc";ctx.lineWidth=1;
-  ctx.beginPath();ctx.roundRect(bx,by,bw,bh,7);ctx.fill();ctx.stroke();
+  ctx.beginPath();if(typeof ctx.roundRect==="function"){ctx.roundRect(bx,by,bw,bh,7);}else{ctx.rect(bx,by,bw,bh);}ctx.fill();ctx.stroke();
   ctx.fillStyle="#fff";lines.forEach((value,i)=>ctx.fillText(value,bx+padX,by+padY+i*lineHeight));
   // Small speech-bubble pointer aimed at the character.
   ctx.fillStyle="rgba(18,18,25,.94)";ctx.beginPath();ctx.moveTo(Math.max(bx+9,Math.min(bx+bw-9,x)),by+bh);ctx.lineTo(Math.max(bx+9,Math.min(bx+bw-9,x))-4,by+bh-1);ctx.lineTo(Math.max(bx+9,Math.min(bx+bw-9,x)),by+bh+5);ctx.closePath();ctx.fill();
@@ -170,7 +170,7 @@ function connect(){
  if(!/^[a-z0-9_]{1,25}$/.test(channel)){showStatus("Укажи канал Twitch в настройках виджета");return}
  try{socket=new WebSocket("wss://irc-ws.chat.twitch.tv:443");}catch(_){showStatus("Не удалось подключиться к чату");return}
  socket.onopen=()=>{socket.send("CAP REQ :twitch.tv/tags twitch.tv/commands");socket.send("PASS SCHMOOPIIE");socket.send("NICK justinfan"+Math.floor(Math.random()*900000+100000));socket.send("JOIN #"+channel);showStatus("Подключаемся к чату "+channel)};
- socket.onmessage=e=>{for(const line of String(e.data||"").split("\r\n")){if(!line)continue;if(line.startsWith("PING")){socket.send("PONG :"+line.slice(5));continue}const tagPart=line.startsWith("@")?line.slice(1,line.indexOf(" ")).split(";"):[];const tags=Object.fromEntries(tagPart.map(x=>{const i=x.indexOf("=");return i<0?[x,""]:[x.slice(0,i),x.slice(i+1)]}));const match=line.match(/(?:^| ):([a-zA-Z0-9_]{1,25})![^ ]+ PRIVMSG #[^ ]+ :(.*)$/);if(match)addPerson(match[1],(tags.badges||"").split(",").filter(Boolean),tags["user-type"]||"",match[2]||"");}};
+ socket.onmessage=e=>{for(const line of String(e.data||"").split("\r\n")){if(!line)continue;if(line.startsWith("PING")){socket.send("PONG :"+line.slice(5));continue}const tagPart=line.startsWith("@")?line.slice(1,line.indexOf(" ")).split(";"):[];const tags=Object.fromEntries(tagPart.map(x=>{const i=x.indexOf("=");return i<0?[x,""]:[x.slice(0,i),x.slice(i+1)]}));const match=line.match(/:([a-zA-Z0-9_]{1,25})![^ ]+ PRIVMSG #\S+ :(.*)$/);if(match){const text=match[2].replace(/\\s/g," ").replace(/\\:/g,";").replace(/\\r/g," ").replace(/\\n/g," ");addPerson(match[1],(tags.badges||"").split(",").filter(Boolean),tags["user-type"]||"",text);}}};
  socket.onerror=()=>showStatus("Чат Twitch временно недоступен");
  socket.onclose=()=>{if(!preview)retryTimer=setTimeout(connect,5000)};
 }
