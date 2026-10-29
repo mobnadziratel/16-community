@@ -1848,7 +1848,8 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
 .wall-posts-section{min-width:0}
 @media(max-width:700px){.community-wall-tools{grid-template-columns:minmax(0,1fr)}.wall-submit-card,.wall-moderator-login{min-width:0;width:100%;padding:15px}.community-submission-area .wall-action-button{width:100%}.community-pending-actions{display:grid;grid-template-columns:minmax(0,1fr)}}
 
-\n/* Prevent the three brand lines from sharing a line box or overlapping. */
+
+/* Prevent the three brand lines from sharing a line box or overlapping. */
 .brand{align-items:center}
 .brand-wordmark{display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:flex-start!important;gap:4px!important;line-height:1.2!important;height:auto!important;min-height:0!important;overflow:visible!important}
 .brand-wordmark .brand-top,.brand-wordmark .brand-main,.brand-wordmark .brand-bottom{position:static!important;display:block!important;float:none!important;clear:both!important;line-height:1.2!important;margin:0!important;padding:0!important;transform:none!important;flex:none!important}
@@ -1858,7 +1859,14 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
 .brand-wordmark{position:relative;display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center;gap:2px;line-height:1.02;letter-spacing:-.045em;min-width:0;width:max-content;max-width:100%;white-space:normal;flex:0 1 auto;transition:gap .45s ease}
 .brand-wordmark .brand-top,.brand-wordmark .brand-bottom{display:block!important;flex:0 0 auto;width:max-content;max-width:100%;font-size:.56em;font-weight:750;letter-spacing:-.025em;color:var(--muted);opacity:.88;transform:translateY(0);transition:transform .48s cubic-bezier(.2,.75,.25,1),opacity .35s ease,color .35s ease}
 .brand-wordmark .brand-main{display:block!important;flex:0 0 auto;width:max-content;max-width:100%;font-size:1em;font-weight:900;white-space:nowrap;transition:transform .48s cubic-bezier(.2,.75,.25,1),color .35s ease}
-.brand-wordmark .brand-main #brandMainLead{color:var(--accent)}\n.brand-wordmark[data-brand-state="moderators"] .brand-top{transform:translateY(1px)}\n.brand-wordmark[data-brand-state="moderators"] .brand-bottom{opacity:.9}\n.brand-wordmark[data-brand-state="community"] .brand-top{transform:translateY(1px)}\n.brand-wordmark[data-brand-state="community"] .brand-main #brandMainLead{color:var(--accent)}\n@media(max-width:500px){.brand-wordmark .brand-top,.brand-wordmark .brand-bottom{font-size:.52em}.brand-wordmark .brand-main{font-size:.9em}}\n@media(prefers-reduced-motion:reduce){.brand-wordmark,.brand-wordmark *{transition:none!important}}\n
+.brand-wordmark .brand-main #brandMainLead{color:var(--accent)}
+.brand-wordmark[data-brand-state="moderators"] .brand-top{transform:translateY(1px)}
+.brand-wordmark[data-brand-state="moderators"] .brand-bottom{opacity:.9}
+.brand-wordmark[data-brand-state="community"] .brand-top{transform:translateY(1px)}
+.brand-wordmark[data-brand-state="community"] .brand-main #brandMainLead{color:var(--accent)}
+@media(max-width:500px){.brand-wordmark .brand-top,.brand-wordmark .brand-bottom{font-size:.52em}.brand-wordmark .brand-main{font-size:.9em}}
+@media(prefers-reduced-motion:reduce){.brand-wordmark,.brand-wordmark *{transition:none!important}}
+
 /* Chat widget builder */
 .chat-builder{padding:30px 0 42px;min-height:55vh}
 .widget-tabs{display:flex;gap:10px;margin:0 0 22px;flex-wrap:wrap}
@@ -1907,7 +1915,8 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
         
         <div class="chat-field"><label for="chatText">Цвет сообщений</label><input id="chatText" type="color" value="#f5f5f7"></div>
         <div class="chat-field"><label for="chatName">Цвет ников</label><input id="chatName" type="color" value="#b9ff36"></div>
-        <input id="chatAccent" type="hidden" value="#9147ff">\n        <input id="chatBgOpacity" type="hidden" value="0">
+        <input id="chatAccent" type="hidden" value="#9147ff">
+        <input id="chatBgOpacity" type="hidden" value="0">
         <div class="chat-field"><label for="chatBubble">Цвет пузырьков</label><input id="chatBubble" type="color" value="#292936"></div>
         <div class="chat-field"><label for="chatOutline">Цвет обводки сообщений</label><input id="chatOutline" type="color" value="#9147ff"></div>
         <div class="chat-field"><label for="chatSize">Размер текста</label><select id="chatSize"><option value="14">Маленький</option><option value="16" selected>Обычный</option><option value="19">Крупный</option><option value="22">Очень крупный</option></select></div>
