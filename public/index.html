@@ -3863,7 +3863,7 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
     document.body.appendChild(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
   async function loadPending(){
-    pending.replaceChildren(makeText("p","Загружаем заявки…","wall-muted"));
+    moderatorMessage.textContent="Обновляем список заявок…";
     try{
       const data=await apiJson("/api/community/moderation");
       byId("moderatorSessionLabel").textContent="Вошёл: "+data.moderator+" ("+(data.role==="admin"?"владелец":"модератор")+")";
@@ -3900,7 +3900,7 @@ if (initialProfileLogin) openStreamerProfile(initialProfileLogin, false);
         card.append(actions);pending.append(card);
       });
       setModeratorSignedIn(true);
-    }catch(error){if(error.message==="Нужен вход модератора.")setModeratorSignedIn(false);else moderatorMessage.textContent=error.message;}
+    }catch(error){if(error.message==="Нужен вход модератора.")setModeratorSignedIn(false);else moderatorMessage.textContent=error.message+" Список заявок оставлен на экране; попробуйте обновить ещё раз."}
   }
   loginForm.addEventListener("submit",async event=>{
     event.preventDefault();const button=loginForm.querySelector('[type="submit"]');button.disabled=true;moderatorMessage.textContent="Входим…";
