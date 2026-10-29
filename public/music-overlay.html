@@ -30,6 +30,7 @@ body{font:14px system-ui,-apple-system,Segoe UI,sans-serif}
   let currentId="";
   let loadedQueueId="";
   let pollInProgress=false;
+  let transitionInProgress=false;
 
   function showVideo(){layer.classList.add("is-active")}
   function hideVideo(stop){
@@ -54,7 +55,7 @@ body{font:14px system-ui,-apple-system,Segoe UI,sans-serif}
     }catch(_){}
   }
   async function poll(){
-    if(pollInProgress)return;
+    if(pollInProgress||transitionInProgress)return;
     pollInProgress=true;
     try{
       const items=await getQueue();
@@ -67,12 +68,10 @@ body{font:14px system-ui,-apple-system,Segoe UI,sans-serif}
         return;
       }
       showVideo();
-      if(playing.id!==currentId||playing.id!==loadedQueueId){
-        currentId=playing.id;
+      if(playing.id!==currentId)currentId=playing.id;
+      if(player&&typeof player.loadVideoById==="function"&&playing.id!==loadedQueueId){
         loadedQueueId=playing.id;
-        if(player&&typeof player.loadVideoById==="function"){
-          player.loadVideoById({videoId:playing.videoId,startSeconds:0});
-        }
+        player.loadVideoById({videoId:playing.videoId,startSeconds:0});
       }
     }catch(_){
       currentId="";
@@ -106,8 +105,12 @@ body{font:14px system-ui,-apple-system,Segoe UI,sans-serif}
             const finishedId=currentId;
             currentId="";
             loadedQueueId="";
+            transitionInProgress=true;
             hideVideo(false);
-            markEnded(finishedId).finally(function(){setTimeout(poll,350)});
+            markEnded(finishedId).finally(function(){
+              transitionInProgress=false;
+              setTimeout(poll,350);
+            });
           }
         },
         onError:function(){
