@@ -84,6 +84,7 @@ html[data-theme="light"] .card-description{color:#656978}
 .live-status.is-loading::before{background:#b9ff36;box-shadow:0 0 8px #b9ff3677}
 .stream-meta{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.45}
 .stream-meta:empty{display:none}
+.collab-badge-wrap{display:flex;flex-wrap:wrap;gap:5px;align-items:flex-start;margin-top:6px;min-width:0}.collab-badge{display:inline-flex;align-items:center;border:1px solid rgba(185,255,54,.35);background:rgba(185,255,54,.1);color:var(--accent);border-radius:6px;padding:3px 7px;font-size:10px;font-weight:900;letter-spacing:.04em}.collab-names{font-size:11px;line-height:1.4;color:var(--muted);overflow-wrap:anywhere;min-width:0}
 .arrow{color:#777786;transition:.18s;flex:0 0 auto}.streamer:hover .arrow{color:var(--accent);transform:translate(2px,-2px)}
 .empty{display:none;text-align:center;color:var(--muted);padding:40px 12px;grid-column:1/-1}
 footer{border-top:1px solid var(--line);padding:23px 0 32px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
@@ -2856,7 +2857,7 @@ function render(filter="") {
     }
     const moderationTags = modData ? `<div class="moderates"><span class="moderates-label">${modData.tagLabel}</span> ${modData.channels.map(channel => `<button type="button" class="moderates-tag" data-streamer-target="${String(channel).replace(/&/g, "&amp;").replace(/\"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}" aria-label="Найти стримера ${channel}">@${channel}</button>`).join(" ")}</div>` : "";
     card.innerHTML = `<div class="avatar"><img src="${avatarSvg(name,i)}" alt="Аватар ${name}" loading="eager" referrerpolicy="no-referrer"></div>
-      <div class="info"><div class="name">${cardLabel}</div>${moderator ? "" : ``}${moderator ? moderationTags : `<div class="status-line"><div class="live-status is-loading" data-status="${name}">Проверяем эфир…</div></div><div class="stream-meta" data-meta="${name}"></div>`}</div>
+      <div class="info"><div class="name">${cardLabel}</div>${moderator ? "" : ``}${moderator ? moderationTags : `<div class="status-line"><div class="live-status is-loading" data-status="${name}">Проверяем эфир…</div></div><div class="stream-meta" data-meta="${name}"></div><div class="collab-badge-wrap" data-collab="${name}"></div>`}</div>
       <svg class="arrow" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10"/></svg>`;
 
     // Put each profile's social destinations directly on its directory card.
@@ -3079,6 +3080,47 @@ function reorderCategoryCards() {
   });
 }
 
+let latestCollaborations = {};
+let collabRequestInFlight = null;
+let lastCollabAttemptAt = 0;
+function applyCollaborations(collaborations) {
+  latestCollaborations = collaborations && typeof collaborations === "object" ? collaborations : {};
+  streamers.forEach(({name}) => {
+    const wrap = document.querySelector(`[data-collab="${name}"]`);
+    if (!wrap) return;
+    wrap.replaceChildren();
+    const item = latestCollaborations[String(name).toLowerCase()];
+    if (!item || !Array.isArray(item.participants) || !item.participants.length) continue;
+    const badge = document.createElement("div");
+    badge.className = "collab-badge";
+    badge.textContent = "🤝 КОЛЛАБ";
+    badge.title = "Совместный эфир: " + item.participants.map(p => p.displayName || p.login).join(", ");
+    const names = document.createElement("div");
+    names.className = "collab-names";
+    names.textContent = "Вместе с: " + item.participants.map(p => p.displayName || p.login).join(", ");
+    wrap.append(badge, names);
+  });
+}
+async function refreshCollaborations(force = false) {
+  if (collabRequestInFlight) return collabRequestInFlight;
+  if (!force && Date.now() - lastCollabAttemptAt < 20000) return;
+  lastCollabAttemptAt = Date.now();
+  collabRequestInFlight = (async () => {
+    try {
+      const response = await fetch("/api/collaborations", { cache: "no-store" });
+      if (!response.ok) throw new Error("Collaboration endpoint unavailable");
+      const payload = await response.json();
+      if (!payload || !payload.collaborations || typeof payload.collaborations !== "object") throw new Error("Invalid collaboration response");
+      applyCollaborations(payload.collaborations);
+    } catch (error) {
+      console.warn("Could not refresh Twitch collaborations:", error);
+    } finally {
+      collabRequestInFlight = null;
+    }
+  })();
+  return collabRequestInFlight;
+}
+
 function applyLiveStatuses(streams) {
   streamers.forEach(({name}) => {
     const status = document.querySelector(`[data-status="${name}"]`);
@@ -3121,6 +3163,7 @@ async function refreshLiveStatuses() {
       // The user may have switched tabs while the request was in flight. Update any
       // streamer cards that currently exist, without touching moderator/editor cards.
       applyLiveStatuses(latestStreamData);
+      refreshCollaborations();
       if (activeTab === "streamers") reorderCategoryCards();
     } catch (error) {
       // Keep failures distinct from offline. If streamer cards are recreated later,
