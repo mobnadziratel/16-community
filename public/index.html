@@ -2225,6 +2225,116 @@ html[data-theme="light"] #wallPanel .wall-posts-on-mural .wall-post-card{
   }
 }
 
+
+/* Extra Halloween scenery on the community wall */
+#wallPanel .wall-mural{
+  background-image:
+    radial-gradient(ellipse at 84% 9%,rgba(115,47,149,.32),transparent 21%),
+    radial-gradient(ellipse at 11% 34%,rgba(255,104,24,.18),transparent 24%),
+    radial-gradient(ellipse at 75% 70%,rgba(139,53,177,.16),transparent 24%),
+    linear-gradient(180deg,rgba(16,8,22,.42),rgba(28,10,29,.06) 22%,rgba(13,7,18,.28) 73%,rgba(7,6,6,.80)),
+    repeating-linear-gradient(0deg,transparent 0 57px,rgba(38,22,18,.98) 57px 64px),
+    repeating-linear-gradient(90deg,#a06c5a 0 73px,#392722 73px 82px,#845849 82px 181px,#4b3028 181px 190px,#966654 190px 309px,#392722 309px 318px,#7b5143 318px 405px,#392722 405px 414px),
+    repeating-linear-gradient(90deg,transparent 0 39px,rgba(38,24,20,.98) 39px 48px,transparent 48px 129px,rgba(38,24,20,.98) 129px 138px,transparent 138px 246px,rgba(38,24,20,.98) 246px 255px,transparent 255px 365px),
+    repeating-linear-gradient(176deg,rgba(255,223,193,.07) 0 1px,transparent 1px 6px),
+    linear-gradient(125deg,#986555,#5d4038 46%,#a47763);
+  background-size:auto,auto,auto,auto,100% 64px,414px 64px,414px 64px,100% 100%,auto;
+  background-position:0 0,0 0,0 0,0 0,0 0,0 0,207px 32px,0 0,0 0;
+}
+#wallPanel .wall-halloween-scene{
+  position:absolute;inset:0;z-index:2;overflow:hidden;pointer-events:none;
+}
+#wallPanel .wall-halloween-moon{
+  position:absolute;top:235px;right:clamp(25px,6%,90px);
+  width:clamp(76px,10vw,132px);aspect-ratio:1;border-radius:50%;
+  background:
+    radial-gradient(circle at 32% 31%,rgba(255,244,193,.92) 0 3%,transparent 4%),
+    radial-gradient(circle at 67% 54%,rgba(255,130,74,.30) 0 7%,transparent 8%),
+    radial-gradient(circle at 40% 70%,rgba(255,126,73,.22) 0 5%,transparent 6%),
+    radial-gradient(circle at 65% 24%,rgba(255,227,184,.45) 0 8%,transparent 9%),
+    radial-gradient(circle at 35% 35%,#ffdca0,#ff945a 58%,#e45b44);
+  box-shadow:0 0 16px rgba(255,128,71,.42),0 0 48px rgba(255,89,50,.25),inset -10px -7px 18px rgba(105,28,64,.24);
+  opacity:.88;
+}
+#wallPanel .wall-halloween-moon::before{
+  content:"";position:absolute;inset:-13px;border:1px solid rgba(255,174,110,.45);
+  border-radius:50%;box-shadow:0 0 0 8px rgba(255,139,43,.055),0 0 0 18px rgba(255,139,43,.035);
+}
+#wallPanel .wall-halloween-bat{
+  position:absolute;font-size:clamp(24px,3.4vw,43px);
+  filter:drop-shadow(0 4px 5px rgba(0,0,0,.72)) drop-shadow(0 0 8px rgba(210,112,255,.38));
+}
+#wallPanel .wall-halloween-bat.bat-one{top:390px;left:12%;transform:rotate(-9deg)}
+#wallPanel .wall-halloween-bat.bat-two{top:610px;right:8%;font-size:clamp(19px,2.5vw,32px);transform:rotate(12deg)}
+#wallPanel .wall-halloween-ghost{
+  position:absolute;font-size:clamp(28px,4vw,50px);
+  filter:drop-shadow(0 0 10px rgba(232,205,255,.45));
+  animation:wall-halloween-float 5.5s ease-in-out infinite;
+}
+#wallPanel .wall-halloween-ghost.ghost-one{top:810px;left:5%}
+#wallPanel .wall-halloween-ghost.ghost-two{top:1460px;right:6%;font-size:clamp(24px,3vw,38px);animation-delay:-2.7s}
+#wallPanel .wall-halloween-cat{
+  position:absolute;top:1740px;left:7%;font-size:clamp(38px,5.5vw,68px);
+  filter:drop-shadow(0 9px 5px rgba(0,0,0,.65));
+}
+#wallPanel .wall-halloween-pumpkin{
+  position:absolute;font-size:clamp(27px,3.6vw,46px);
+  filter:drop-shadow(0 5px 5px rgba(0,0,0,.65)) drop-shadow(0 0 12px rgba(255,113,31,.26));
+}
+#wallPanel .wall-halloween-pumpkin.pumpkin-one{top:1120px;right:7%}
+#wallPanel .wall-halloween-pumpkin.pumpkin-two{top:2210px;left:6%;font-size:clamp(23px,3vw,37px)}
+#wallPanel .wall-halloween-graveyard{
+  position:absolute;left:50%;bottom:55px;transform:translateX(-50%);
+  display:flex;align-items:flex-end;gap:8px;width:100%;justify-content:center;opacity:.88;
+  filter:drop-shadow(0 5px 5px rgba(0,0,0,.45));
+}
+#wallPanel .wall-halloween-grave{
+  position:relative;display:flex;align-items:center;justify-content:center;
+  width:clamp(48px,7vw,90px);height:clamp(49px,6.8vw,86px);
+  border:2px solid #29202f;border-bottom:0;border-radius:45% 45% 5px 5px;
+  background:linear-gradient(105deg,#66576d,#34283f 72%);
+  color:#b9a6c8;font:bold clamp(9px,1vw,12px)/1 Georgia,serif;letter-spacing:.18em;
+  box-shadow:inset 3px 0 7px rgba(255,255,255,.1),inset -5px 0 9px rgba(0,0,0,.22);
+}
+#wallPanel .wall-halloween-grave::before{
+  content:"";position:absolute;top:12px;left:50%;transform:translateX(-50%);
+  width:3px;height:13px;background:#9a82a8;border-radius:2px;
+}
+#wallPanel .wall-halloween-grave::after{
+  content:"";position:absolute;top:17px;left:50%;transform:translateX(-50%);
+  width:11px;height:3px;background:#9a82a8;border-radius:2px;
+}
+#wallPanel .wall-halloween-grave.grave-one{height:clamp(56px,7.8vw,100px);transform:rotate(-4deg)}
+#wallPanel .wall-halloween-grave.grave-two{height:clamp(67px,9vw,114px);border-radius:48% 48% 4px 4px}
+#wallPanel .wall-halloween-grave.grave-three{height:clamp(52px,7vw,88px);transform:rotate(4deg)}
+#wallPanel .wall-halloween-candle{
+  position:absolute;top:1900px;font-size:clamp(25px,3vw,38px);
+  filter:drop-shadow(0 0 10px rgba(255,163,66,.45));
+}
+#wallPanel .wall-halloween-candle.candle-one{left:22%}
+#wallPanel .wall-halloween-candle.candle-two{right:19%;top:2010px}
+#wallPanel .wall-posts-on-mural{margin-bottom:125px}
+@media(max-width:650px){
+  #wallPanel .wall-halloween-scene{z-index:1}
+  #wallPanel .wall-halloween-moon{top:225px;right:10px;width:62px;opacity:.55}
+  #wallPanel .wall-halloween-bat.bat-one{top:340px;left:6%;font-size:23px;opacity:.7}
+  #wallPanel .wall-halloween-bat.bat-two{top:870px;right:5%;font-size:21px;opacity:.65}
+  #wallPanel .wall-halloween-ghost.ghost-one{top:610px;left:2%;font-size:25px;opacity:.72}
+  #wallPanel .wall-halloween-ghost.ghost-two{top:1340px;right:3%;font-size:23px;opacity:.65}
+  #wallPanel .wall-halloween-cat{top:1580px;left:3%;font-size:37px;opacity:.78}
+  #wallPanel .wall-halloween-pumpkin.pumpkin-one{top:1060px;right:3%;font-size:28px}
+  #wallPanel .wall-halloween-pumpkin.pumpkin-two{top:2230px;left:3%;font-size:25px}
+  #wallPanel .wall-halloween-graveyard{bottom:48px;gap:5px}
+  #wallPanel .wall-halloween-grave{width:46px;height:52px;font-size:9px}
+  #wallPanel .wall-halloween-grave.grave-two{height:64px}
+  #wallPanel .wall-halloween-candle.candle-one{left:6%;top:1840px}
+  #wallPanel .wall-halloween-candle.candle-two{right:6%;top:2060px}
+  #wallPanel .wall-posts-on-mural{margin-bottom:110px}
+}
+@media(prefers-reduced-motion:reduce){
+  #wallPanel .wall-halloween-ghost{animation:none!important}
+}
+
 </style>
 </head>
 <body>
@@ -2310,6 +2420,23 @@ html[data-theme="light"] #wallPanel .wall-posts-on-mural .wall-post-card{
         <strong>ХЭЛЛОУИНСКАЯ СТЕНА</strong>
         <span class="wall-halloween-icon">👻</span>
         <span class="wall-halloween-icon">🎃</span>
+      </div>
+      <div class="wall-halloween-scene" aria-hidden="true">
+        <span class="wall-halloween-moon"></span>
+        <span class="wall-halloween-bat bat-one">🦇</span>
+        <span class="wall-halloween-bat bat-two">🦇</span>
+        <span class="wall-halloween-ghost ghost-one">👻</span>
+        <span class="wall-halloween-ghost ghost-two">👻</span>
+        <span class="wall-halloween-cat">🐈‍⬛</span>
+        <span class="wall-halloween-pumpkin pumpkin-one">🎃</span>
+        <span class="wall-halloween-pumpkin pumpkin-two">🎃</span>
+        <div class="wall-halloween-graveyard">
+          <span class="wall-halloween-grave grave-one">RIP</span>
+          <span class="wall-halloween-grave grave-two">RIP</span>
+          <span class="wall-halloween-grave grave-three">RIP</span>
+        </div>
+        <span class="wall-halloween-candle candle-one">🕯️</span>
+        <span class="wall-halloween-candle candle-two">🕯️</span>
       </div>
       <div id="plovecmolodecCountdown" role="timer" aria-live="off" style="position:absolute;z-index:8;top:12px;left:50%;transform:translateX(-50%);width:max-content;max-width:calc(100% - 24px);box-sizing:border-box;padding:12px 18px;border:1px solid rgba(255,255,255,.28);border-radius:16px;background:rgba(10,10,16,.78);backdrop-filter:blur(8px);color:#fff;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.35);font-family:inherit">
         <div style="font-weight:800;font-size:clamp(13px,2.4vw,18px);margin-bottom:7px">До дня возвращения plovecmolodec</div>
