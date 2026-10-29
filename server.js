@@ -252,6 +252,46 @@ async function fetchStreams() {
   return result;
 }
 
+let collabCache = {};
+let collabCacheAt = 0;
+async function getCollaborations() {
+  if (Date.now() - collabCacheAt < 60000) return collabCache;
+  const live = await getStreams();
+  const logins = LOGINS.filter(login => live[login] && live[login].isLive);
+  if (!logins.length) { collabCache = {}; collabCacheAt = Date.now(); return collabCache; }
+  const params = new URLSearchParams();
+  LOGINS.forEach(login => params.append("login", login));
+  const userData = await helix("users", params);
+  const users = userData.data || [];
+  const byLogin = new Map(users.map(user => [String(user.login).toLowerCase(), user]));
+  const byId = new Map(users.map(user => [String(user.id), user]));
+  const result = {};
+  for (const login of logins) {
+    const user = byLogin.get(login);
+    if (!user) continue;
+    try {
+      const data = await helix("shared_chat/session", new URLSearchParams({ broadcaster_id: String(user.id) }));
+      const session = (data.data || [])[0];
+      if (!session || !Array.isArray(session.participants) || session.participants.length < 2) continue;
+      const ids = session.participants.map(p => String(p.broadcaster_id));
+      const missing = ids.filter(id => !byId.has(id));
+      if (missing.length) {
+        const extraParams = new URLSearchParams();
+        missing.forEach(id => extraParams.append("id", id));
+        const extra = await helix("users", extraParams);
+        (extra.data || []).forEach(u => byId.set(String(u.id), u));
+      }
+      const participants = ids.map(id => byId.get(id)).filter(Boolean).map(u => ({ login: String(u.login).toLowerCase(), displayName: String(u.display_name || u.login) }));
+      if (participants.length > 1) result[login] = { participants: participants.filter(p => p.login !== login) };
+    } catch (error) {
+      console.warn("Twitch shared-chat lookup failed for " + login + ": " + error.message);
+    }
+  }
+  collabCache = result;
+  collabCacheAt = Date.now();
+  return result;
+}
+
 async function getStreams() {
   if (Date.now() < cacheExpiresAt) return cachedStreams;
   if (!refreshInFlight) {
@@ -510,6 +550,20 @@ const server = http.createServer(async (req, res) => {
       console.error(`Twitch diagnostics failed: ${error.message}`);
       res.writeHead(503);
       res.end(JSON.stringify({ checkedAt: new Date().toISOString(), error: "Diagnostic request failed" }));
+    }
+    return;
+  }
+
+  if (url.pathname === "/api/collaborations") {
+    res.setHeader("Content-Type", "application/json; charset=utf-8");
+    res.setHeader("Cache-Control", "no-store");
+    try {
+      res.writeHead(200);
+      res.end(JSON.stringify({ collaborations: await getCollaborations() }));
+    } catch (error) {
+      console.error("Twitch collaborations unavailable: " + error.message);
+      res.writeHead(503);
+      res.end(JSON.stringify({ collaborations: {}, error: "unavailable" }));
     }
     return;
   }
