@@ -46,7 +46,15 @@ async function loadChatEmotes(){
   const [bttv,seventv,ffz,ffzGlobal]=await Promise.all(jobs);
   for(const e of [...(bttv?.channelEmotes||[]),...(bttv?.sharedEmotes||[])])addEmote(e.code,"https://cdn.betterttv.net/emote/"+e.id+"/2x");
   const seven=[...(seventv?.emote_set?.emotes||[]),...(seventv?.user?.emote_sets||[]).flatMap(s=>s.emotes||[])];
-  for(const e of seven){const id=e.id||e.data?.id,name=e.name||e.data?.name;if(id&&name)addEmote(name,"https://cdn.7tv.app/emote/"+id+"/2x.webp");}
+  for(const e of seven){
+    const id=e.id||e.data?.id,name=e.name||e.data?.name,host=e.data?.host||e.host;
+    const files=host?.files||[];
+    const file=files.find(f=>/^(2x|3x)\\.webp$/i.test(f.name))||files.find(f=>/^1x\\.webp$/i.test(f.name))||files.find(f=>/webp/i.test(f.name));
+    let url="";
+    if(host?.url&&file)url=(host.url.startsWith("//")?"https:":host.url.startsWith("http")?"":"https://")+host.url.replace(/^https?:\\/\\//,"").replace(/\\/$/,"")+"/"+file.name;
+    else if(id)url="https://cdn.7tv.app/emote/"+id+"/2x.webp";
+    if(id&&name&&url)addEmote(name,url);
+   }
   for(const set of Object.values(ffz?.sets||{}))for(const e of (set.emoticons||[]))addEmote(e.name,"https://cdn.frankerfacez.com/emote/"+e.id+"/2");
   for(const set of Object.values(ffzGlobal?.sets||{}))for(const e of (set.emoticons||[]))addEmote(e.name,"https://cdn.frankerfacez.com/emote/"+e.id+"/2");
  }catch(_){}
