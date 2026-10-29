@@ -4,25 +4,25 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#09090d"><title>SMALL-STREAMERS Music</title>
 <style>
-:root{color-scheme:dark;--bg:#08090c;--panel:rgba(20,21,27,.92);--panel2:#1b1d24;--line:rgba(255,255,255,.09);--text:#f6f7f8;--muted:#9a9eaa;--accent:#b9ff36;--accent-soft:rgba(185,255,54,.12);--danger:#ff647c;--radius:18px}
+:root{color-scheme:dark;--bg:#0b0b0f;--panel:#14141b;--panel2:#1a1a23;--line:rgba(255,255,255,.09);--text:#f5f5f7;--muted:#9a9aa8;--accent:#b9ff36;--accent-soft:rgba(185,255,54,.12);--danger:#ff647c;--radius:18px}
 *{box-sizing:border-box}
-html{min-height:100%;background:var(--bg)}
-body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -12%,rgba(185,255,54,.12),transparent 38%),radial-gradient(ellipse at 100% 45%,rgba(82,94,57,.08),transparent 32%),var(--bg);color:var(--text);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:.01em}
+html{min-height:100%;background:var(--bg);scroll-behavior:smooth}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -15%,#292b20 0,transparent 42%),var(--bg);color:var(--text);font:14px/1.6 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:0}
 button,input{font:inherit}
-button{cursor:pointer;border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#24262e,#191a21);color:var(--text);padding:10px 14px;font-weight:800;transition:transform .16s ease,border-color .16s ease,background .16s ease,box-shadow .16s ease}
-button:hover:not(:disabled){border-color:rgba(185,255,54,.55);background:linear-gradient(180deg,#2a3021,#1c2018);box-shadow:0 0 0 3px rgba(185,255,54,.07),0 7px 22px rgba(0,0,0,.18);transform:translateY(-1px)}
+button{cursor:pointer;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text);padding:11px 15px;font-weight:850;transition:transform .18s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease}
+button:hover:not(:disabled){border-color:#b9ff3677;background:linear-gradient(130deg,#20251a,#15151c);box-shadow:0 0 0 3px #b9ff3610;transform:translateY(-2px)}
 button:active:not(:disabled){transform:translateY(0)}
 button:disabled{opacity:.42;cursor:not-allowed}
-.dock{width:min(100%,780px);margin:0 auto;padding:22px 16px 28px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 2px 20px}
-.brand{font-weight:950;font-size:clamp(17px,3vw,21px);letter-spacing:-.045em;display:flex;align-items:center;gap:8px}
-.brand span{color:var(--accent);text-shadow:0 0 24px rgba(185,255,54,.24)}
+.dock{width:min(1120px,calc(100% - 36px));margin:0 auto;padding:28px 0 36px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 0 28px;margin-bottom:34px;border-bottom:1px solid var(--line)}
+.brand{font-weight:950;font-size:clamp(19px,3vw,24px);letter-spacing:-.06em;display:flex;align-items:center;gap:12px}
+.brand span{color:var(--accent);text-shadow:0 0 24px rgba(185,255,54,.18)}
 .icon{font-size:17px;padding:9px 12px;min-width:42px}
-.card{background:linear-gradient(145deg,rgba(25,26,34,.97),rgba(15,16,21,.97));border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:14px;box-shadow:0 14px 38px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.025)}
-.heading{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 17px;background:linear-gradient(90deg,rgba(255,255,255,.035),transparent);border-bottom:1px solid var(--line);font-size:11px;letter-spacing:.11em;font-weight:950}
+.card{background:linear-gradient(130deg,#17171f,#121218);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;margin-bottom:16px;box-shadow:none;transition:border-color .18s,background .18s}.card:hover{border-color:#ffffff18}
+.heading{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 18px;background:rgba(255,255,255,.018);border-bottom:1px solid var(--line);font-size:11px;letter-spacing:.14em;font-weight:900}
 .now{padding:17px}
 .track{display:flex;align-items:center;gap:14px;min-width:0}
-.cover{width:76px;height:76px;border-radius:13px;background:linear-gradient(135deg,#303a20,#171920);border:1px solid rgba(185,255,54,.13);display:grid;place-items:center;font-size:26px;flex:none;overflow:hidden;box-shadow:0 5px 20px rgba(0,0,0,.18)}
+.cover{width:76px;height:76px;border-radius:16px;background:#26262f;border:1px solid var(--line);display:grid;place-items:center;font-size:26px;flex:none;overflow:hidden;box-shadow:0 0 0 1px #ffffff08}
 .cover img{width:100%;height:100%;object-fit:cover}
 .meta{min-width:0;flex:1}
 .title{font-size:clamp(15px,2.5vw,18px);font-weight:900;line-height:1.3;overflow-wrap:anywhere}
@@ -47,7 +47,7 @@ button:disabled{opacity:.42;cursor:not-allowed}
 .settings{padding:16px;display:grid;gap:13px}
 .field{display:grid;gap:7px}
 .field label{font-size:11px;letter-spacing:.08em;color:var(--muted);font-weight:900}
-.field input{width:100%;min-width:0;background:#0b0c10;color:var(--text);border:1px solid var(--line);border-radius:11px;padding:12px 13px;outline:none;transition:border-color .15s ease,box-shadow .15s ease}
+.field input{width:100%;min-width:0;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:13px;padding:13px 15px;outline:none;transition:border-color .18s ease,box-shadow .18s ease}
 .field input:focus{border-color:rgba(185,255,54,.6);box-shadow:0 0 0 3px rgba(185,255,54,.08)}
 .field input::placeholder{color:#676b76}
 .row{display:flex;gap:9px}
@@ -59,7 +59,7 @@ button:disabled{opacity:.42;cursor:not-allowed}
 .settings-toggle{display:flex;align-items:center;gap:8px}
 .settings-toggle span{font-size:12px;color:var(--muted)}
 footer.sub{opacity:.72}
-@media(max-width:520px){.dock{padding:12px 10px 20px}.top{padding-bottom:15px}.card{border-radius:15px;margin-bottom:11px}.heading{padding:13px 14px}.now{padding:14px}.cover{width:62px;height:62px;border-radius:11px}.queue{padding:4px 11px 10px}.item{gap:8px;align-items:flex-start}.number{width:24px;padding-top:3px}.item .actions{gap:4px}.item .actions button{padding:7px 8px;min-width:32px}.controls{padding:10px}.controls button{flex-basis:calc(50% - 8px)}.settings{padding:13px}}
+@media(max-width:650px){.dock{width:min(100% - 24px,540px);padding:18px 0 24px}.top{padding-bottom:18px;margin-bottom:24px}.card{border-radius:15px;margin-bottom:12px}.heading{padding:13px 14px}.now{padding:14px}.cover{width:62px;height:62px;border-radius:11px}.queue{padding:4px 11px 10px}.item{gap:8px;align-items:flex-start}.number{width:24px;padding-top:3px}.item .actions{gap:4px}.item .actions button{padding:7px 8px;min-width:32px}.controls{padding:10px}.controls button{flex-basis:calc(50% - 8px)}.settings{padding:13px}.brand{font-size:18px}}
 @media(prefers-reduced-motion:reduce){button{transition:none}}
 </style></head><body><main class="dock">
 <header class="top"><div class="brand">🎵 SMALL-STREAMERS <span>Music</span></div><button class="icon" id="settingsToggle" aria-label="Настройки" title="Настройки">⚙</button></header>
