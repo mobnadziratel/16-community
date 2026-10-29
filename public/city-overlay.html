@@ -17,9 +17,13 @@ const channel=(params.get("channel")||"").trim().toLowerCase();
 const idleMinutes=Math.max(1,Math.min(180,Number(params.get("idle")||5)));
 const style=params.get("game")||"mixed";
 const preview=params.get("preview")==="1";
+const nameColor=/^#[0-9a-f]{6}$/i.test(params.get("nameColor")||"")?params.get("nameColor"):"#b9ff36";
+const useTwitchColors=params.get("twitchColors")!=="0";
 const canvas=document.getElementById("city"),ctx=canvas.getContext("2d"),status=document.getElementById("status");
 const people=new Map();
-let width=0,height=0,lastFrame=0,lastPing=0,socket=null,retryTimer=null;
+const twitchColorCache={};
+const pendingColorLogins=new Set();
+let colorTimer=null,width=0,height=0,lastFrame=0,lastPing=0,socket=null,retryTimer=null;
 const palettes=[
 {skin:"#f0c49a",hair:"#53352c",shirt:"#4b8bd8",pants:"#25395d",accent:"#f3d56a"},
 {skin:"#dba47b",hair:"#2d2928",shirt:"#5dbb77",pants:"#303a40",accent:"#f3f3f3"},
@@ -29,13 +33,29 @@ const palettes=[
 {skin:"#d9aa8a",hair:"#5942a4",shirt:"#e5a34b",pants:"#463a35",accent:"#83ed91"}
 ];
 function resize(){const dpr=Math.min(window.devicePixelRatio||1,2);width=Math.max(1,canvas.clientWidth);height=Math.max(1,canvas.clientHeight);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);for(const p of people.values())p.y=height-2;}
+function queueTwitchColor(login){
+ if(!useTwitchColors||!login||twitchColorCache[login]||pendingColorLogins.has(login))return;
+ pendingColorLogins.add(login);
+ if(colorTimer)clearTimeout(colorTimer);
+ colorTimer=setTimeout(async()=>{
+  const logins=[...pendingColorLogins];pendingColorLogins.clear();colorTimer=null;
+  try{
+   const response=await fetch("/api/chat-colors?logins="+encodeURIComponent(logins.join(",")));
+   if(!response.ok)throw new Error("Twitch colors unavailable");
+   const data=await response.json();
+   Object.assign(twitchColorCache,data.colors||{});
+   for(const [key,p] of people){const c=twitchColorCache[key];if(/^#[0-9a-f]{6}$/i.test(c||""))p.nameColor=c;}
+  }catch(_){}
+ },180);
+}
 function addPerson(login){
  const key=String(login||"").toLowerCase().replace(/[^a-z0-9_]/g,"").slice(0,25);if(!key)return;
  const now=Date.now();let p=people.get(key);
- if(p){p.last=now;p.display=login;return}
+ if(p){p.last=now;p.display=login;queueTwitchColor(key);return}
  const palette=palettes[Math.floor(Math.random()*palettes.length)];
  const x=people.size%2===0?Math.random()*Math.max(1,width*.35):width*.65+Math.random()*Math.max(1,width*.3);
- people.set(key,{key,display:login,last:now,x,y:height-2,vx:(Math.random()>.5?1:-1)*(.3+Math.random()*.45),phase:Math.random()*6.28,palette,kind:style==="mixed"?Math.floor(Math.random()*4):({minecraft:0,terraria:1,rpg:2,scifi:3}[style]??0),variant:Math.floor(Math.random()*6),scale:.85+Math.random()*.7});
+ people.set(key,{key,display:login,last:now,x,y:height-2,vx:(Math.random()>.5?1:-1)*(.3+Math.random()*.45),phase:Math.random()*6.28,palette,kind:style==="mixed"?Math.floor(Math.random()*4):({minecraft:0,terraria:1,rpg:2,scifi:3}[style]??0),variant:Math.floor(Math.random()*6),scale:.85+Math.random()*.7,nameColor:twitchColorCache[key]||nameColor});
+ queueTwitchColor(key);
 }
 function drawPerson(p,t){
  const gait=t*.012+p.phase,stride=Math.sin(gait),bob=Math.abs(Math.cos(gait))*1.5;
@@ -110,7 +130,7 @@ function drawPerson(p,t){
  ctx.restore();
  ctx.save();ctx.font="bold 13px Arial,sans-serif";ctx.textAlign="center";ctx.textBaseline="bottom";
  const label=p.display;const tw=Math.min(ctx.measureText(label).width,width*.4);const tx=Math.max(tw/2+3,Math.min(width-tw/2-3,x));
- ctx.lineWidth=4;ctx.strokeStyle="#101014";ctx.lineJoin="round";ctx.strokeText(label,tx,base-34*s);ctx.fillStyle="#fff";ctx.fillText(label,tx,base-34*s);ctx.restore();
+ ctx.lineWidth=4;ctx.strokeStyle="#101014";ctx.lineJoin="round";ctx.strokeText(label,tx,base-34*s);ctx.fillStyle=p.nameColor||nameColor;ctx.fillText(label,tx,base-34*s);ctx.restore();
 }
 function frame(t){
  if(!lastFrame)lastFrame=t;const dt=Math.min(40,t-lastFrame);lastFrame=t;
