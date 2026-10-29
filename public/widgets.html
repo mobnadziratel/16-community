@@ -1960,7 +1960,7 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
   </div>
  </div>
  <div class="city-preview-wrap"><div class="city-preview-label">ПРЕДПРОСМОТР · ФОН ПРОЗРАЧНЫЙ</div><iframe id="cityPreviewFrame" title="Предпросмотр ходящих персонажей из чата" loading="eager"></iframe></div>
- <div class="chat-field city-link-field"><label for="cityObsLink">Ссылка для OBS</label><input id="cityObsLink" type="url" readonly placeholder="Введи канал Twitch выше"><button id="cityCopyLink" class="refresh-clips" type="button">Скопировать ссылку</button></div>
+ <div class="chat-field city-link-field"><label for="cityObsLink">Ссылка для OBS</label><input id="cityObsLink" type="url" readonly placeholder="Введи Twitch канал"><button id="cityCopyLink" class="refresh-clips" type="button">Скопировать ссылку</button></div>
  <p id="cityWidgetStatus" class="chat-note" aria-live="polite">Персонаж появляется, когда пользователь пишет в чат. Если он не пишет выбранное время, он исчезает.</p>
 </section>
 </main>
@@ -2195,11 +2195,13 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
   if(preview)u.searchParams.set("preview","1");
   return u.toString();
  }
+ let previewTimer=0;
  function update(){
   const login=channel.value.trim().toLowerCase().replace(/^#/,"");
   const valid=/^[a-z0-9_]{1,25}$/.test(login);
   link.value=valid?buildUrl(false):"";
-  frame.src=buildUrl(true);
+  clearTimeout(previewTimer);
+  previewTimer=setTimeout(()=>{const previewUrl=buildUrl(true);if(frame.src!==previewUrl)frame.src=previewUrl;},250);
   try{localStorage.setItem(settingsKey,JSON.stringify({nameColor:nameColor.value,twitchColors:twitchColors.checked,game:game.value,idle:idle.value}))}catch(_){}
   if(status)status.textContent=valid?"Настройки обновлены. Скопируй ссылку в OBS как источник «Браузер».":"Введи корректный логин канала Twitch. Настройки можно менять в любое время.";
  }
