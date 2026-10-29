@@ -3090,7 +3090,7 @@ function applyCollaborations(collaborations) {
     if (!wrap) return;
     wrap.replaceChildren();
     const item = latestCollaborations[String(name).toLowerCase()];
-    if (!item || !Array.isArray(item.participants) || !item.participants.length) continue;
+    if (!item || !Array.isArray(item.participants) || !item.participants.length) return;
     const badge = document.createElement("div");
     badge.className = "collab-badge";
     badge.textContent = "🤝 КОЛЛАБ";
