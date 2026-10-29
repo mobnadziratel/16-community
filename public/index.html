@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#101014">
+<meta name="theme-color" content="#160d20">
 <meta name="description" content="Small Streamers Community — сообщество Twitch-стримеров: каталог каналов, клипы, стена и предложения участников.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Small Streamers Community">
@@ -1858,7 +1858,136 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
 .brand-wordmark{position:relative;display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center;gap:2px;line-height:1.02;letter-spacing:-.045em;min-width:0;width:max-content;max-width:100%;white-space:normal;flex:0 1 auto;transition:gap .45s ease}
 .brand-wordmark .brand-top,.brand-wordmark .brand-bottom{display:block!important;flex:0 0 auto;width:max-content;max-width:100%;font-size:.56em;font-weight:750;letter-spacing:-.025em;color:var(--muted);opacity:.88;transform:translateY(0);transition:transform .48s cubic-bezier(.2,.75,.25,1),opacity .35s ease,color .35s ease}
 .brand-wordmark .brand-main{display:block!important;flex:0 0 auto;width:max-content;max-width:100%;font-size:1em;font-weight:900;white-space:nowrap;transition:transform .48s cubic-bezier(.2,.75,.25,1),color .35s ease}
-.brand-wordmark .brand-main #brandMainLead{color:var(--accent)}\n.brand-wordmark[data-brand-state="moderators"] .brand-top{transform:translateY(1px)}\n.brand-wordmark[data-brand-state="moderators"] .brand-bottom{opacity:.9}\n.brand-wordmark[data-brand-state="community"] .brand-top{transform:translateY(1px)}\n.brand-wordmark[data-brand-state="community"] .brand-main #brandMainLead{color:var(--accent)}\n@media(max-width:500px){.brand-wordmark .brand-top,.brand-wordmark .brand-bottom{font-size:.52em}.brand-wordmark .brand-main{font-size:.9em}}\n@media(prefers-reduced-motion:reduce){.brand-wordmark,.brand-wordmark *{transition:none!important}}\n</style>
+.brand-wordmark .brand-main #brandMainLead{color:var(--accent)}\n.brand-wordmark[data-brand-state="moderators"] .brand-top{transform:translateY(1px)}\n.brand-wordmark[data-brand-state="moderators"] .brand-bottom{opacity:.9}\n.brand-wordmark[data-brand-state="community"] .brand-top{transform:translateY(1px)}\n.brand-wordmark[data-brand-state="community"] .brand-main #brandMainLead{color:var(--accent)}\n@media(max-width:500px){.brand-wordmark .brand-top,.brand-wordmark .brand-bottom{font-size:.52em}.brand-wordmark .brand-main{font-size:.9em}}\n@media(prefers-reduced-motion:reduce){.brand-wordmark,.brand-wordmark *{transition:none!important}}\n
+/* === Halloween season theme: midnight violet, pumpkin orange and warm glow === */
+:root{
+  --bg:#100b18;
+  --panel:#1a1224;
+  --panel2:#24182f;
+  --text:#fff5e9;
+  --muted:#baaac7;
+  --accent:#ff8b2b;
+  --line:rgba(255,157,82,.2);
+  --input-bg:rgba(255,255,255,.045);
+  --accent-soft:rgba(255,139,43,.15);
+}
+html[data-theme="light"]{
+  --bg:#fff7ef;
+  --panel:#fffdfb;
+  --panel2:#f5eaf7;
+  --text:#2a1834;
+  --muted:#796982;
+  --accent:#d85e16;
+  --line:rgba(81,39,103,.18);
+  --input-bg:#fffaf5;
+  --accent-soft:rgba(216,94,22,.12);
+  color-scheme:light;
+}
+body{
+  background:
+    radial-gradient(ellipse at 9% 0%,rgba(123,54,174,.24),transparent 34%),
+    radial-gradient(ellipse at 92% 6%,rgba(255,118,35,.15),transparent 30%),
+    linear-gradient(180deg,#100b18 0%,#0d0912 58%,#130b18 100%) !important;
+}
+html[data-theme="light"] body{
+  background:
+    radial-gradient(ellipse at 8% 0%,rgba(151,87,197,.12),transparent 35%),
+    radial-gradient(ellipse at 94% 4%,rgba(255,143,63,.13),transparent 30%),
+    linear-gradient(180deg,#fff7ef 0%,#fffaf5 60%,#f9f0fb 100%) !important;
+}
+header{border-bottom-color:var(--line);box-shadow:0 8px 35px rgba(0,0,0,.08)}
+.logo{
+  background:linear-gradient(145deg,#ffb04e,#ff7727) !important;
+  color:#281333 !important;
+  box-shadow:0 0 28px rgba(255,126,36,.25),inset 0 1px 0 rgba(255,255,255,.35) !important;
+}
+html[data-theme="light"] .logo{
+  background:linear-gradient(145deg,#ffb04e,#ff7727) !important;
+  color:#281333 !important;
+  box-shadow:0 5px 22px rgba(216,94,22,.2) !important;
+}
+.brand-top,.brand-bottom{color:var(--muted)!important}
+.brand-main #brandMainLead{color:var(--accent)!important}
+h1 span,.category-title span{color:var(--accent)}
+html[data-theme="light"] h1 span{
+  color:#b8490d !important;
+  background:none !important;
+  -webkit-text-fill-color:initial !important;
+}
+.navtag,.site-switch,.theme-toggle{border-color:var(--line)}
+.site-switch,.theme-toggle{background:var(--panel);color:var(--text)}
+.site-switch a.current,.tab-button.active,.music-button.primary,.chat-action,
+.community-submission-area .wall-action-button{
+  background:linear-gradient(135deg,#ffad46,#ff7829)!important;
+  border-color:#ff8b2b!important;
+  color:#24132d!important;
+  box-shadow:0 4px 18px rgba(255,124,37,.16);
+}
+.tab-button,.music-button,.chat-secondary{border-color:var(--line)}
+.tab-button:hover,.music-button:hover,.chat-action:hover,
+.community-submission-area .wall-action-button:hover{filter:brightness(1.07)}
+.tab-button:focus-visible,.music-button:focus-visible,.theme-toggle:focus-visible,
+input:focus-visible,textarea:focus-visible,select:focus-visible{
+  outline:2px solid var(--accent);outline-offset:3px;
+}
+.search input:focus,.community-submission-area input:focus,
+.community-submission-area textarea:focus,.community-submission-area select:focus{
+  border-color:var(--accent)!important;
+  box-shadow:0 0 0 3px rgba(255,139,43,.13)!important;
+}
+.streamer{
+  background:linear-gradient(132deg,#21152c,#17111f)!important;
+  border-color:var(--line);
+  box-shadow:0 8px 24px rgba(0,0,0,.08);
+}
+.streamer:hover{
+  background:linear-gradient(132deg,#2d1b36,#1b1224)!important;
+  border-color:rgba(255,139,43,.62)!important;
+  box-shadow:0 10px 32px rgba(255,119,36,.09);
+}
+html[data-theme="light"] .streamer{
+  background:linear-gradient(132deg,#fffdfb,#fff5eb)!important;
+  border-color:var(--line);
+}
+html[data-theme="light"] .streamer:hover{
+  background:linear-gradient(132deg,#fff0df,#fffaf5)!important;
+  border-color:rgba(216,94,22,.5)!important;
+}
+.clip-card,.profile-card,.music-card,.chat-panel,.widget-section,
+.city-widget-panel,.community-pending-item,.approved-streamer-card{
+  border-color:var(--line)!important;
+}
+.music-card,.chat-panel{box-shadow:0 10px 35px rgba(0,0,0,.12)}
+.music-playing{border-color:var(--accent)!important;box-shadow:inset 3px 0 var(--accent),0 0 22px rgba(255,139,43,.1)!important}
+.live-status.is-live,.status-live{color:#ff9561}
+footer{border-top-color:var(--line)}
+::selection{background:rgba(255,139,43,.35);color:var(--text)}
+/* Small, decorative Halloween accents; they never intercept clicks. */
+@keyframes halloween-drift{
+  0%,100%{transform:translate3d(0,0,0) rotate(-5deg)}
+  50%{transform:translate3d(0,-10px,0) rotate(5deg)}
+}
+body::before,body::after{
+  position:fixed;z-index:0;pointer-events:none;user-select:none;
+  display:block;line-height:1;filter:drop-shadow(0 5px 18px rgba(255,125,37,.2));
+  animation:halloween-drift 7s ease-in-out infinite;
+}
+body::before{
+  content:"🦇";top:19vh;left:clamp(8px,2.5vw,34px);
+  font-size:clamp(22px,3vw,34px);opacity:.38;
+}
+body::after{
+  content:"🎃";right:clamp(8px,3vw,38px);bottom:7vh;
+  font-size:clamp(25px,3.6vw,43px);opacity:.34;animation-delay:-3.5s;
+}
+header,main,footer{position:relative;z-index:1}
+@media(max-width:650px){
+  body::before{top:130px;left:5px;font-size:22px;opacity:.2}
+  body::after{right:8px;bottom:18px;font-size:28px;opacity:.22}
+}
+@media(prefers-reduced-motion:reduce){body::before,body::after{animation:none}}
+
+</style>
 </head>
 <body>
 <header><div class="wrap nav">
