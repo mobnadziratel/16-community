@@ -45,12 +45,12 @@ body{font:14px system-ui,-apple-system,Segoe UI,sans-serif}
     const data=await response.json();
     return Array.isArray(data.items)?data.items:[];
   }
-  async function markEnded(id){
+  async function markEnded(id,status="done"){
     try{
       await fetch("/api/music/overlay/ended",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({channel,id})
+        body:JSON.stringify({channel,id,status})
       });
     }catch(_){}
   }
@@ -59,6 +59,7 @@ body{font:14px system-ui,-apple-system,Segoe UI,sans-serif}
     pollInProgress=true;
     try{
       const items=await getQueue();
+      if(transitionInProgress)return;
       const playing=items.find(item=>item&&item.status==="playing"&&/^[A-Za-z0-9_-]{11}$/.test(String(item.videoId||"")));
       if(!playing){
         const hadCurrent=Boolean(currentId);
@@ -107,16 +108,24 @@ body{font:14px system-ui,-apple-system,Segoe UI,sans-serif}
             loadedQueueId="";
             transitionInProgress=true;
             hideVideo(false);
-            markEnded(finishedId).finally(function(){
+            markEnded(finishedId,"done").finally(function(){
               transitionInProgress=false;
               setTimeout(poll,350);
             });
           }
         },
         onError:function(){
+          const failedId=currentId;
           currentId="";
           loadedQueueId="";
-          hideVideo(true);
+          hideVideo(false);
+          if(failedId){
+            transitionInProgress=true;
+            markEnded(failedId,"skipped").finally(function(){
+              transitionInProgress=false;
+              setTimeout(poll,350);
+            });
+          }
         }
       }
     });
