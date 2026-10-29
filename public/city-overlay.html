@@ -51,9 +51,9 @@ async function loadChatEmotes(){
   for(const e of seven){
     const id=e.id||e.data?.id,name=e.name||e.data?.name,host=e.data?.host||e.host;
     const files=host?.files||[];
-    const file=files.find(f=>/^(2x|3x)\\.webp$/i.test(f.name))||files.find(f=>/^1x\\.webp$/i.test(f.name))||files.find(f=>/webp/i.test(f.name));
+    const file=files.find(f=>/^(2x|3x)\.webp$/i.test(f.name))||files.find(f=>/^1x\.webp$/i.test(f.name))||files.find(f=>/webp/i.test(f.name));
     let url="";
-    if(host?.url&&file)url=(host.url.startsWith("//")?"https:":host.url.startsWith("http")?"":"https://")+host.url.replace(/^https?:\\/\\//,"").replace(/\\/$/,"")+"/"+file.name;
+    if(host?.url&&file)url=(host.url.startsWith("//")?"https:":host.url.startsWith("http")?"":"https://")+host.url.replace(/^https?:\/\//,"").replace(/\/$/,"")+"/"+file.name;
     else if(id)url="https://cdn.7tv.app/emote/"+id+"/2x.webp";
     if(id&&name&&url)addEmote(name,url);
    }
@@ -240,7 +240,7 @@ function connect(){
  if(!/^[a-z0-9_]{1,25}$/.test(channel)){showStatus("Укажи канал Twitch в настройках виджета");return}
  try{socket=new WebSocket("wss://irc-ws.chat.twitch.tv:443");}catch(_){showStatus("Не удалось подключиться к чату");return}
  socket.onopen=()=>{socket.send("CAP REQ :twitch.tv/tags twitch.tv/commands");socket.send("PASS SCHMOOPIIE");socket.send("NICK justinfan"+Math.floor(Math.random()*900000+100000));socket.send("JOIN #"+channel);showStatus("Подключаемся к чату "+channel)};
- socket.onmessage=e=>{for(const line of String(e.data||"").split("\r\n")){if(!line)continue;if(line.startsWith("PING")){socket.send("PONG :"+line.slice(5));continue}const tagPart=line.startsWith("@")?line.slice(1,line.indexOf(" ")).split(";"):[];const tags=Object.fromEntries(tagPart.map(x=>{const i=x.indexOf("=");return i<0?[x,""]:[x.slice(0,i),x.slice(i+1)]}));const match=line.match(/:([a-zA-Z0-9_]{1,25})![^ ]+ PRIVMSG #\S+ :(.*)$/);if(match){const text=match[2].replace(/\\s/g," ").replace(/\\:/g,";").replace(/\\r/g," ").replace(/\\n/g," ");nativeEmotesFromTag(tags.emotes||"",text);addPerson(match[1],(tags.badges||"").split(",").filter(Boolean),tags["user-type"]||"",text);}}};
+ socket.onmessage=e=>{for(const line of String(e.data||"").split("\r\n")){if(!line)continue;if(line.startsWith("PING")){socket.send("PONG :"+line.slice(5));continue}const tagPart=line.startsWith("@")?line.slice(1,line.indexOf(" ")).split(";"):[];const tags=Object.fromEntries(tagPart.map(x=>{const i=x.indexOf("=");return i<0?[x,""]:[x.slice(0,i),x.slice(i+1)]}));const match=line.match(/:([a-zA-Z0-9_]{1,25})![^ ]+ PRIVMSG #\S+ :(.*)$/);if(match){const text=match[2].replace(/\s/g," ").replace(/\:/g,";").replace(/\r/g," ").replace(/\n/g," ");nativeEmotesFromTag(tags.emotes||"",text);addPerson(match[1],(tags.badges||"").split(",").filter(Boolean),tags["user-type"]||"",text);}}};
  socket.onerror=()=>showStatus("Чат Twitch временно недоступен");
  socket.onclose=()=>{if(!preview)retryTimer=setTimeout(connect,5000)};
 }
