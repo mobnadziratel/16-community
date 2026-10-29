@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#101014">
+<meta name="theme-color" content="#160d20">
 <meta name="description" content="Small Streamers Community — сообщество Twitch-стримеров: каталог каналов, клипы, стена и предложения участников.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Small Streamers Community">
@@ -1895,6 +1895,135 @@ html[data-theme="light"] .back-to-top { color:#252b18; background:linear-gradien
 
 /* Music request widget */
 .music-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;margin-top:16px}.music-card{min-width:0;padding:20px;border:1px solid var(--line);border-radius:18px;background:var(--panel);box-shadow:0 10px 28px rgba(0,0,0,.08)}.music-card h2{margin:0 0 8px;font-size:20px}.music-card p{line-height:1.55}.music-field{display:grid;gap:7px;margin:13px 0}.music-field label{font-size:13px;font-weight:750;color:var(--muted)}.music-field input{width:100%;min-width:0;border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--input-bg,rgba(255,255,255,.04));color:var(--text);font:inherit}.music-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.music-button{border:1px solid var(--line);border-radius:11px;padding:10px 14px;background:var(--panel);color:var(--text);font:inherit;font-weight:800;cursor:pointer}.music-button.primary{background:var(--accent);color:#111;border-color:transparent}.music-button:disabled{opacity:.5;cursor:wait}.music-status{font-size:13px;line-height:1.5;color:var(--muted);min-height:1.5em}.music-queue{display:grid;gap:9px;margin-top:14px}.music-item{display:flex;align-items:center;gap:10px;min-width:0;padding:11px;border:1px solid var(--line);border-radius:12px;background:rgba(127,127,127,.05)}.music-item-info{flex:1;min-width:0}.music-item-title{font-weight:800;overflow-wrap:anywhere}.music-item-meta{font-size:12px;color:var(--muted);margin-top:4px}.music-item-actions{display:flex;gap:5px;flex-wrap:wrap}.music-item-actions .music-button{padding:7px 9px;font-size:12px}.music-playing{border-color:var(--accent);box-shadow:inset 3px 0 var(--accent)}.music-preview{width:100%;height:320px;border:1px solid var(--line);border-radius:14px;background:#08080b;overflow:hidden}.music-preview iframe{display:block;width:100%;height:100%;border:0}@media(max-width:760px){.music-grid{grid-template-columns:1fr}.music-card{padding:15px}.music-preview{height:230px}.music-item{align-items:flex-start;flex-wrap:wrap}.music-item-info{flex-basis:65%}.music-item-actions{width:100%}}
+
+/* === Halloween season theme: midnight violet, pumpkin orange and warm glow === */
+:root{
+  --bg:#100b18;
+  --panel:#1a1224;
+  --panel2:#24182f;
+  --text:#fff5e9;
+  --muted:#baaac7;
+  --accent:#ff8b2b;
+  --line:rgba(255,157,82,.2);
+  --input-bg:rgba(255,255,255,.045);
+  --accent-soft:rgba(255,139,43,.15);
+}
+html[data-theme="light"]{
+  --bg:#fff7ef;
+  --panel:#fffdfb;
+  --panel2:#f5eaf7;
+  --text:#2a1834;
+  --muted:#796982;
+  --accent:#d85e16;
+  --line:rgba(81,39,103,.18);
+  --input-bg:#fffaf5;
+  --accent-soft:rgba(216,94,22,.12);
+  color-scheme:light;
+}
+body{
+  background:
+    radial-gradient(ellipse at 9% 0%,rgba(123,54,174,.24),transparent 34%),
+    radial-gradient(ellipse at 92% 6%,rgba(255,118,35,.15),transparent 30%),
+    linear-gradient(180deg,#100b18 0%,#0d0912 58%,#130b18 100%) !important;
+}
+html[data-theme="light"] body{
+  background:
+    radial-gradient(ellipse at 8% 0%,rgba(151,87,197,.12),transparent 35%),
+    radial-gradient(ellipse at 94% 4%,rgba(255,143,63,.13),transparent 30%),
+    linear-gradient(180deg,#fff7ef 0%,#fffaf5 60%,#f9f0fb 100%) !important;
+}
+header{border-bottom-color:var(--line);box-shadow:0 8px 35px rgba(0,0,0,.08)}
+.logo{
+  background:linear-gradient(145deg,#ffb04e,#ff7727) !important;
+  color:#281333 !important;
+  box-shadow:0 0 28px rgba(255,126,36,.25),inset 0 1px 0 rgba(255,255,255,.35) !important;
+}
+html[data-theme="light"] .logo{
+  background:linear-gradient(145deg,#ffb04e,#ff7727) !important;
+  color:#281333 !important;
+  box-shadow:0 5px 22px rgba(216,94,22,.2) !important;
+}
+.brand-top,.brand-bottom{color:var(--muted)!important}
+.brand-main #brandMainLead{color:var(--accent)!important}
+h1 span,.category-title span{color:var(--accent)}
+html[data-theme="light"] h1 span{
+  color:#b8490d !important;
+  background:none !important;
+  -webkit-text-fill-color:initial !important;
+}
+.navtag,.site-switch,.theme-toggle{border-color:var(--line)}
+.site-switch,.theme-toggle{background:var(--panel);color:var(--text)}
+.site-switch a.current,.tab-button.active,.music-button.primary,.chat-action,
+.community-submission-area .wall-action-button{
+  background:linear-gradient(135deg,#ffad46,#ff7829)!important;
+  border-color:#ff8b2b!important;
+  color:#24132d!important;
+  box-shadow:0 4px 18px rgba(255,124,37,.16);
+}
+.tab-button,.music-button,.chat-secondary{border-color:var(--line)}
+.tab-button:hover,.music-button:hover,.chat-action:hover,
+.community-submission-area .wall-action-button:hover{filter:brightness(1.07)}
+.tab-button:focus-visible,.music-button:focus-visible,.theme-toggle:focus-visible,
+input:focus-visible,textarea:focus-visible,select:focus-visible{
+  outline:2px solid var(--accent);outline-offset:3px;
+}
+.search input:focus,.community-submission-area input:focus,
+.community-submission-area textarea:focus,.community-submission-area select:focus{
+  border-color:var(--accent)!important;
+  box-shadow:0 0 0 3px rgba(255,139,43,.13)!important;
+}
+.streamer{
+  background:linear-gradient(132deg,#21152c,#17111f)!important;
+  border-color:var(--line);
+  box-shadow:0 8px 24px rgba(0,0,0,.08);
+}
+.streamer:hover{
+  background:linear-gradient(132deg,#2d1b36,#1b1224)!important;
+  border-color:rgba(255,139,43,.62)!important;
+  box-shadow:0 10px 32px rgba(255,119,36,.09);
+}
+html[data-theme="light"] .streamer{
+  background:linear-gradient(132deg,#fffdfb,#fff5eb)!important;
+  border-color:var(--line);
+}
+html[data-theme="light"] .streamer:hover{
+  background:linear-gradient(132deg,#fff0df,#fffaf5)!important;
+  border-color:rgba(216,94,22,.5)!important;
+}
+.clip-card,.profile-card,.music-card,.chat-panel,.widget-section,
+.city-widget-panel,.community-pending-item,.approved-streamer-card{
+  border-color:var(--line)!important;
+}
+.music-card,.chat-panel{box-shadow:0 10px 35px rgba(0,0,0,.12)}
+.music-playing{border-color:var(--accent)!important;box-shadow:inset 3px 0 var(--accent),0 0 22px rgba(255,139,43,.1)!important}
+.live-status.is-live,.status-live{color:#ff9561}
+footer{border-top-color:var(--line)}
+::selection{background:rgba(255,139,43,.35);color:var(--text)}
+/* Small, decorative Halloween accents; they never intercept clicks. */
+@keyframes halloween-drift{
+  0%,100%{transform:translate3d(0,0,0) rotate(-5deg)}
+  50%{transform:translate3d(0,-10px,0) rotate(5deg)}
+}
+body::before,body::after{
+  position:fixed;z-index:0;pointer-events:none;user-select:none;
+  display:block;line-height:1;filter:drop-shadow(0 5px 18px rgba(255,125,37,.2));
+  animation:halloween-drift 7s ease-in-out infinite;
+}
+body::before{
+  content:"🦇";top:19vh;left:clamp(8px,2.5vw,34px);
+  font-size:clamp(22px,3vw,34px);opacity:.38;
+}
+body::after{
+  content:"🎃";right:clamp(8px,3vw,38px);bottom:7vh;
+  font-size:clamp(25px,3.6vw,43px);opacity:.34;animation-delay:-3.5s;
+}
+header,main,footer{position:relative;z-index:1}
+@media(max-width:650px){
+  body::before{top:130px;left:5px;font-size:22px;opacity:.2}
+  body::after{right:8px;bottom:18px;font-size:28px;opacity:.22}
+}
+@media(prefers-reduced-motion:reduce){body::before,body::after{animation:none}}
+
 </style>
 </head><body>
 <header><div class="wrap nav">
