@@ -3039,7 +3039,7 @@ let lastStatusAttemptAt = 0;
 
 async function loadTwitchAvatar(name, img) {
   // Load avatars through our own server so mobile browsers do not depend on a third-party lookup/CORS.
-  const forceRefresh = String(name || "").toLowerCase() === "ilyuha_lake";
+  const forceRefresh = String(name || "").toLowerCase() === "ilyuhalakee";
   if (!forceRefresh && avatarCache.has(name)) { img.src = avatarCache.get(name); return; }
   try {
     const response = await fetch(`/api/avatar?login=${encodeURIComponent(name)}${forceRefresh ? "&refresh=1" : ""}`, { cache: "no-store" });
