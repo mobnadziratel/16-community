@@ -1175,7 +1175,7 @@ html[data-theme="light"] .tabs .tab-button.active {
   .tabs .tab-button { transition: none !important; transform: none !important; }
   .hero.tab-section-arrive, #streamersPanel.tab-section-arrive,
   #moderatorsPanel.tab-section-arrive, #clipsPanel.tab-section-arrive,
-  #wallPanel.tab-section-arrive, #suggestionsPanel.tab-section-arrive { animation: none !important; }
+  #wallPanel.tab-section-arrive { animation: none !important; }
 }
 
 /* Secret five-click easter egg: directory cards fly away from the wall/suggestion tabs. */
@@ -2079,7 +2079,6 @@ main.wrap::after{
 #moderatorsTab::before{content:"🧙 ";font-size:.92em}
 #clipsTab::before{content:"🌙 ";font-size:.92em}
 #wallTab::before{content:"🕸️ ";font-size:.92em}
-#suggestionsTab::before{content:"🧪 ";font-size:.92em}
 #chatWidgetTab::before{content:"👻 ";font-size:.92em}
 #cityWidgetTab::before{content:"🦇 ";font-size:.92em}
 #musicWidgetTab::before{content:"🎃 ";font-size:.92em}
@@ -2364,7 +2363,6 @@ html[data-theme="light"] #wallPanel .wall-posts-on-mural .wall-post-card{
     <button class="tab-button" id="moderatorsTab" role="tab" aria-selected="false" type="button">МОДЕРАТОРЫ</button>
     <button class="tab-button" id="clipsTab" role="tab" aria-selected="false" type="button">КЛИПЫ</button>
     <button class="tab-button" id="wallTab" role="tab" aria-selected="false" aria-controls="wallPanel" type="button">СТЕНА</button>
-    <button class="tab-button" id="suggestionsTab" role="tab" aria-selected="false" aria-controls="suggestionsPanel" type="button">ПРЕДЛОЖКА</button>
   </div>
   <section id="streamersPanel" aria-label="Список стримеров">
     <div class="toolbar">
@@ -2505,73 +2503,7 @@ LEGENDS</div>
       <div class="wall-posts-grid wall-posts-on-mural" id="communityWallFeed" aria-label="Публикации сообщества"></div>
     </div>
   </section>
-  <section id="suggestionsPanel" aria-label="Предложка" hidden>
-      <div class="community-submission-area">
-                  <details class="wall-moderator-login" id="wallModeratorDetails">
-                    <summary>Вход для модераторов</summary>
-                    <div class="wall-moderator-login-inner">
-                      <h2 id="wallModerationTitle">Модерация</h2>
-                      <p class="wall-muted">Вход доступен владельцу и модераторам с выданным доступом.</p>
-                      <form id="communityModeratorLogin">
-                        <label for="moderatorUsername">Логин модератора</label>
-                        <input id="moderatorUsername" name="username" autocomplete="username" required placeholder="Ваш логин">
-                        <label for="moderatorPassword">Пароль</label>
-                        <input id="moderatorPassword" name="password" type="password" autocomplete="current-password" required>
-                        <button class="wall-action-button" type="submit">Войти</button>
-                      </form>
-                      <div id="communityModeratorPanel" hidden>
-                        <p class="wall-form-message" id="moderatorSessionLabel"></p>
-                        <button class="wall-action-button" id="communityModeratorRefresh" type="button">Обновить заявки</button>
-                        <button class="wall-action-button" id="communityModeratorLogout" type="button">Выйти</button>
-                        <div id="communityPendingList" class="community-pending-list"></div>
-                      </div>
-                      <p class="wall-form-message" id="moderatorFormMessage" aria-live="polite"></p>
-                    </div>
-                  </details>
-        <div class="community-wall-tools">
-          <form class="wall-submit-card" id="communitySuggestionForm">
-            <h2>Предложить стримера, пост или улучшение сайта</h2>
-            <p>Предложение сначала попадёт на модерацию. Опубликуем его только после одобрения.</p>
-            <label for="suggestionNickname">Твой никнейм</label>
-            <input id="suggestionNickname" name="nickname" maxlength="32" minlength="2" required autocomplete="nickname" placeholder="Как тебя подписать">
-            <label for="suggestionKind">Что предложить?</label>
-            <select id="suggestionKind" name="kind">
-              <option value="streamer">Стримера в каталог</option>
-              <option value="wall">Публикацию на стену</option>
-              <option value="site">Изменение или улучшение сайта</option>
-              <option value="moderator">Добавление модератора</option>
-            </select>
-            <div id="suggestionStreamerFields">
-              <label for="suggestionTwitch">Ссылка на Twitch или ник канала</label>
-              <input id="suggestionTwitch" name="twitch" maxlength="300" placeholder="https://twitch.tv/username">
-              <label for="suggestionStreamerText">Комментарий (необязательно)</label>
-              <textarea id="suggestionStreamerText" name="streamerText" maxlength="500" rows="3" placeholder="Почему стоит добавить этого стримера?"></textarea>
-            </div>
-            <div id="suggestionSiteFields" hidden>
-              <label for="suggestionSiteText">Что стоит изменить или добавить?</label>
-              <textarea id="suggestionSiteText" name="siteText" maxlength="1200" rows="4" placeholder="Опиши идею, проблему или новую функцию…"></textarea>
-            </div>
-            <div id="suggestionModeratorFields" hidden>
-              <label for="suggestionModeratorName">Ник модератора</label>
-              <input id="suggestionModeratorName" name="moderatorName" maxlength="32" placeholder="Ник человека">
-              <label for="suggestionModeratorOf">Где человек модератор? (обязательно)</label>
-              <input id="suggestionModeratorOf" name="moderatorOf" maxlength="300" placeholder="Twitch-ники каналов через запятую">
-              <p class="wall-muted">Укажи Twitch-ники каналов, где человек будет модератором.</p>
-            </div>
-            <div id="suggestionWallFields" hidden>
-              <label for="suggestionWallText">Текст публикации</label>
-              <textarea id="suggestionWallText" name="wallText" maxlength="1200" rows="4" placeholder="Напиши что-нибудь для стены…"></textarea>
-              <label for="suggestionImage">Изображение (необязательно, до 2 МБ)</label>
-              <input id="suggestionImage" name="image" type="file" accept="image/jpeg,image/png,image/webp,image/gif">
-              <img id="suggestionImagePreview" alt="Предпросмотр изображения" hidden>
-            </div>
-            <button class="wall-action-button" type="submit">Отправить на модерацию</button>
-            <p class="wall-form-message" id="suggestionFormMessage" aria-live="polite"></p>
-          </form>
 
-        </div>
-      </div>
-  </section>
 </main>
 <footer class="wrap"><span>Открывай каналы и поддерживай стримеров на Twitch ✦</span></footer>
 <section id="profilePage" role="dialog" aria-modal="true" aria-labelledby="profileName" aria-label="Профиль стримера" aria-hidden="true">
@@ -2859,7 +2791,7 @@ const editors = [
 let activeTab = "streamers";
 try {
   const savedTab = sessionStorage.getItem("small-streamers-active-tab");
-  if (["streamers", "moderators", "clips", "wall", "suggestions"].includes(savedTab)) activeTab = savedTab;
+  if (["streamers", "moderators", "clips", "wall"].includes(savedTab)) activeTab = savedTab;
 } catch (_) {}
 (function startAtTopOnReload() {
   let isReload = false;
@@ -3420,7 +3352,6 @@ function render(filter="") {
   document.getElementById("moderatorsPanel").hidden = activeTab !== "moderators";
   document.getElementById("clipsPanel").hidden = activeTab !== "clips";
   document.getElementById("wallPanel").hidden = activeTab !== "wall";
-  document.getElementById("suggestionsPanel").hidden = activeTab !== "suggestions";
   if (activeTab === "clips") loadClips();
   updateStreamerCount(visibleCount);
   document.getElementById("empty").style.display = activeTab === "streamers" && visibleCount ? "none" : (activeTab === "streamers" ? "block" : "none");
@@ -3774,7 +3705,7 @@ document.getElementById("moderatorSearch").addEventListener("input", e => {
   let avatarClicks = 0;
   let avatarClickTimer = null;
   const triggerFlyout = () => {
-    if (activeTab !== "wall" && activeTab !== "suggestions" && activeTab !== "clips") { avatarClicks = 0; return; }
+    if (activeTab !== "wall" && activeTab !== "clips") { avatarClicks = 0; return; }
     avatarClicks += 1;
     if (avatarClickTimer) clearTimeout(avatarClickTimer);
     if (avatarClicks < 5) {
@@ -3826,7 +3757,6 @@ const tabButtons = {
   moderators: "moderatorsTab",
   clips: "clipsTab",
   wall: "wallTab",
-  suggestions: "suggestionsTab"
 };
 function activateTab(nextTab) {
   activeTab = nextTab;
@@ -3836,14 +3766,12 @@ function activateTab(nextTab) {
     moderators: ["МОДЕРАТОРЫ", "Команда, которая помогает сообществу и поддерживает порядок на каналах."],
     clips: ["КЛИПЫ", "Лучшие моменты со стримов — выбирай период, сортировку и смотри подборку."],
     wall: ["СТЕНА СООБЩЕСТВА", "Общие мемы, картинки и подписи — всё, что делает наше комьюнити живым."],
-    suggestions: ["ПРЕДЛОЖКА", "Предложи нового стримера или добавь фото и подпись на стену. Публикации появляются после модерации."]
   };
   const [heading, description] = sectionCopy[nextTab] || sectionCopy.streamers;
   document.getElementById("streamersPanel").hidden = nextTab !== "streamers";
   document.getElementById("moderatorsPanel").hidden = nextTab !== "moderators";
   document.getElementById("clipsPanel").hidden = nextTab !== "clips";
   document.getElementById("wallPanel").hidden = nextTab !== "wall";
-  document.getElementById("suggestionsPanel").hidden = nextTab !== "suggestions";
   const brandWordmark = document.getElementById("brandWordmark");
   const brandTop = document.getElementById("brandTop");
   const brandMainLead = document.getElementById("brandMainLead");
