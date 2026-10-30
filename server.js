@@ -836,6 +836,20 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
+  if (url.pathname.startsWith("/fonts/")) {
+    const fontPath = path.resolve(__dirname, decodeURIComponent(url.pathname.slice(1)));
+    const fontsDir = path.join(__dirname, "fonts");
+    if (!fontPath.startsWith(fontsDir + path.sep)) { res.writeHead(403); res.end("Forbidden"); return; }
+    fs.readFile(fontPath, (err, data) => {
+      if (err) { res.writeHead(404); res.end("Not found"); return; }
+      const ext = path.extname(fontPath).toLowerCase();
+      const types = { ".otf": "font/otf", ".ttf": "font/ttf", ".woff": "font/woff", ".woff2": "font/woff2" };
+      res.writeHead(200, { "Content-Type": types[ext] || "application/octet-stream", "Cache-Control": "public, max-age=31536000, immutable", "Access-Control-Allow-Origin": "*" });
+      res.end(data);
+    });
+    return;
+  }
+
   const requested = url.pathname === "/music-dock" || url.pathname === "/music-dock/" ? "music-dock.html" : url.pathname === "/" ? "index.html" : (url.pathname === "/widgets" || url.pathname === "/widgets/") ? "widgets.html" : decodeURIComponent(url.pathname.slice(1));
   const filePath = path.resolve(PUBLIC_DIR, requested);
   if (!filePath.startsWith(PUBLIC_DIR + path.sep) && filePath !== path.join(PUBLIC_DIR, "index.html")) {
@@ -844,7 +858,7 @@ const server = http.createServer(async (req, res) => {
   fs.readFile(filePath, (err, data) => {
     if (err) { res.writeHead(404); res.end("Not found"); return; }
     const ext = path.extname(filePath);
-    const types = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".svg": "image/svg+xml" };
+    const types = { ".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".svg": "image/svg+xml", ".otf": "font/otf", ".ttf": "font/ttf", ".woff": "font/woff", ".woff2": "font/woff2" };
     const headers = { "Content-Type": types[ext] || "application/octet-stream" };
     // HTML must not be served from a stale browser/proxy cache after deployments (e.g. old music-login instructions).
     if (ext === ".html") {
