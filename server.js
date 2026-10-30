@@ -26,7 +26,7 @@ const LOGINS = [
   "lo4kalove",
   "slavabraze",
   "zavryz1el",
-  "ilyuha_lake",
+  "ilyuhalakee",
   "brill1antt",
   "helgard_simbirskiy",
   "pickachu2281",
@@ -506,7 +506,7 @@ const server = http.createServer(async (req, res) => {
     if (!/^[a-z0-9_]{1,25}$/.test(login)) {
       res.writeHead(400); res.end(JSON.stringify({ error: "Invalid Twitch login", avatarUrl: null })); return;
     }
-    const forceRefresh = url.searchParams.get("refresh") === "1" || login === "ilyuha_lake";
+    const forceRefresh = url.searchParams.get("refresh") === "1" || login === "ilyuhalakee";
     const cached = avatarCache.get(login);
     if (!forceRefresh && cached && Date.now() - cached.time < 30 * 60_000) {
       res.writeHead(200); res.end(JSON.stringify({ login, avatarUrl: cached.avatarUrl })); return;
